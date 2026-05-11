@@ -21,7 +21,7 @@ RiffSync runs on a small server so everyone in your band can access it from any 
 
 ### What You Need
 
-- **A small server** — Rent one for $4-6/month from [DigitalOcean](https://www.digitalocean.com/), [Hetzner](https://www.hetzner.com/), or [Linode](https://www.linode.com/). Pick a plan with at least **50 GB of storage** so you have plenty of room for recordings. 1 GB of RAM is plenty. Choose **Ubuntu** when asked which operating system.
+- **A small server** — Rent one from [DigitalOcean Droplets](https://www.digitalocean.com/products/droplets), [Hetzner Cloud](https://www.hetzner.com/cloud), or [Linode Compute](https://www.linode.com/products/essential-compute). Pick a plan with at least **50 GB of storage** so you have plenty of room for recordings. 1 GB of RAM is plenty. Choose **Ubuntu** when asked which operating system.
 - **A way to connect to your server** — On Mac/Linux, open Terminal. On Windows, use [PuTTY](https://www.putty.org/) or Windows Terminal. Your server provider will give you an IP address and password.
 
 ### One-Command Install
