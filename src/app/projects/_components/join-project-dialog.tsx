@@ -70,7 +70,7 @@ export function JoinProjectDialog() {
               <Label htmlFor="invite-code">Invite Code</Label>
               <Input
                 id="invite-code"
-                placeholder="e.g. a1b2c3d4"
+                placeholder="e.g. Xk8f9Qb2mNpL"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
                 required

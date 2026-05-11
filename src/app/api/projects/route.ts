@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import crypto from "crypto";
 
 function generateInviteCode(): string {
-  return crypto.randomBytes(16).toString("hex");
+  return nanoid(12);
 }
 
 function slugify(name: string): string {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     const existingSlug = await prisma.project.findUnique({ where: { slug } });
     if (existingSlug) {
-      slug = `${slug}-${crypto.randomBytes(3).toString("hex")}`;
+      slug = `${slug}-${nanoid(6)}`;
     }
 
     const inviteCode = generateInviteCode();

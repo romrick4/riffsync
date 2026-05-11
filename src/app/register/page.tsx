@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ const USERNAME_RE = /^[a-zA-Z0-9_]{3,30}$/;
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteCode = searchParams.get("invite");
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -57,7 +59,11 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push("/projects");
+      if (inviteCode) {
+        router.push(`/invite/${inviteCode}`);
+      } else {
+        router.push("/projects");
+      }
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -141,7 +147,10 @@ export default function RegisterPage() {
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-primary underline underline-offset-4 hover:text-primary/80">
+            <Link
+              href={inviteCode ? `/login?invite=${inviteCode}` : "/login"}
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
+            >
               Log in
             </Link>
           </p>

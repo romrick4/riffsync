@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Music, Users, Calendar, Copy } from "lucide-react";
+import { Music, Users, Calendar, Link as LinkIcon } from "lucide-react";
 import { InviteCode } from "./_components/invite-code";
 import { formatDistanceToNow } from "date-fns";
 
@@ -128,8 +128,8 @@ export default async function ProjectDashboard({
             })}
           </div>
           <div className="mt-3 flex items-center gap-2 rounded-md border border-dashed px-3 py-2.5">
-            <Copy className="size-3.5 shrink-0 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Invite code:</span>
+            <LinkIcon className="size-3.5 shrink-0 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Invite link:</span>
             <InviteCode code={project.inviteCode} />
           </div>
         </section>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteCode = searchParams.get("invite");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -33,7 +35,11 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/projects");
+      if (inviteCode) {
+        router.push(`/invite/${inviteCode}`);
+      } else {
+        router.push("/projects");
+      }
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -88,7 +94,10 @@ export default function LoginPage() {
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-primary underline underline-offset-4 hover:text-primary/80">
+            <Link
+              href={inviteCode ? `/register?invite=${inviteCode}` : "/register"}
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
+            >
               Register
             </Link>
           </p>

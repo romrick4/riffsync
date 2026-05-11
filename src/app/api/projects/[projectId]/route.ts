@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
+import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 
@@ -79,7 +79,7 @@ export async function PATCH(
     if (name !== undefined) data.name = name.trim();
     if (description !== undefined) data.description = description?.trim() || null;
     if (rotateInviteCode === true) {
-      data.inviteCode = crypto.randomBytes(16).toString("hex");
+      data.inviteCode = nanoid(12);
     }
 
     const project = await prisma.project.update({

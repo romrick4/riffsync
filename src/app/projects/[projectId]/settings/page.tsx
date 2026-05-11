@@ -79,16 +79,16 @@ export default async function ProjectSettingsPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Invite Code</CardTitle>
+          <CardTitle>Invite Link</CardTitle>
           <CardDescription>
-            Share this code with bandmates so they can join the project.
+            Share this link with bandmates so they can join the project.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <InviteCode code={project.inviteCode} />
           <p className="mt-3 text-xs text-muted-foreground">
-            New members can join by entering this code on the projects page via
-            &quot;Join Project&quot;.
+            New members can join by opening this link or by entering the code on
+            the projects page via &quot;Join Project&quot;.
           </p>
         </CardContent>
       </Card>
