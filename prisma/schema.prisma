@@ -1,0 +1,276 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectRole {
+  OWNER
+  MEMBER
+}
+
+enum FileFormat {
+  WAV
+  FLAC
+  MP3
+}
+
+enum TabFileType {
+  GUITAR_PRO
+  TEXT_TAB
+  IMAGE
+}
+
+enum EventType {
+  REHEARSAL
+  SHOW
+  RECORDING_SESSION
+  OTHER
+}
+
+enum RsvpStatus {
+  GOING
+  MAYBE
+  CANT_MAKE_IT
+}
+
+enum NotificationType {
+  NEW_VERSION
+  LYRICS_EDITED
+  EVENT_CREATED
+  EVENT_UPDATED
+  POLL_CREATED
+  INVITE_RECEIVED
+  AUDIO_COMMENT
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  displayName  String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  projectMembers ProjectMember[]
+  songVersions   SongVersion[]
+  lyricVersions  LyricVersion[]
+  audioComments  AudioComment[]
+  pollResponses  PollResponse[]
+  notifications  Notification[]
+  tabFiles       TabFile[]
+  calendarEvents CalendarEvent[]
+  polls          Poll[]
+  eventRsvps     EventRsvp[]
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  inviteCode  String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members        ProjectMember[]
+  songs          Song[]
+  calendarEvents CalendarEvent[]
+  polls          Poll[]
+}
+
+model ProjectMember {
+  id       String      @id @default(uuid())
+  role     ProjectRole @default(MEMBER)
+  joinedAt DateTime    @default(now())
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  @@unique([projectId, userId])
+}
+
+model Song {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  versions      SongVersion[]
+  lyricVersions LyricVersion[]
+  tabFiles      TabFile[]
+}
+
+model SongVersion {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  filePath      String
+  fileName      String
+  fileFormat    FileFormat
+  fileSizeBytes Int
+  isFinal       Boolean  @default(false)
+  versionNumber Int
+  createdAt     DateTime @default(now())
+
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId String
+
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+
+  parentVersion   SongVersion?  @relation("VersionLineage", fields: [parentVersionId], references: [id])
+  parentVersionId String?
+  childVersions   SongVersion[] @relation("VersionLineage")
+
+  mergeParents  MergeParent[] @relation("MergeChild")
+  mergeChildren MergeParent[] @relation("MergeParentVersion")
+
+  audioComments AudioComment[]
+}
+
+model MergeParent {
+  childVersion    SongVersion @relation("MergeChild", fields: [childVersionId], references: [id], onDelete: Cascade)
+  childVersionId  String
+  parentVersion   SongVersion @relation("MergeParentVersion", fields: [parentVersionId], references: [id], onDelete: Cascade)
+  parentVersionId String
+
+  @@id([childVersionId, parentVersionId])
+}
+
+model AudioComment {
+  id           String   @id @default(uuid())
+  content      String
+  timestampSec Float
+  createdAt    DateTime @default(now())
+
+  songVersion   SongVersion @relation(fields: [songVersionId], references: [id], onDelete: Cascade)
+  songVersionId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model LyricVersion {
+  id            String   @id @default(uuid())
+  content       String
+  changeNote    String?
+  versionNumber Int
+  createdAt     DateTime @default(now())
+
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId String
+
+  editedBy   User   @relation(fields: [editedById], references: [id])
+  editedById String
+}
+
+model TabFile {
+  id          String      @id @default(uuid())
+  title       String
+  fileType    TabFileType
+  filePath    String?
+  textContent String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId String
+
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+}
+
+model CalendarEvent {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  eventType   EventType
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  rsvps EventRsvp[]
+}
+
+model EventRsvp {
+  id          String     @id @default(uuid())
+  status      RsvpStatus
+  respondedAt DateTime   @default(now())
+
+  event   CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  @@unique([eventId, userId])
+}
+
+model Poll {
+  id        String   @id @default(uuid())
+  question  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  options PollOption[]
+}
+
+model PollOption {
+  id   String @id @default(uuid())
+  text String
+
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId String
+
+  responses PollResponse[]
+}
+
+model PollResponse {
+  id          String   @id @default(uuid())
+  respondedAt DateTime @default(now())
+
+  option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  @@unique([optionId, userId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  message   String
+  linkUrl   String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+}
