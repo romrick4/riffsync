@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, verifySongInProject } from "@/lib/auth";
 import { getStorage } from "@/lib/storage";
 
 const FORMAT_TO_CONTENT_TYPE: Record<string, string> = {
@@ -30,6 +30,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   });
   if (!membership) {
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
+  }
+
+  const song = await verifySongInProject(songId, projectId);
+  if (!song) {
+    return NextResponse.json({ error: "Song not found" }, { status: 404 });
   }
 
   const version = await prisma.songVersion.findUnique({

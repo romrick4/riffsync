@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { notify, getProjectMemberIds } from "@/lib/notifications";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const rateLimited = rateLimit(request, "join", { windowMs: 60_000, maxRequests: 10 });
+  if (rateLimited) return rateLimited;
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

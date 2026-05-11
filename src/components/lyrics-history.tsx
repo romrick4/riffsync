@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import DOMPurify from "isomorphic-dompurify";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LyricsDiff } from "@/components/lyrics-diff";
@@ -165,7 +166,7 @@ export function LyricsHistory({
                     ) : (
                       <div
                         className="prose prose-invert prose-sm max-w-none rounded-md bg-muted/20 px-3 py-2 text-xs"
-                        dangerouslySetInnerHTML={{ __html: version.content }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(version.content) }}
                       />
                     )}
                   </div>

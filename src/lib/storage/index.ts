@@ -1,3 +1,8 @@
+export function sanitizeFilename(name: string): string {
+  const base = name.replace(/^.*[\\/]/, "");
+  return base.replace(/[^a-zA-Z0-9._-]/g, "_").replace(/^\.+/, "_") || "file";
+}
+
 export interface StorageProvider {
   save(key: string, data: Buffer, contentType: string): Promise<void>;
   get(key: string): Promise<Buffer>;

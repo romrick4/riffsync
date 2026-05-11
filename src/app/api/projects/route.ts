@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import crypto from "crypto";
 
 function generateInviteCode(): string {
-  return crypto.randomBytes(4).toString("hex");
+  return crypto.randomBytes(16).toString("hex");
 }
 
 function slugify(name: string): string {

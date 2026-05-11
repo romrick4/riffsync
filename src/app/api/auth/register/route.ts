@@ -1,14 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword, createSession, setSessionCookie } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const rateLimited = rateLimit(request, "register", { windowMs: 60_000, maxRequests: 5 });
+  if (rateLimited) return rateLimited;
+
   try {
     const { displayName, username, password } = await request.json();
 
     if (!displayName || !username || !password) {
       return NextResponse.json(
         { error: "Display name, username, and password are required" },
+        { status: 400 },
+      );
+    }
+
+    if (typeof displayName !== "string" || displayName.trim().length < 1 || displayName.trim().length > 100) {
+      return NextResponse.json(
+        { error: "Display name must be between 1 and 100 characters" },
         { status: 400 },
       );
     }
@@ -20,9 +31,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (password.length < 8) {
+    if (password.length < 8 || password.length > 128) {
       return NextResponse.json(
-        { error: "Password must be at least 8 characters" },
+        { error: "Password must be between 8 and 128 characters" },
         { status: 400 },
       );
     }

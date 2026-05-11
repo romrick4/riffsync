@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
-import { getStorage } from "@/lib/storage";
+import { getCurrentUser, verifyMembership, verifySongInProject } from "@/lib/auth";
+import { getStorage, sanitizeFilename } from "@/lib/storage";
 
 type RouteParams = {
   params: Promise<{ projectId: string; songId: string }>;
 };
-
-async function verifyMembership(projectId: string, userId: string) {
-  return prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId } },
-  });
-}
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const user = await getCurrentUser();
@@ -24,6 +18,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   const membership = await verifyMembership(projectId, user.id);
   if (!membership) {
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
+  }
+
+  const song = await verifySongInProject(songId, projectId);
+  if (!song) {
+    return NextResponse.json({ error: "Song not found" }, { status: 404 });
   }
 
   const tabs = await prisma.tabFile.findMany({
@@ -123,8 +122,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "File is required" }, { status: 400 });
   }
 
+  const MAX_TAB_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+  if (file.size > MAX_TAB_FILE_SIZE) {
+    return NextResponse.json(
+      { error: "File size exceeds 50MB limit" },
+      { status: 400 }
+    );
+  }
+
   const tabId = crypto.randomUUID();
-  const storageKey = `projects/${projectId}/songs/${songId}/tabs/${tabId}/${file.name}`;
+  const storageKey = `projects/${projectId}/songs/${songId}/tabs/${tabId}/${sanitizeFilename(file.name)}`;
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const storage = getStorage();

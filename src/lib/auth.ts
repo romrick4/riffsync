@@ -83,3 +83,16 @@ export async function clearSessionCookie(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
 }
+
+export async function verifyMembership(projectId: string, userId: string) {
+  return prisma.projectMember.findUnique({
+    where: { projectId_userId: { projectId, userId } },
+  });
+}
+
+export async function verifySongInProject(songId: string, projectId: string) {
+  return prisma.song.findUnique({
+    where: { id: songId, projectId },
+    select: { id: true },
+  });
+}

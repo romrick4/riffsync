@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
-import { getStorage } from "@/lib/storage";
+import { getCurrentUser, verifyMembership, verifySongInProject } from "@/lib/auth";
+import { getStorage, sanitizeFilename } from "@/lib/storage";
 import { FileFormat } from "@/generated/prisma/client";
 import { notify, getProjectMemberIds } from "@/lib/notifications";
 
@@ -23,12 +23,6 @@ type RouteParams = {
   params: Promise<{ projectId: string; songId: string }>;
 };
 
-async function verifyMembership(projectId: string, userId: string) {
-  return prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId } },
-  });
-}
-
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const user = await getCurrentUser();
   if (!user) {
@@ -40,6 +34,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   const membership = await verifyMembership(projectId, user.id);
   if (!membership) {
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
+  }
+
+  const song = await verifySongInProject(songId, projectId);
+  if (!song) {
+    return NextResponse.json({ error: "Song not found" }, { status: 404 });
   }
 
   const versions = await prisma.songVersion.findMany({
@@ -115,7 +114,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     );
   }
 
-  const fileName = file.name;
+  const fileName = sanitizeFilename(file.name);
   const ext = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
   const fileFormat = EXTENSION_TO_FORMAT[ext];
 

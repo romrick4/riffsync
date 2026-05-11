@@ -3,6 +3,14 @@ import { prisma } from "@/lib/db";
 import { sendEmail, isEmailConfigured } from "@/lib/email";
 import type { NotificationType } from "@/generated/prisma/client";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
     process.env.VAPID_SUBJECT ?? "mailto:admin@localhost",
@@ -77,11 +85,12 @@ export async function notify({
     });
 
     const subject = `RiffSync: ${message}`;
+    const safeMessage = escapeHtml(message);
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
         <h2 style="color: #7c3aed; margin: 0 0 16px 0;">RiffSync</h2>
-        <p style="font-size: 16px; color: #1a1a1a; line-height: 1.5; margin: 0 0 16px 0;">${message}</p>
-        ${linkUrl ? `<a href="${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}${linkUrl}" style="display: inline-block; background: #7c3aed; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">View in RiffSync</a>` : ""}
+        <p style="font-size: 16px; color: #1a1a1a; line-height: 1.5; margin: 0 0 16px 0;">${safeMessage}</p>
+        ${linkUrl ? `<a href="${escapeHtml((process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000") + linkUrl)}" style="display: inline-block; background: #7c3aed; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">View in RiffSync</a>` : ""}
         <p style="font-size: 13px; color: #888; margin: 24px 0 0 0;">You received this because you're a member of a RiffSync project.</p>
       </div>
     `;

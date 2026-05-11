@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, verifyMembership } from "@/lib/auth";
 import { getStorage } from "@/lib/storage";
 
 type RouteParams = { params: Promise<{ projectId: string; songId: string }> };
-
-async function verifyMembership(projectId: string, userId: string) {
-  return prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId } },
-  });
-}
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const user = await getCurrentUser();

@@ -10,7 +10,12 @@ export class LocalStorageProvider implements StorageProvider {
   }
 
   private resolve(key: string): string {
-    return path.join(this.basePath, key);
+    const resolved = path.resolve(this.basePath, key);
+    const base = path.resolve(this.basePath);
+    if (!resolved.startsWith(base + path.sep) && resolved !== base) {
+      throw new Error("Path traversal detected");
+    }
+    return resolved;
   }
 
   async save(key: string, data: Buffer, _contentType: string): Promise<void> {

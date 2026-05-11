@@ -3,11 +3,15 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
+      # SECURITY: Override POSTGRES_USER and POSTGRES_PASSWORD in production.
+      # The defaults here are for local development only.
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-riffsync}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    # SECURITY: In production, remove this ports mapping. Only the app
+    # container needs DB access (via Docker networking), not the host.
     ports:
       - "${DB_PORT:-5433}:5432"
     healthcheck:

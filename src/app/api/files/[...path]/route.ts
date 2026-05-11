@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getSession, verifyMembership } from "@/lib/auth";
 import { getStorage } from "@/lib/storage";
 import path from "path";
 
@@ -34,6 +34,16 @@ export async function GET(
 
   if (key.includes("..")) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+  }
+
+  const projectIdMatch = key.match(/^projects\/([^/]+)\//);
+  if (!projectIdMatch) {
+    return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+  }
+
+  const membership = await verifyMembership(projectIdMatch[1], session.userId);
+  if (!membership) {
+    return NextResponse.json({ error: "File not found" }, { status: 404 });
   }
 
   const storage = getStorage();

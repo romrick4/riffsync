@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, verifyMembership, verifySongInProject } from "@/lib/auth";
 import { getStorage } from "@/lib/storage";
 
 type RouteParams = {
   params: Promise<{ projectId: string; songId: string; tabId: string }>;
 };
-
-async function verifyMembership(projectId: string, userId: string) {
-  return prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId } },
-  });
-}
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const user = await getCurrentUser();
@@ -24,6 +18,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   const membership = await verifyMembership(projectId, user.id);
   if (!membership) {
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
+  }
+
+  const song = await verifySongInProject(songId, projectId);
+  if (!song) {
+    return NextResponse.json({ error: "Song not found" }, { status: 404 });
   }
 
   const tab = await prisma.tabFile.findUnique({
@@ -51,6 +50,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const membership = await verifyMembership(projectId, user.id);
   if (!membership) {
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
+  }
+
+  const song = await verifySongInProject(songId, projectId);
+  if (!song) {
+    return NextResponse.json({ error: "Song not found" }, { status: 404 });
   }
 
   const tab = await prisma.tabFile.findUnique({
@@ -100,6 +104,11 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   const membership = await verifyMembership(projectId, user.id);
   if (!membership) {
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
+  }
+
+  const song = await verifySongInProject(songId, projectId);
+  if (!song) {
+    return NextResponse.json({ error: "Song not found" }, { status: 404 });
   }
 
   const tab = await prisma.tabFile.findUnique({

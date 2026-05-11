@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
-
-async function verifyMembership(projectId: string, userId: string) {
-  return prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId } },
-  });
-}
+import { getCurrentUser, verifyMembership } from "@/lib/auth";
 
 export async function GET(
   _request: NextRequest,

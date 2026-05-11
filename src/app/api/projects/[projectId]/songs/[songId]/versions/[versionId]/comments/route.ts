@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, verifyMembership, verifySongInProject } from "@/lib/auth";
 import { notify, getProjectMemberIds } from "@/lib/notifications";
 
 type RouteParams = {
@@ -11,23 +11,22 @@ type RouteParams = {
   }>;
 };
 
-async function verifyMembership(projectId: string, userId: string) {
-  return prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId } },
-  });
-}
-
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { projectId, versionId } = await params;
+  const { projectId, songId, versionId } = await params;
 
   const membership = await verifyMembership(projectId, user.id);
   if (!membership) {
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
+  }
+
+  const song = await verifySongInProject(songId, projectId);
+  if (!song) {
+    return NextResponse.json({ error: "Song not found" }, { status: 404 });
   }
 
   const comments = await prisma.audioComment.findMany({
@@ -54,6 +53,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const membership = await verifyMembership(projectId, user.id);
   if (!membership) {
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
+  }
+
+  const song = await verifySongInProject(songId, projectId);
+  if (!song) {
+    return NextResponse.json({ error: "Song not found" }, { status: 404 });
   }
 
   let body: { content?: string; timestampSec?: number };
