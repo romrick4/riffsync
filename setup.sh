@@ -55,15 +55,26 @@ if [ ! -f .env ]; then
     DB_PASSWORD=$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 32)
     SESSION_SECRET=$(openssl rand -base64 32)
 
+    # Generate VAPID keys for push notifications
+    VAPID_TEMP=$(mktemp)
+    openssl ecparam -name prime256v1 -genkey -noout -out "$VAPID_TEMP" 2>/dev/null
+    VAPID_PUB=$(openssl ec -in "$VAPID_TEMP" -pubout -outform DER 2>/dev/null | tail -c 65 | base64 | tr -d '\n' | tr '+/' '-_' | sed 's/=*$//')
+    VAPID_PRIV=$(openssl ec -in "$VAPID_TEMP" -outform DER 2>/dev/null | dd bs=1 skip=7 count=32 2>/dev/null | base64 | tr -d '\n' | tr '+/' '-_' | sed 's/=*$//')
+    rm -f "$VAPID_TEMP"
+
     if [[ "$OSTYPE" == "darwin"* ]]; then
         sed -i '' "s/change-me-to-a-strong-password/$DB_PASSWORD/g" .env
         sed -i '' "s/change-me-to-a-random-string/$SESSION_SECRET/" .env
+        sed -i '' "s/^VAPID_PUBLIC_KEY=.*/VAPID_PUBLIC_KEY=$VAPID_PUB/" .env
+        sed -i '' "s/^VAPID_PRIVATE_KEY=.*/VAPID_PRIVATE_KEY=$VAPID_PRIV/" .env
     else
         sed -i "s/change-me-to-a-strong-password/$DB_PASSWORD/g" .env
         sed -i "s/change-me-to-a-random-string/$SESSION_SECRET/" .env
+        sed -i "s/^VAPID_PUBLIC_KEY=.*/VAPID_PUBLIC_KEY=$VAPID_PUB/" .env
+        sed -i "s/^VAPID_PRIVATE_KEY=.*/VAPID_PRIVATE_KEY=$VAPID_PRIV/" .env
     fi
 
-    echo "→ Generated secure passwords and secrets."
+    echo "→ Generated secure passwords, secrets, and push notification keys."
 else
     echo "→ .env already exists, skipping..."
 fi
