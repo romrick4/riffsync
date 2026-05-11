@@ -10,6 +10,8 @@ import {
   ClockIcon,
   MapPinIcon,
   UsersIcon,
+  PencilIcon,
+  TrashIcon,
 } from "lucide-react";
 import type { CalendarEvent } from "@/components/calendar-view";
 
@@ -51,13 +53,22 @@ function formatDate(dateStr: string) {
 export function EventCard({
   event,
   projectId,
+  currentUserId,
+  isOwner,
   onRsvpChange,
+  onEdit,
+  onDelete,
 }: {
   event: CalendarEvent;
   projectId: string;
+  currentUserId: string;
+  isOwner: boolean;
   onRsvpChange: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const [submitting, setSubmitting] = useState(false);
+  const canDelete = isOwner || event.createdBy.id === currentUserId;
 
   async function handleRsvp(status: string) {
     setSubmitting(true);
@@ -96,6 +107,16 @@ export function EventCard({
               <p className="text-sm text-muted-foreground">
                 {event.description}
               </p>
+            )}
+          </div>
+          <div className="flex shrink-0 gap-1">
+            <Button variant="ghost" size="icon-sm" onClick={onEdit}>
+              <PencilIcon className="size-3.5" />
+            </Button>
+            {canDelete && (
+              <Button variant="ghost" size="icon-sm" onClick={onDelete}>
+                <TrashIcon className="size-3.5" />
+              </Button>
             )}
           </div>
         </div>

@@ -71,6 +71,7 @@ model User {
   polls             Poll[]
   eventRsvps        EventRsvp[]
   pushSubscriptions PushSubscription[]
+  busyBlocks        BusyBlock[]
 }
 
 model PushSubscription {
@@ -98,6 +99,7 @@ model Project {
   albums         Album[]
   calendarEvents CalendarEvent[]
   polls          Poll[]
+  busyBlocks     BusyBlock[]
 }
 
 model ProjectMember {
@@ -319,6 +321,21 @@ model Notification {
   linkUrl   String?
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+}
+
+model BusyBlock {
+  id        String   @id @default(uuid())
+  startTime DateTime
+  endTime   DateTime
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String

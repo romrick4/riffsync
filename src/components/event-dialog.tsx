@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import type { BusyBlock, CalendarMember } from "@/components/calendar-view";
+import type { MemberColor } from "@/lib/member-colors";
+import { AlertTriangleIcon } from "lucide-react";
 
 const EVENT_TYPES = [
   { value: "REHEARSAL", label: "Rehearsal" },
@@ -41,6 +45,9 @@ interface EventDialogProps {
     endTime: string;
     location: string | null;
   };
+  busyBlocks?: BusyBlock[];
+  memberColorMap?: Map<string, MemberColor>;
+  members?: CalendarMember[];
 }
 
 function toLocalDatetime(iso: string) {
@@ -50,12 +57,24 @@ function toLocalDatetime(iso: string) {
   return local.toISOString().slice(0, 16);
 }
 
+function timeRangesOverlap(
+  aStart: Date,
+  aEnd: Date,
+  bStart: Date,
+  bEnd: Date,
+) {
+  return aStart < bEnd && aEnd > bStart;
+}
+
 export function EventDialog({
   projectId,
   open,
   onOpenChange,
   onSuccess,
   editEvent,
+  busyBlocks = [],
+  memberColorMap,
+  members = [],
 }: EventDialogProps) {
   const [title, setTitle] = useState(editEvent?.title ?? "");
   const [eventType, setEventType] = useState(
@@ -74,12 +93,40 @@ export function EventDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  const conflicts = useMemo(() => {
+    if (!startTime || !endTime || busyBlocks.length === 0) return [];
+
+    const eventStart = new Date(startTime);
+    const eventEnd = new Date(endTime);
+    if (eventEnd <= eventStart) return [];
+
+    const matched: { block: BusyBlock; memberName: string }[] = [];
+    const seenUsers = new Set<string>();
+
+    for (const block of busyBlocks) {
+      if (seenUsers.has(block.user.id)) continue;
+      const bStart = new Date(block.startTime);
+      const bEnd = new Date(block.endTime);
+      if (timeRangesOverlap(eventStart, eventEnd, bStart, bEnd)) {
+        matched.push({
+          block,
+          memberName: block.user.displayName,
+        });
+        seenUsers.add(block.user.id);
+      }
+    }
+    return matched;
+  }, [startTime, endTime, busyBlocks]);
+
+  const totalMembers = members.length;
+  const availableCount = totalMembers - conflicts.length;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
     if (!title || !startTime || !endTime) {
-      setError("Title, start time, and end time are required");
+      setError("Fill in a title, start time, and end time.");
       return;
     }
 
@@ -104,7 +151,7 @@ export function EventDialog({
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Something went wrong");
+        setError(data.error || "Something went wrong. Try again.");
         return;
       }
 
@@ -175,6 +222,39 @@ export function EventDialog({
               />
             </div>
           </div>
+
+          {/* Conflict warning */}
+          {conflicts.length > 0 && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-400" />
+                <div className="space-y-1 text-sm">
+                  <p className="font-medium text-amber-300">
+                    {conflicts.length === 1
+                      ? "1 member has a conflict"
+                      : `${conflicts.length} members have conflicts`}
+                    {totalMembers > 0 && (
+                      <span className="font-normal text-amber-400/80">
+                        {" "}
+                        — {availableCount} of {totalMembers} available
+                      </span>
+                    )}
+                  </p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-amber-400/80">
+                    {conflicts.map(({ block, memberName }) => {
+                      const color = memberColorMap?.get(block.user.id);
+                      return (
+                        <span key={block.user.id} className="flex items-center gap-1.5">
+                          <span className={cn("size-2 rounded-full", color?.dot ?? "bg-zinc-400")} />
+                          {memberName}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="event-location">Location (optional)</Label>

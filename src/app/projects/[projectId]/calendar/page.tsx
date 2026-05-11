@@ -25,22 +25,46 @@ export default async function CalendarPage({
   const monthStart = new Date(year, month, 1);
   const monthEnd = new Date(year, month + 1, 0, 23, 59, 59, 999);
 
-  const events = await prisma.calendarEvent.findMany({
-    where: {
-      projectId,
-      startTime: { gte: monthStart, lte: monthEnd },
-    },
-    include: {
-      createdBy: { select: { id: true, displayName: true, username: true } },
-      rsvps: { select: { status: true, userId: true } },
-    },
-    orderBy: { startTime: "asc" },
-  });
+  const [events, busyBlocks, projectMembers] = await Promise.all([
+    prisma.calendarEvent.findMany({
+      where: {
+        projectId,
+        startTime: { gte: monthStart, lte: monthEnd },
+      },
+      include: {
+        createdBy: {
+          select: { id: true, displayName: true, username: true },
+        },
+        rsvps: { select: { status: true, userId: true } },
+      },
+      orderBy: { startTime: "asc" },
+    }),
+    prisma.busyBlock.findMany({
+      where: {
+        projectId,
+        startTime: { lte: monthEnd },
+        endTime: { gte: monthStart },
+      },
+      include: {
+        user: { select: { id: true, displayName: true, username: true } },
+      },
+      orderBy: { startTime: "asc" },
+    }),
+    prisma.projectMember.findMany({
+      where: { projectId },
+      include: {
+        user: { select: { id: true, displayName: true } },
+      },
+      orderBy: { joinedAt: "asc" },
+    }),
+  ]);
 
-  const serialized = events.map((event) => {
+  const serializedEvents = events.map((event) => {
     const going = event.rsvps.filter((r) => r.status === "GOING").length;
     const maybe = event.rsvps.filter((r) => r.status === "MAYBE").length;
-    const cant = event.rsvps.filter((r) => r.status === "CANT_MAKE_IT").length;
+    const cant = event.rsvps.filter(
+      (r) => r.status === "CANT_MAKE_IT",
+    ).length;
     const userRsvp = event.rsvps.find((r) => r.userId === user.id);
 
     return {
@@ -54,16 +78,34 @@ export default async function CalendarPage({
       createdBy: event.createdBy,
       createdAt: event.createdAt.toISOString(),
       rsvpCounts: { going, maybe, cant },
-      userRsvp: (userRsvp?.status as "GOING" | "MAYBE" | "CANT_MAKE_IT") ?? null,
+      userRsvp:
+        (userRsvp?.status as "GOING" | "MAYBE" | "CANT_MAKE_IT") ?? null,
     };
   });
+
+  const serializedBusy = busyBlocks.map((block) => ({
+    id: block.id,
+    startTime: block.startTime.toISOString(),
+    endTime: block.endTime.toISOString(),
+    note: block.note,
+    user: block.user,
+  }));
+
+  const members = projectMembers.map((pm) => ({
+    userId: pm.user.id,
+    displayName: pm.user.displayName,
+  }));
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold">Calendar</h1>
       <CalendarView
         projectId={projectId}
-        initialEvents={serialized}
+        currentUserId={user.id}
+        isOwner={membership.role === "OWNER"}
+        members={members}
+        initialEvents={serializedEvents}
+        initialBusyBlocks={serializedBusy}
         initialYear={year}
         initialMonth={month}
       />
