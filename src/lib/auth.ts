@@ -96,3 +96,10 @@ export async function verifySongInProject(songId: string, projectId: string) {
     select: { id: true },
   });
 }
+
+export async function verifyAlbumInProject(albumId: string, projectId: string) {
+  return prisma.album.findUnique({
+    where: { id: albumId, projectId },
+    select: { id: true },
+  });
+}

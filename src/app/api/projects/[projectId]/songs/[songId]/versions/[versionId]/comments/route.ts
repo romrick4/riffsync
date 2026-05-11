@@ -109,7 +109,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   notify({
     type: "AUDIO_COMMENT",
     message: `${user.displayName} commented on "${version.title}"`,
-    linkUrl: `/projects/${projectId}/songs/${songId}`,
+    linkUrl: `/projects/${projectId}/music/songs/${songId}`,
     recipientIds,
   }).catch(() => {});
 

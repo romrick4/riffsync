@@ -81,12 +81,12 @@ export function AudioComments({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border bg-card p-4">
+    <div className="flex flex-1 flex-col gap-3 rounded-xl border bg-card p-4">
       <h3 className="text-base font-medium">Comments</h3>
 
       <div
         ref={listRef}
-        className="flex max-h-64 flex-col gap-1.5 overflow-y-auto"
+        className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto"
       >
         {sorted.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">

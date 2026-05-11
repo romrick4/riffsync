@@ -102,7 +102,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       data: members.map((m) => ({
         type: "LYRICS_EDITED" as const,
         message: `${user.displayName} updated lyrics for ${song.title}`,
-        linkUrl: `/projects/${projectId}/songs/${songId}`,
+        linkUrl: `/projects/${projectId}/music/songs/${songId}`,
         userId: m.userId,
       })),
     });

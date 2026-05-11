@@ -65,16 +65,31 @@ export async function POST(
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
   }
 
-  let body: { title?: string; description?: string };
+  let body: {
+    title?: string;
+    description?: string;
+    albumId?: string | null;
+    trackNumber?: number | null;
+  };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { title, description } = body;
+  const { title, description, albumId, trackNumber } = body;
   if (!title || !title.trim()) {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
+  }
+
+  if (albumId) {
+    const album = await prisma.album.findUnique({
+      where: { id: albumId, projectId },
+      select: { id: true },
+    });
+    if (!album) {
+      return NextResponse.json({ error: "Album not found" }, { status: 400 });
+    }
   }
 
   const song = await prisma.song.create({
@@ -82,6 +97,8 @@ export async function POST(
       title: title.trim(),
       description: description?.trim() || null,
       projectId,
+      albumId: albumId || null,
+      trackNumber: trackNumber ?? null,
     },
   });
 

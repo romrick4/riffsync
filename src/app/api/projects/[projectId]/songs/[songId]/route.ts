@@ -71,17 +71,37 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Not a project member" }, { status: 403 });
   }
 
-  let body: { title?: string; description?: string };
+  let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const data: Record<string, string | null> = {};
-  if (body.title !== undefined) data.title = body.title.trim();
-  if (body.description !== undefined)
-    data.description = body.description?.trim() || null;
+  const data: Record<string, unknown> = {};
+  if (typeof body.title === "string") data.title = body.title.trim();
+  if (typeof body.description === "string") data.description = body.description.trim() || null;
+  if (typeof body.featuredArtists === "string") data.featuredArtists = body.featuredArtists.trim() || null;
+  if (typeof body.songwriters === "string") data.songwriters = body.songwriters.trim() || null;
+  if (typeof body.isrc === "string") data.isrc = body.isrc.trim() || null;
+  if (typeof body.isExplicit === "boolean") data.isExplicit = body.isExplicit;
+  if (typeof body.language === "string") data.language = body.language.trim();
+  if (typeof body.trackNumber === "number") data.trackNumber = body.trackNumber;
+  if (body.trackNumber === null) data.trackNumber = null;
+
+  if (body.albumId === null) {
+    data.albumId = null;
+    data.trackNumber = null;
+  } else if (typeof body.albumId === "string") {
+    const album = await prisma.album.findUnique({
+      where: { id: body.albumId, projectId },
+      select: { id: true },
+    });
+    if (!album) {
+      return NextResponse.json({ error: "Album not found" }, { status: 400 });
+    }
+    data.albumId = body.albumId;
+  }
 
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });

@@ -30,7 +30,7 @@ export default async function ProjectDashboard({
         },
         orderBy: { joinedAt: "asc" },
       },
-      _count: { select: { songs: true, calendarEvents: true } },
+      _count: { select: { songs: true, albums: true, calendarEvents: true } },
       songs: {
         orderBy: { updatedAt: "desc" },
         take: 5,

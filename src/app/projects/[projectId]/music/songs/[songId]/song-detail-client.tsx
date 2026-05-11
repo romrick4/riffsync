@@ -164,7 +164,7 @@ export function SongDetailClient({
   }, []);
 
   const copyShareLink = useCallback(() => {
-    const url = `${window.location.origin}/projects/${projectId}/songs/${songId}`;
+    const url = `${window.location.origin}/projects/${projectId}/music/songs/${songId}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -375,9 +375,9 @@ export function SongDetailClient({
           </div>
 
           {/* Comments panel */}
-          <div>
+          <div className="flex flex-col">
             {commentsLoading ? (
-              <div className="flex h-32 items-center justify-center rounded-xl border bg-card">
+              <div className="flex flex-1 items-center justify-center rounded-xl border bg-card">
                 <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               </div>
             ) : (

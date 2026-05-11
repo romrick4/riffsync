@@ -11,12 +11,17 @@ const EXTENSION_TO_FORMAT: Record<string, FileFormat> = {
   ".wav": FileFormat.WAV,
   ".flac": FileFormat.FLAC,
   ".mp3": FileFormat.MP3,
+  ".aiff": FileFormat.AIFF,
+  ".aif": FileFormat.AIFF,
+  ".m4a": FileFormat.M4A,
 };
 
 const FORMAT_TO_CONTENT_TYPE: Record<string, string> = {
   WAV: "audio/wav",
   FLAC: "audio/flac",
   MP3: "audio/mpeg",
+  AIFF: "audio/aiff",
+  M4A: "audio/mp4",
 };
 
 type RouteParams = {
@@ -120,7 +125,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
   if (!fileFormat) {
     return NextResponse.json(
-      { error: "Unsupported file format. Accepted: .wav, .flac, .mp3" },
+      { error: "Unsupported file format. Accepted: .wav, .flac, .mp3, .aiff, .m4a" },
       { status: 400 }
     );
   }
@@ -176,7 +181,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   notify({
     type: "NEW_VERSION",
     message: `${user.displayName} uploaded v${versionNumber} "${title.trim()}" for ${song.title}`,
-    linkUrl: `/projects/${projectId}/songs/${songId}`,
+    linkUrl: `/projects/${projectId}/music/songs/${songId}`,
     recipientIds,
   }).catch(() => {});
 

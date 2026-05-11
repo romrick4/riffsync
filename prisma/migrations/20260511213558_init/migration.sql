@@ -1,11 +1,8 @@
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
-
 -- CreateEnum
 CREATE TYPE "ProjectRole" AS ENUM ('OWNER', 'MEMBER');
 
 -- CreateEnum
-CREATE TYPE "FileFormat" AS ENUM ('WAV', 'FLAC', 'MP3');
+CREATE TYPE "FileFormat" AS ENUM ('WAV', 'FLAC', 'MP3', 'AIFF', 'M4A');
 
 -- CreateEnum
 CREATE TYPE "TabFileType" AS ENUM ('GUITAR_PRO', 'TEXT_TAB', 'IMAGE');
@@ -17,18 +14,31 @@ CREATE TYPE "EventType" AS ENUM ('REHEARSAL', 'SHOW', 'RECORDING_SESSION', 'OTHE
 CREATE TYPE "RsvpStatus" AS ENUM ('GOING', 'MAYBE', 'CANT_MAKE_IT');
 
 -- CreateEnum
-CREATE TYPE "NotificationType" AS ENUM ('NEW_VERSION', 'LYRICS_EDITED', 'EVENT_CREATED', 'EVENT_UPDATED', 'POLL_CREATED', 'INVITE_RECEIVED', 'AUDIO_COMMENT');
+CREATE TYPE "NotificationType" AS ENUM ('NEW_VERSION', 'LYRICS_EDITED', 'EVENT_CREATED', 'EVENT_UPDATED', 'POLL_CREATED', 'INVITE_RECEIVED', 'AUDIO_COMMENT', 'NEW_ALBUM', 'ALBUM_UPDATED');
 
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "username" TEXT NOT NULL,
+    "email" TEXT,
     "displayName" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PushSubscription" (
+    "id" TEXT NOT NULL,
+    "endpoint" TEXT NOT NULL,
+    "p256dh" TEXT NOT NULL,
+    "auth" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "PushSubscription_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -56,13 +66,41 @@ CREATE TABLE "ProjectMember" (
 );
 
 -- CreateTable
+CREATE TABLE "Album" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT,
+    "coverArtPath" TEXT,
+    "releaseDate" TIMESTAMP(3),
+    "genre" TEXT,
+    "secondaryGenre" TEXT,
+    "artistName" TEXT,
+    "upc" TEXT,
+    "isExplicit" BOOLEAN NOT NULL DEFAULT false,
+    "language" TEXT NOT NULL DEFAULT 'en',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "projectId" TEXT NOT NULL,
+
+    CONSTRAINT "Album_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Song" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
+    "coverArtPath" TEXT,
+    "trackNumber" INTEGER,
+    "isExplicit" BOOLEAN NOT NULL DEFAULT false,
+    "language" TEXT NOT NULL DEFAULT 'en',
+    "isrc" TEXT,
+    "featuredArtists" TEXT,
+    "songwriters" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "projectId" TEXT NOT NULL,
+    "albumId" TEXT,
 
     CONSTRAINT "Song_pkey" PRIMARY KEY ("id")
 );
@@ -211,6 +249,9 @@ CREATE TABLE "Notification" (
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "PushSubscription_endpoint_key" ON "PushSubscription"("endpoint");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Project_slug_key" ON "Project"("slug");
 
 -- CreateIndex
@@ -226,13 +267,22 @@ CREATE UNIQUE INDEX "EventRsvp_eventId_userId_key" ON "EventRsvp"("eventId", "us
 CREATE UNIQUE INDEX "PollResponse_optionId_userId_key" ON "PollResponse"("optionId", "userId");
 
 -- AddForeignKey
+ALTER TABLE "PushSubscription" ADD CONSTRAINT "PushSubscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "ProjectMember" ADD CONSTRAINT "ProjectMember_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ProjectMember" ADD CONSTRAINT "ProjectMember_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Album" ADD CONSTRAINT "Album_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Song" ADD CONSTRAINT "Song_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Song" ADD CONSTRAINT "Song_albumId_fkey" FOREIGN KEY ("albumId") REFERENCES "Album"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "SongVersion" ADD CONSTRAINT "SongVersion_songId_fkey" FOREIGN KEY ("songId") REFERENCES "Song"("id") ON DELETE CASCADE ON UPDATE CASCADE;

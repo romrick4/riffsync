@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 
 const tabs = [
   { label: "Overview", href: "" },
-  { label: "Songs", href: "/songs" },
+  { label: "Music", href: "/music" },
   { label: "Calendar", href: "/calendar" },
   { label: "Polls", href: "/polls" },
   { label: "Settings", href: "/settings" },
@@ -42,7 +42,7 @@ export default async function ProjectDetailLayout({
         },
         orderBy: { joinedAt: "asc" },
       },
-      _count: { select: { songs: true } },
+      _count: { select: { songs: true, albums: true } },
     },
   });
 

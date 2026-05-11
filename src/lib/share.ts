@@ -3,7 +3,7 @@ export function getSongVersionUrl(
   songId: string,
   versionId: string,
 ): string {
-  return `/projects/${projectId}/songs/${songId}?version=${versionId}`;
+  return `/projects/${projectId}/music/songs/${songId}?version=${versionId}`;
 }
 
 export function getLyricsUrl(
@@ -11,12 +11,16 @@ export function getLyricsUrl(
   songId: string,
   versionNumber?: number,
 ): string {
-  const base = `/projects/${projectId}/songs/${songId}?tab=lyrics`;
+  const base = `/projects/${projectId}/music/songs/${songId}?tab=lyrics`;
   return versionNumber ? `${base}&lyricsVersion=${versionNumber}` : base;
 }
 
 export function getSongUrl(projectId: string, songId: string): string {
-  return `/projects/${projectId}/songs/${songId}`;
+  return `/projects/${projectId}/music/songs/${songId}`;
+}
+
+export function getAlbumUrl(projectId: string, albumId: string): string {
+  return `/projects/${projectId}/music/albums/${albumId}`;
 }
 
 export function getProjectUrl(projectId: string): string {
