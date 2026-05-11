@@ -21,7 +21,7 @@ RiffSync runs on a small server so everyone in your band can access it from any 
 
 ### What You Need
 
-- **A small server** — Rent one for $4-6/month from [DigitalOcean](https://www.digitalocean.com/), [Hetzner](https://www.hetzner.com/), or [Linode](https://www.linode.com/). Pick the cheapest option (1 GB RAM is plenty). Choose **Ubuntu** when asked which operating system.
+- **A small server** — Rent one for $4-6/month from [DigitalOcean](https://www.digitalocean.com/), [Hetzner](https://www.hetzner.com/), or [Linode](https://www.linode.com/). Pick a plan with at least **50 GB of storage** so you have plenty of room for recordings. 1 GB of RAM is plenty. Choose **Ubuntu** when asked which operating system.
 - **A way to connect to your server** — On Mac/Linux, open Terminal. On Windows, use [PuTTY](https://www.putty.org/) or Windows Terminal. Your server provider will give you an IP address and password.
 
 ### One-Command Install
@@ -35,7 +35,7 @@ ssh root@your-server-ip
 Then paste this single command and press Enter:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USER/riffsync/main/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/romrick4/riffsync/main/setup.sh | bash
 ```
 
 That's it. The script does everything automatically:
@@ -149,7 +149,7 @@ Caddy automatically sets up HTTPS with a free certificate. Your band can now acc
 If you want to run RiffSync on your own computer for development:
 
 ```bash
-git clone https://github.com/YOUR_USER/riffsync.git
+git clone https://github.com/romrick4/riffsync.git
 cd riffsync
 npm install
 npm run setup
