@@ -179,6 +179,12 @@ All settings live in the `.env` file. Most are set automatically by the setup sc
 | `STORAGE_PROVIDER` | No | `local` (default) or `s3` for cloud storage |
 | `APP_PORT` | No | Port the app runs on (default: 3000) |
 
+## Support the Project
+
+If RiffSync is useful to your band, consider buying me a coffee. It helps keep the project going.
+
+<a href="https://www.buymeacoffee.com/YOUR_USERNAME" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" height="48"></a>
+
 ## Tech Stack
 
 Next.js, Tailwind CSS, Base UI, PostgreSQL, Prisma, wavesurfer.js, Tiptap, web-push, nodemailer
