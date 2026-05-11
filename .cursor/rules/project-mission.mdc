@@ -1,0 +1,21 @@
+---
+description: Core project mission, target audience, and guiding principles for RiffSync
+alwaysApply: true
+---
+
+# RiffSync Project Mission
+
+RiffSync is an **open source, self-hosted** tool for bands who manage themselves. Bands clone the repo, follow a simple setup guide, and have their own private creative hub running on their own server.
+
+## Target Audience
+
+The typical user is a **musician with little or no tech experience**. They may have never rented a server, edited a config file, or used a terminal before. Every decision — from feature design to error messages — must respect this.
+
+## Guiding Principles
+
+1. **Self-hosted by default** — Users own their data on their own server. Never require a third-party service to get core functionality working. External services (S3, SMTP) are optional upgrades, not requirements.
+2. **Zero-jargon by default** — If a term wouldn't make sense to someone who's never written code, rephrase it. Say "your server's address" not "IP endpoint". Say "restart the app" not "restart the container".
+3. **Sensible defaults over configuration** — Everything should work out of the box. Auto-generate secrets, use local storage, skip optional features. Only ask the user to configure what they actually want.
+4. **One path, not many** — Don't present multiple ways to do something. Pick the simplest path and document that. Advanced users can figure out alternatives on their own.
+5. **Fail gracefully, explain clearly** — When something goes wrong, tell the user what happened and what to do next in plain language. Never show raw stack traces or cryptic error codes to end users.
+6. **Low maintenance** — Updates should be a single command. The app shouldn't need babysitting. If a feature adds operational burden for self-hosters, reconsider it.
