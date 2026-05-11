@@ -203,8 +203,8 @@ export const LyricsEditor = forwardRef<LyricsEditorHandle, LyricsEditorProps>(
                 Save
               </Button>
             ) : (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex min-w-0 flex-1 items-center gap-1.5">
                   <Label
                     htmlFor="change-note"
                     className="text-xs whitespace-nowrap"
@@ -216,36 +216,38 @@ export const LyricsEditor = forwardRef<LyricsEditorHandle, LyricsEditorProps>(
                     value={changeNote}
                     onChange={(e) => setChangeNote(e.target.value)}
                     placeholder="e.g. Rewrote chorus"
-                    className="h-7 w-48 text-xs"
+                    className="h-7 w-full text-xs sm:w-48"
                   />
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <Loader2Icon
-                      className="animate-spin"
-                      data-icon="inline-start"
-                    />
-                  ) : (
-                    <SaveIcon data-icon="inline-start" />
-                  )}
-                  {saving ? "Saving..." : "Confirm"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowSaveForm(false);
-                    setChangeNote("");
-                  }}
-                >
-                  Cancel
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <Loader2Icon
+                        className="animate-spin"
+                        data-icon="inline-start"
+                      />
+                    ) : (
+                      <SaveIcon data-icon="inline-start" />
+                    )}
+                    {saving ? "Saving..." : "Confirm"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowSaveForm(false);
+                      setChangeNote("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
             )}
           </div>

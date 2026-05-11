@@ -100,23 +100,23 @@ export function EventCard({
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <CalendarIcon className="size-3" />
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <CalendarIcon className="size-3.5" />
             {formatDate(event.startTime)}
           </span>
-          <span className="flex items-center gap-1">
-            <ClockIcon className="size-3" />
+          <span className="flex items-center gap-1.5">
+            <ClockIcon className="size-3.5" />
             {formatTime(event.startTime)} – {formatTime(event.endTime)}
           </span>
           {event.location && (
-            <span className="flex items-center gap-1">
-              <MapPinIcon className="size-3" />
+            <span className="flex items-center gap-1.5">
+              <MapPinIcon className="size-3.5" />
               {event.location}
             </span>
           )}
-          <span className="flex items-center gap-1">
-            <UsersIcon className="size-3" />
+          <span className="flex items-center gap-1.5">
+            <UsersIcon className="size-3.5" />
             {event.rsvpCounts.going} going · {event.rsvpCounts.maybe} maybe ·{" "}
             {event.rsvpCounts.cant} can&apos;t
           </span>

@@ -255,7 +255,7 @@ export function TextTabEditor({ songId, projectId, tabs }: TextTabEditorProps) {
                   </div>
                 )}
 
-                <div className="mt-2 text-[11px] text-muted-foreground">
+                <div className="mt-2 text-xs text-muted-foreground">
                   Uploaded by {tab.uploadedBy.displayName} on{" "}
                   {new Date(tab.createdAt).toLocaleDateString()}
                 </div>

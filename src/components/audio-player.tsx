@@ -146,7 +146,7 @@ export function AudioPlayer({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium">{title}</span>
-          <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
+          <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground">
             {format}
           </span>
         </div>
@@ -202,7 +202,7 @@ export function AudioPlayer({
             step={0.01}
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
-            className="h-1 w-20 cursor-pointer appearance-none rounded-full bg-muted accent-primary [&::-webkit-slider-thumb]:size-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
+            className="h-1.5 w-24 cursor-pointer appearance-none rounded-full bg-muted accent-primary [&::-webkit-slider-thumb]:size-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary md:[&::-webkit-slider-thumb]:size-3"
           />
         </div>
       </div>
@@ -228,17 +228,17 @@ function CommentMarkers({
           return (
             <Tooltip key={c.id}>
               <TooltipTrigger
-                className="pointer-events-auto absolute -top-1 z-10 -translate-x-1/2 cursor-pointer"
+                className="pointer-events-auto absolute -top-2 z-10 -translate-x-1/2 cursor-pointer p-1"
                 style={{ left: `${pct}%` }}
                 onClick={() => onSeek(c.timestampSec)}
                 render={<button type="button" />}
               >
-                <div className="size-2.5 rounded-full bg-primary shadow-sm shadow-primary/50 ring-1 ring-primary/30" />
+                <div className="size-3.5 rounded-full bg-primary shadow-sm shadow-primary/50 ring-1 ring-primary/30 md:size-2.5" />
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-52">
                 <span className="font-medium">{c.user.displayName}</span>
                 {" \u00b7 "}
-                <span className="font-mono text-[10px]">
+                <span className="font-mono text-xs">
                   {formatTime(c.timestampSec)}
                 </span>
                 <br />

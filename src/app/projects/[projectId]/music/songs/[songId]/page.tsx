@@ -115,7 +115,7 @@ export default async function SongDetailPage({
     : null;
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 md:p-8">
+    <div className="flex flex-1 flex-col gap-6">
       <div className="flex items-start gap-4">
         <Link href={`/projects/${projectId}/music`}>
           <Button variant="ghost" size="icon">
@@ -129,8 +129,8 @@ export default async function SongDetailPage({
             className="size-14 rounded-lg object-cover"
           />
         )}
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight">
               {song.title}
             </h1>

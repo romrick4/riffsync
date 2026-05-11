@@ -99,7 +99,7 @@ export function LyricsHistory({
                         v{version.versionNumber}
                       </span>
                       {isCurrent && (
-                        <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                        <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-xs font-medium text-primary">
                           Current
                         </span>
                       )}
@@ -109,13 +109,13 @@ export function LyricsHistory({
                         {version.changeNote}
                       </p>
                     )}
-                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <UserIcon className="size-2.5" />
+                        <UserIcon className="size-3" />
                         {version.editedBy.displayName}
                       </span>
                       <span className="flex items-center gap-1">
-                        <CalendarIcon className="size-2.5" />
+                        <CalendarIcon className="size-3" />
                         {new Date(version.createdAt).toLocaleDateString()}
                       </span>
                     </div>

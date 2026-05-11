@@ -201,6 +201,20 @@ export function VersionTree({
     []
   );
 
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!scrollRef.current || e.touches.length !== 1) return;
+      setIsDragging(true);
+      dragStart.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        scrollLeft: scrollRef.current.scrollLeft,
+        scrollTop: scrollRef.current.scrollTop,
+      };
+    },
+    []
+  );
+
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
       if (!isDragging || !scrollRef.current) return;
@@ -213,13 +227,28 @@ export function VersionTree({
     function handleMouseUp() {
       setIsDragging(false);
     }
+    function handleTouchMove(e: TouchEvent) {
+      if (!isDragging || !scrollRef.current || e.touches.length !== 1) return;
+      e.preventDefault();
+      scrollRef.current.scrollLeft =
+        dragStart.current.scrollLeft - (e.touches[0].clientX - dragStart.current.x);
+      scrollRef.current.scrollTop =
+        dragStart.current.scrollTop - (e.touches[0].clientY - dragStart.current.y);
+    }
+    function handleTouchEnd() {
+      setIsDragging(false);
+    }
     if (isDragging) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchmove", handleTouchMove, { passive: false });
+      window.addEventListener("touchend", handleTouchEnd);
     }
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isDragging]);
 
@@ -256,8 +285,9 @@ export function VersionTree({
     <div
       ref={scrollRef}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
       className={cn(
-        "overflow-auto rounded-xl border bg-card/50 p-6",
+        "overflow-auto rounded-xl border bg-card/50 p-4 md:p-6 touch-none",
         isDragging ? "cursor-grabbing" : "cursor-grab"
       )}
       style={{ maxHeight: 460 }}
@@ -380,7 +410,7 @@ function VersionNodeCard({
         <div className="flex items-center gap-1">
           <Badge
             variant="outline"
-            className="h-5 px-1.5 text-[10px] leading-none"
+            className="h-5 px-1.5 text-xs leading-none"
           >
             {version.fileFormat}
           </Badge>
@@ -394,7 +424,7 @@ function VersionNodeCard({
             e.stopPropagation();
             onUpload();
           }}
-          className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full border bg-card text-muted-foreground opacity-0 shadow-sm transition-opacity hover:bg-accent hover:text-accent-foreground group-hover:opacity-100"
+          className="absolute -right-2 -top-2 flex size-8 items-center justify-center rounded-full border bg-card text-muted-foreground shadow-sm transition-opacity hover:bg-accent hover:text-accent-foreground opacity-100 sm:opacity-0 sm:group-hover:opacity-100 md:size-6"
         >
           <PlusIcon className="size-3.5" />
         </button>

@@ -134,19 +134,19 @@ export function CalendarView({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={prevMonth}>
             <ChevronLeftIcon className="size-4" />
           </Button>
-          <h2 className="min-w-[180px] text-center text-lg font-semibold">
+          <h2 className="min-w-[140px] text-center text-lg font-semibold sm:min-w-[180px]">
             {monthLabel}
           </h2>
           <Button variant="outline" size="icon" onClick={nextMonth}>
             <ChevronRightIcon className="size-4" />
           </Button>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>Add Event</Button>
+        <Button onClick={() => setDialogOpen(true)} className="w-full sm:w-auto">Add Event</Button>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border">
@@ -205,7 +205,7 @@ export function CalendarView({
                           />
                         ))}
                         {dayEvents.length > 3 && (
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-xs text-muted-foreground">
                             +{dayEvents.length - 3}
                           </span>
                         )}

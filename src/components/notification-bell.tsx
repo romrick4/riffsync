@@ -162,12 +162,12 @@ export function NotificationBell() {
       >
         <BellIcon className="size-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+          <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-xs font-bold leading-none text-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-80 p-0">
+      <PopoverContent align="end" sideOffset={8} className="w-[calc(100vw-2rem)] p-0 sm:w-80">
         <div className="flex items-center justify-between px-3 py-2">
           <span className="text-sm font-medium">Notifications</span>
           {unreadCount > 0 && (

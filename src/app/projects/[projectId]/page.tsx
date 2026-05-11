@@ -1,11 +1,10 @@
 import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { Music, Users, Calendar } from "lucide-react";
+import { Music, Users, Calendar, Copy } from "lucide-react";
 import { InviteCode } from "./_components/invite-code";
 import { formatDistanceToNow } from "date-fns";
 
@@ -57,7 +56,7 @@ export default async function ProjectDashboard({
   if (!project) notFound();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold">{project.name}</h1>
         {project.description && (
@@ -67,123 +66,99 @@ export default async function ProjectDashboard({
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardContent className="flex items-center gap-3 pt-0">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-              <Music className="size-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{project._count.songs}</p>
-              <p className="text-xs text-muted-foreground">Songs</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 pt-0">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-              <Users className="size-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{project.members.length}</p>
-              <p className="text-xs text-muted-foreground">Members</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 pt-0">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-              <Calendar className="size-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">
-                {project._count.calendarEvents}
-              </p>
-              <p className="text-xs text-muted-foreground">Events</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex items-center gap-0 divide-x divide-border rounded-lg border bg-card/50 text-center">
+        <Link href={`/projects/${projectId}/music`} className="flex flex-1 flex-col items-center gap-1 py-3 transition-colors hover:bg-muted/50">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Music className="size-3.5" />
+            <span className="text-xs">Songs</span>
+          </div>
+          <span className="text-xl font-bold tabular-nums">{project._count.songs}</span>
+        </Link>
+        <div className="flex flex-1 flex-col items-center gap-1 py-3">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Users className="size-3.5" />
+            <span className="text-xs">Members</span>
+          </div>
+          <span className="text-xl font-bold tabular-nums">{project.members.length}</span>
+        </div>
+        <Link href={`/projects/${projectId}/calendar`} className="flex flex-1 flex-col items-center gap-1 py-3 transition-colors hover:bg-muted/50">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Calendar className="size-3.5" />
+            <span className="text-xs">Events</span>
+          </div>
+          <span className="text-xl font-bold tabular-nums">{project._count.calendarEvents}</span>
+        </Link>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {project.members.map((member: any) => {
-                const initials = member.user.displayName
-                  .split(" ")
-                  .map((w: string) => w[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2);
-                return (
-                  <div
-                    key={member.id}
-                    className="flex items-center gap-3"
-                  >
-                    <Avatar size="sm">
-                      <AvatarFallback>{initials}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">
-                        {member.user.displayName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        @{member.user.username}
-                      </p>
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {member.role}
-                    </Badge>
+      <div className="grid gap-5 md:grid-cols-2">
+        <section>
+          <h2 className="mb-2.5 text-sm font-medium text-muted-foreground">Members</h2>
+          <div className="space-y-1">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            {project.members.map((member: any) => {
+              const initials = member.user.displayName
+                .split(" ")
+                .map((w: string) => w[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2);
+              return (
+                <div
+                  key={member.id}
+                  className="flex items-center gap-2.5 rounded-md px-2 py-1.5 -mx-2"
+                >
+                  <Avatar size="sm">
+                    <AvatarFallback>{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
+                      {member.user.displayName}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      @{member.user.username}
+                    </p>
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Invite Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-3 text-sm text-muted-foreground">
-              Share this invite code with your bandmates so they can join the
-              project.
-            </p>
+                  {member.role === "OWNER" && (
+                    <Badge variant="outline" className="text-xs shrink-0">
+                      Owner
+                    </Badge>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-3 flex items-center gap-2 rounded-md border border-dashed px-3 py-2.5">
+            <Copy className="size-3.5 shrink-0 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Invite code:</span>
             <InviteCode code={project.inviteCode} />
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <section>
+          <h2 className="mb-2.5 text-sm font-medium text-muted-foreground">Recent Activity</h2>
           {project.songs.length === 0 &&
           project.calendarEvents.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="py-6 text-center text-sm text-muted-foreground">
               No activity yet. Start by creating a song!
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-0.5">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {project.songs.map((song: any) => {
                 const latestVersion = song.versions[0];
                 return (
-                  <div key={song.id} className="flex items-start gap-3">
-                    <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Link
+                    key={song.id}
+                    href={`/projects/${projectId}/music/songs/${song.id}`}
+                    className="flex items-center gap-2.5 rounded-md px-2 py-2 -mx-2 transition-colors hover:bg-muted/50"
+                  >
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
                       <Music className="size-3.5 text-primary" />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{song.title}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{song.title}</p>
                       {latestVersion ? (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="truncate text-xs text-muted-foreground">
                           v{latestVersion.versionNumber} by{" "}
                           {latestVersion.uploadedBy.displayName} &middot;{" "}
                           {formatDistanceToNow(latestVersion.createdAt, {
@@ -199,22 +174,22 @@ export default async function ProjectDashboard({
                         </p>
                       )}
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
-              {project.songs.length > 0 &&
-                project.calendarEvents.length > 0 && (
-                  <Separator />
-                )}
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {project.calendarEvents.map((event: any) => (
-                <div key={event.id} className="flex items-start gap-3">
-                  <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <Link
+                  key={event.id}
+                  href={`/projects/${projectId}/calendar`}
+                  className="flex items-center gap-2.5 rounded-md px-2 py-2 -mx-2 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <Calendar className="size-3.5 text-primary" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{event.title}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{event.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">
                       {event.eventType.replace(/_/g, " ").toLowerCase()}{" "}
                       &middot;{" "}
                       {formatDistanceToNow(event.startTime, {
@@ -222,12 +197,12 @@ export default async function ProjectDashboard({
                       })}
                     </p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </section>
+      </div>
     </div>
   );
 }

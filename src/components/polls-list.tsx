@@ -32,11 +32,11 @@ export function PollsList({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
           {polls.length} {polls.length === 1 ? "poll" : "polls"}
         </p>
-        <Button onClick={() => setDialogOpen(true)}>Create Poll</Button>
+        <Button onClick={() => setDialogOpen(true)} className="w-full sm:w-auto">Create Poll</Button>
       </div>
 
       {polls.length === 0 && (

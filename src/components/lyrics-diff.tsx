@@ -52,7 +52,7 @@ export function LyricsDiff({
           {newLabel}
         </span>
       </div>
-      <div className="rounded-lg border border-border bg-card/30 font-mono text-sm">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card/30 font-mono text-sm">
         {diff.map((part, i) => {
           const lines = part.value.split("\n");
           // Remove trailing empty string from split

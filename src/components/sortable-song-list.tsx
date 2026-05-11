@@ -64,17 +64,17 @@ function SortableRow({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 ${
+      className={`flex items-center gap-3 rounded-lg border bg-card px-3 py-3 md:py-2.5 ${
         isDragging ? "z-10 shadow-lg ring-2 ring-primary/20" : ""
       }`}
     >
       <button
         type="button"
-        className="cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+        className="cursor-grab touch-none p-2 -m-2 text-muted-foreground hover:text-foreground active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
-        <GripVerticalIcon className="size-4" />
+        <GripVerticalIcon className="size-5" />
       </button>
       <span className="w-6 text-center text-sm font-mono text-muted-foreground">
         {index + 1}

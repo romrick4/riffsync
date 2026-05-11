@@ -62,14 +62,14 @@ export default async function AlbumDetailPage({
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 md:p-8">
+    <div className="flex flex-1 flex-col gap-6">
       <div className="flex items-start gap-4">
         <Link href={`/projects/${projectId}/music`}>
           <Button variant="ghost" size="icon">
             <ArrowLeftIcon />
           </Button>
         </Link>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-semibold tracking-tight">
             {album.title}
           </h1>

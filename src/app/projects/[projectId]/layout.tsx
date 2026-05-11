@@ -52,16 +52,19 @@ export default async function ProjectDetailLayout({
 
   return (
     <div>
-      <nav className="flex gap-1 overflow-x-auto">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.label}
-            href={`/projects/${projectId}${tab.href}`}
-            className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            {tab.label}
-          </Link>
-        ))}
+      <nav className="relative -mx-4 sm:-mx-0">
+        <div className="flex gap-1 overflow-x-auto px-4 sm:px-0 [-webkit-overflow-scrolling:touch]">
+          {tabs.map((tab) => (
+            <Link
+              key={tab.label}
+              href={`/projects/${projectId}${tab.href}`}
+              className="whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:px-3 md:py-1.5"
+            >
+              {tab.label}
+            </Link>
+          ))}
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent sm:hidden" />
       </nav>
       <Separator className="mt-1 mb-6" />
       <ProjectProvider project={serializedProject}>

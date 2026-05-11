@@ -162,7 +162,7 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border bg-card p-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-sm font-medium">A/B Comparison</h3>
         <div className="flex items-center gap-2">
           <Button
@@ -263,16 +263,16 @@ function TrackPanel({
         <div className="flex items-center gap-2">
           <Badge
             variant={isActive ? "default" : "outline"}
-            className="h-5 w-5 justify-center p-0 text-[10px]"
+            className="h-5 w-5 justify-center p-0 text-xs"
           >
             {label}
           </Badge>
           <span className="text-xs font-medium">{title}</span>
-          <span className="rounded bg-muted px-1 py-0.5 font-mono text-[9px] uppercase text-muted-foreground">
+          <span className="rounded bg-muted px-1 py-0.5 font-mono text-xs uppercase text-muted-foreground">
             {format}
           </span>
         </div>
-        <span className="text-[10px] tabular-nums text-muted-foreground">
+        <span className="text-xs tabular-nums text-muted-foreground">
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
       </div>

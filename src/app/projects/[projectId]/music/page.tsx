@@ -70,8 +70,8 @@ export default async function MusicPage({
   const hasContent = albums.length > 0 || singles.length > 0;
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-1 flex-col gap-6 md:gap-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Music</h1>
           <p className="text-sm text-muted-foreground">
