@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { notify, getProjectMemberIds } from "@/lib/notifications";
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
@@ -49,6 +50,19 @@ export async function POST(request: NextRequest) {
         role: "MEMBER",
       },
     });
+
+    const joiningUser = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { displayName: true },
+    });
+
+    const recipientIds = await getProjectMemberIds(project.id, session.userId);
+    notify({
+      type: "INVITE_RECEIVED",
+      message: `${joiningUser?.displayName ?? "Someone"} joined ${project.name}`,
+      linkUrl: `/projects/${project.id}`,
+      recipientIds,
+    }).catch(() => {});
 
     const updatedProject = await prisma.project.findUnique({
       where: { id: project.id },

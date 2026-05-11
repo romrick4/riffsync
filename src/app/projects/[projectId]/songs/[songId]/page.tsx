@@ -8,6 +8,7 @@ import Link from "next/link";
 import { SongDetailClient } from "./song-detail-client";
 import { LyricsSection } from "@/components/lyrics-section";
 import { TextTabEditor } from "@/components/text-tab-editor";
+import { UploadVersionDialog } from "@/components/upload-version-dialog";
 import type { VersionNode } from "@/components/version-tree";
 
 export default async function SongDetailPage({
@@ -145,6 +146,11 @@ export default async function SongDetailPage({
                   Upload your first recording to get started.
                 </p>
               </div>
+              <UploadVersionDialog
+                projectId={projectId}
+                songId={songId}
+                existingVersions={[]}
+              />
             </div>
           ) : (
             <SongDetailClient

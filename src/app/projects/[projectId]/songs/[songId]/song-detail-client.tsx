@@ -277,17 +277,17 @@ export function SongDetailClient({
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <UserIcon className="size-3" />
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <UserIcon className="size-3.5" />
                 {selectedVersion.uploadedBy.displayName}
               </span>
-              <span className="flex items-center gap-1">
-                <CalendarIcon className="size-3" />
+              <span className="flex items-center gap-1.5">
+                <CalendarIcon className="size-3.5" />
                 {new Date(selectedVersion.createdAt).toLocaleDateString()}
               </span>
-              <span className="flex items-center gap-1">
-                <HardDriveIcon className="size-3" />
+              <span className="flex items-center gap-1.5">
+                <HardDriveIcon className="size-3.5" />
                 {formatFileSize(selectedVersion.fileSizeBytes)}
               </span>
             </div>

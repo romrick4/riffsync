@@ -47,6 +47,7 @@ export const LyricsEditor = forwardRef<LyricsEditorHandle, LyricsEditorProps>(
     const [error, setError] = useState<string | null>(null);
 
     const editor = useEditor({
+      immediatelyRender: false,
       extensions: [
         StarterKit.configure({
           heading: { levels: [1, 2, 3] },

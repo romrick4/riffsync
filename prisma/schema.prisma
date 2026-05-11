@@ -50,21 +50,34 @@ enum NotificationType {
 model User {
   id           String   @id @default(uuid())
   username     String   @unique
+  email        String?
   displayName  String
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  projectMembers ProjectMember[]
-  songVersions   SongVersion[]
-  lyricVersions  LyricVersion[]
-  audioComments  AudioComment[]
-  pollResponses  PollResponse[]
-  notifications  Notification[]
-  tabFiles       TabFile[]
-  calendarEvents CalendarEvent[]
-  polls          Poll[]
-  eventRsvps     EventRsvp[]
+  projectMembers    ProjectMember[]
+  songVersions      SongVersion[]
+  lyricVersions     LyricVersion[]
+  audioComments     AudioComment[]
+  pollResponses     PollResponse[]
+  notifications     Notification[]
+  tabFiles          TabFile[]
+  calendarEvents    CalendarEvent[]
+  polls             Poll[]
+  eventRsvps        EventRsvp[]
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
 }
 
 model Project {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { NotificationType } from "@/generated/prisma";
+import { notify, getProjectMemberIds } from "@/lib/notifications";
 
 export async function GET(
   request: Request,
@@ -111,21 +111,13 @@ export async function POST(
     },
   });
 
-  const members = await prisma.projectMember.findMany({
-    where: { projectId, userId: { not: user.id } },
-    select: { userId: true },
-  });
-
-  if (members.length > 0) {
-    await prisma.notification.createMany({
-      data: members.map((m) => ({
-        type: NotificationType.POLL_CREATED,
-        message: `${user.displayName} created a poll: "${question}"`,
-        linkUrl: `/projects/${projectId}/polls`,
-        userId: m.userId,
-      })),
-    });
-  }
+  const recipientIds = await getProjectMemberIds(projectId, user.id);
+  notify({
+    type: "POLL_CREATED",
+    message: `${user.displayName} created a poll: "${question}"`,
+    linkUrl: `/projects/${projectId}/polls`,
+    recipientIds,
+  }).catch(() => {});
 
   return NextResponse.json(poll, { status: 201 });
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { notify, getProjectMemberIds } from "@/lib/notifications";
 
 type RouteParams = {
   params: Promise<{
@@ -97,16 +98,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     },
   });
 
-  if (version.uploadedById !== user.id) {
-    await prisma.notification.create({
-      data: {
-        type: "AUDIO_COMMENT",
-        message: `${user.displayName} commented on ${version.title}`,
-        linkUrl: `/projects/${projectId}/songs/${songId}`,
-        userId: version.uploadedById,
-      },
-    });
-  }
+  const recipientIds = await getProjectMemberIds(projectId, user.id);
+  notify({
+    type: "AUDIO_COMMENT",
+    message: `${user.displayName} commented on "${version.title}"`,
+    linkUrl: `/projects/${projectId}/songs/${songId}`,
+    recipientIds,
+  }).catch(() => {});
 
   return NextResponse.json(comment, { status: 201 });
 }

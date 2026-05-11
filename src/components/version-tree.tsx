@@ -35,10 +35,10 @@ interface LayoutNode {
   children: LayoutNode[];
 }
 
-const NODE_WIDTH = 200;
-const NODE_HEIGHT = 80;
+const NODE_WIDTH = 224;
+const NODE_HEIGHT = 88;
 const H_GAP = 60;
-const V_GAP = 24;
+const V_GAP = 28;
 
 function buildTree(versions: VersionNode[]): LayoutNode[] {
   const byId = new Map<string, VersionNode>();
@@ -341,14 +341,14 @@ function VersionNodeCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-[200px] flex-col gap-1 rounded-lg border bg-card p-3 text-left text-xs transition-all hover:bg-accent/50",
+        "flex w-[224px] flex-col gap-1.5 rounded-lg border bg-card p-3.5 text-left text-sm transition-all hover:bg-accent/50",
         isSelected
           ? "border-primary ring-2 ring-primary/30"
           : "border-border hover:border-muted-foreground/40"
       )}
     >
       <div className="flex items-center gap-1.5">
-        <span className="font-mono text-[10px] text-muted-foreground">
+        <span className="font-mono text-xs text-muted-foreground">
           v{version.versionNumber}
         </span>
         <span className="truncate font-medium text-card-foreground">
@@ -358,20 +358,20 @@ function VersionNodeCard({
           <StarIcon className="ml-auto size-3.5 shrink-0 fill-amber-400 text-amber-400" />
         )}
       </div>
-      <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-0.5">
-          <UserIcon className="size-2.5" />
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1">
+          <UserIcon className="size-3" />
           {version.uploadedBy.displayName}
         </span>
-        <span className="flex items-center gap-0.5">
-          <CalendarIcon className="size-2.5" />
+        <span className="flex items-center gap-1">
+          <CalendarIcon className="size-3" />
           {formatDate(version.createdAt)}
         </span>
       </div>
       <div className="flex items-center gap-1">
         <Badge
           variant="outline"
-          className="h-4 px-1 text-[9px] leading-none"
+          className="h-5 px-1.5 text-[10px] leading-none"
         >
           {version.fileFormat}
         </Badge>

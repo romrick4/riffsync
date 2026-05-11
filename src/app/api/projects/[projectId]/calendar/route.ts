@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { NotificationType } from "@/generated/prisma";
-import type { EventType } from "@/generated/prisma";
+import type { EventType } from "@/generated/prisma/client";
+import { notify, getProjectMemberIds } from "@/lib/notifications";
 
 export async function GET(
   request: Request,
@@ -143,21 +143,13 @@ export async function POST(
     },
   });
 
-  const members = await prisma.projectMember.findMany({
-    where: { projectId, userId: { not: user.id } },
-    select: { userId: true },
-  });
-
-  if (members.length > 0) {
-    await prisma.notification.createMany({
-      data: members.map((m) => ({
-        type: NotificationType.EVENT_CREATED,
-        message: `${user.displayName} created event "${title}"`,
-        linkUrl: `/projects/${projectId}/calendar`,
-        userId: m.userId,
-      })),
-    });
-  }
+  const recipientIds = await getProjectMemberIds(projectId, user.id);
+  notify({
+    type: "EVENT_CREATED",
+    message: `${user.displayName} created event "${title}"`,
+    linkUrl: `/projects/${projectId}/calendar`,
+    recipientIds,
+  }).catch(() => {});
 
   return NextResponse.json(event, { status: 201 });
 }

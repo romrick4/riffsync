@@ -223,7 +223,7 @@ export function UploadVersionDialog({
                   <FileAudioIcon className="size-8 text-muted-foreground" />
                   <div className="text-left">
                     <p className="text-sm font-medium">{file.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -246,7 +246,7 @@ export function UploadVersionDialog({
                     <p className="text-sm font-medium">
                       Drop audio file here or click to browse
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       WAV, FLAC, or MP3 up to 200MB
                     </p>
                   </div>
@@ -301,7 +301,7 @@ export function UploadVersionDialog({
 
             {uploading && (
               <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Uploading...</span>
                   <span>{progress}%</span>
                 </div>

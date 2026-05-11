@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { NotificationType } from "@/generated/prisma";
-import type { EventType } from "@/generated/prisma";
+import { NotificationType } from "@/generated/prisma/client";
+import type { EventType } from "@/generated/prisma/client";
 
 type RouteParams = { params: Promise<{ projectId: string; eventId: string }> };
 

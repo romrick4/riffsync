@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import type { RsvpStatus } from "@/generated/prisma";
+import type { RsvpStatus } from "@/generated/prisma/client";
 
 const VALID_STATUSES = ["GOING", "MAYBE", "CANT_MAKE_IT"];
 

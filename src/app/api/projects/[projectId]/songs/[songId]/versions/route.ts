@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getStorage } from "@/lib/storage";
-import { FileFormat } from "@/generated/prisma";
+import { FileFormat } from "@/generated/prisma/client";
+import { notify, getProjectMemberIds } from "@/lib/notifications";
 
 const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
 
@@ -171,6 +172,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
     },
   });
+
+  const recipientIds = await getProjectMemberIds(projectId, user.id);
+  notify({
+    type: "NEW_VERSION",
+    message: `${user.displayName} uploaded v${versionNumber} "${title.trim()}" for ${song.title}`,
+    linkUrl: `/projects/${projectId}/songs/${songId}`,
+    recipientIds,
+  }).catch(() => {});
 
   return NextResponse.json(version, { status: 201 });
 }

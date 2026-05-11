@@ -2,18 +2,20 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, BellRing, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NotificationBell } from "@/components/notification-bell";
+import { usePushSubscription } from "@/hooks/use-push-subscription";
 
 interface NavBarProps {
   user: {
@@ -25,10 +27,20 @@ interface NavBarProps {
 
 export function NavBar({ user }: NavBarProps) {
   const router = useRouter();
+  const { isSubscribed, isSupported, subscribe, unsubscribe } =
+    usePushSubscription();
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
+  }
+
+  async function handleTogglePush() {
+    if (isSubscribed) {
+      await unsubscribe();
+    } else {
+      await subscribe();
+    }
   }
 
   const initials = user.displayName
@@ -62,8 +74,20 @@ export function NavBar({ user }: NavBarProps) {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="bottom" sideOffset={8}>
-              <DropdownMenuLabel>{user.displayName}</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>{user.displayName}</DropdownMenuLabel>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
+              {isSupported && (
+                <DropdownMenuItem onClick={handleTogglePush}>
+                  {isSubscribed ? (
+                    <BellOff className="size-4" />
+                  ) : (
+                    <BellRing className="size-4" />
+                  )}
+                  {isSubscribed ? "Disable push notifications" : "Enable push notifications"}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="size-4" />
                 Log out

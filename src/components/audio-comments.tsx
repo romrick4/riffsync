@@ -82,14 +82,14 @@ export function AudioComments({
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border bg-card p-4">
-      <h3 className="text-sm font-medium">Comments</h3>
+      <h3 className="text-base font-medium">Comments</h3>
 
       <div
         ref={listRef}
         className="flex max-h-64 flex-col gap-1.5 overflow-y-auto"
       >
         {sorted.length === 0 ? (
-          <p className="py-6 text-center text-xs text-muted-foreground">
+          <p className="py-6 text-center text-sm text-muted-foreground">
             No comments yet. Click on the waveform and leave a comment.
           </p>
         ) : (
@@ -101,7 +101,7 @@ export function AudioComments({
                 key={c.id}
                 data-active={isNear}
                 className={cn(
-                  "flex items-start gap-2 rounded-lg px-2.5 py-2 text-xs transition-colors",
+                  "flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors",
                   isNear
                     ? "bg-primary/10 ring-1 ring-primary/20"
                     : "hover:bg-muted/50"
@@ -110,17 +110,17 @@ export function AudioComments({
                 <button
                   type="button"
                   onClick={() => onSeekTo(c.timestampSec)}
-                  className="mt-0.5 shrink-0 rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-primary hover:bg-primary/20 transition-colors"
+                  className="mt-0.5 shrink-0 rounded bg-muted px-2 py-1 font-mono text-xs tabular-nums text-primary hover:bg-primary/20 transition-colors"
                 >
                   {formatTime(c.timestampSec)}
                 </button>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <UserIcon className="size-2.5 text-muted-foreground" />
+                    <UserIcon className="size-3 text-muted-foreground" />
                     <span className="font-medium text-card-foreground">
                       {c.user.displayName}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       {relativeTime(c.createdAt)}
                     </span>
                   </div>
@@ -133,23 +133,22 @@ export function AudioComments({
       </div>
 
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
-        <div className="flex shrink-0 items-center gap-1 rounded bg-muted px-1.5 py-1 text-[10px] font-mono tabular-nums text-muted-foreground">
-          <ClockIcon className="size-2.5" />
+        <div className="flex shrink-0 items-center gap-1.5 rounded bg-muted px-2 py-1.5 text-xs font-mono tabular-nums text-muted-foreground">
+          <ClockIcon className="size-3" />
           {formatTime(currentTimestamp)}
         </div>
         <Input
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Add a comment..."
-          className="h-7 text-xs"
           disabled={submitting}
         />
         <Button
           type="submit"
-          size="icon-sm"
+          size="icon"
           disabled={!content.trim() || submitting}
         >
-          <SendIcon className="size-3.5" />
+          <SendIcon className="size-4" />
         </Button>
       </form>
     </div>
