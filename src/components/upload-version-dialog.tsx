@@ -22,7 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UploadIcon, FileAudioIcon, XIcon, InfoIcon } from "lucide-react";
+import { UploadIcon, FileAudioIcon, XIcon, InfoIcon, HelpCircleIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 interface Version {
   id: string;
@@ -316,13 +322,33 @@ export function UploadVersionDialog({
 
             {existingVersions.length > 0 && (
               <div className="flex flex-col gap-2">
-                <Label>Continues from</Label>
+                <div className="flex items-center gap-1.5">
+                  <Label>Continues from</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={<HelpCircleIcon className="size-3.5 text-muted-foreground hover:text-foreground transition-colors cursor-help" />}
+                      />
+                      <TooltipContent side="right" className="max-w-xs">
+                        <p className="font-medium mb-1">Which version is this based on?</p>
+                        <p>Pick the version you&apos;re iterating on to keep a clear revision history. Choose &quot;None&quot; only if this is a completely fresh take that wasn&apos;t derived from any existing version.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Select
                   value={parentVersionId}
                   onValueChange={(val) => setParentVersionId(val ?? "")}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a parent version..." />
+                    <SelectValue placeholder="Select a parent version...">
+                      {parentVersionId === ""
+                        ? "None \u2014 start new branch"
+                        : (() => {
+                            const v = existingVersions.find((v) => v.id === parentVersionId);
+                            return v ? `v${v.versionNumber} \u2014 ${v.title}` : "Select a parent version...";
+                          })()}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">None &mdash; start new branch</SelectItem>

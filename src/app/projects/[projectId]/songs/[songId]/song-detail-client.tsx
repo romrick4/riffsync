@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { VersionTree, type VersionNode } from "@/components/version-tree";
 import { AudioPlayer } from "@/components/audio-player";
 import { AudioComments } from "@/components/audio-comments";
@@ -17,6 +17,10 @@ import {
   CalendarIcon,
   HardDriveIcon,
   CheckIcon,
+  LightbulbIcon,
+  GitBranchIcon,
+  ArrowRightIcon,
+  PlusIcon,
 } from "lucide-react";
 
 interface CommentData {
@@ -62,6 +66,16 @@ export function SongDetailClient({
   const [abPickStep, setAbPickStep] = useState<null | "A" | "B">(null);
   const [copied, setCopied] = useState(false);
   const [uploadFromVersion, setUploadFromVersion] = useState<VersionNode | null>(null);
+  const [tipsDismissed, setTipsDismissed] = useState(true);
+
+  useEffect(() => {
+    setTipsDismissed(localStorage.getItem("riffsync:version-tips-dismissed") === "true");
+  }, []);
+
+  const dismissTips = useCallback(() => {
+    setTipsDismissed(true);
+    localStorage.setItem("riffsync:version-tips-dismissed", "true");
+  }, []);
 
   const fetchComments = useCallback(
     async (versionId: string) => {
@@ -238,6 +252,54 @@ export function SongDetailClient({
           }
           onUploadFromVersion={setUploadFromVersion}
         />
+      )}
+
+      {/* Versioning tips */}
+      {!tipsDismissed && versions.length <= 3 && (
+        <div className="rounded-lg border border-border bg-card px-5 py-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <LightbulbIcon className="size-4 text-amber-500" />
+              Getting the most out of versioning
+            </div>
+            <button
+              type="button"
+              onClick={dismissTips}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div className="flex gap-2.5 text-sm">
+              <ArrowRightIcon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+              <div>
+                <p className="font-medium">Iterate linearly</p>
+                <p className="text-muted-foreground">
+                  Each new upload continues from the last, keeping a clean revision trail.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2.5 text-sm">
+              <GitBranchIcon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+              <div>
+                <p className="font-medium">Branch out</p>
+                <p className="text-muted-foreground">
+                  Start a new branch to explore an alternative direction without losing the original.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2.5 text-sm">
+              <PlusIcon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+              <div>
+                <p className="font-medium">Revise any version</p>
+                <p className="text-muted-foreground">
+                  Hover over any version and click <strong>+</strong> to upload a revision based on it.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* A/B Comparison */}
