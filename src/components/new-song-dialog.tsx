@@ -20,9 +20,11 @@ import { PlusIcon } from "lucide-react";
 export function NewSongDialog({
   projectId,
   albumId,
+  onCreated,
 }: {
   projectId: string;
   albumId?: string;
+  onCreated?: (song: { id: string; title: string }) => void;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -54,9 +56,11 @@ export function NewSongDialog({
         throw new Error(data.error || "Failed to create song");
       }
 
+      const song = await res.json();
       setTitle("");
       setDescription("");
       setOpen(false);
+      onCreated?.(song);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

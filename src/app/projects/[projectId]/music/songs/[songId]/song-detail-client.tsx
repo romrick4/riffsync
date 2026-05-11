@@ -21,6 +21,7 @@ import {
   GitBranchIcon,
   ArrowRightIcon,
   PlusIcon,
+  StarIcon,
 } from "lucide-react";
 
 interface CommentData {
@@ -67,6 +68,9 @@ export function SongDetailClient({
   const [copied, setCopied] = useState(false);
   const [uploadFromVersion, setUploadFromVersion] = useState<VersionNode | null>(null);
   const [tipsDismissed, setTipsDismissed] = useState(true);
+  const [finalVersionId, setFinalVersionId] = useState<string | null>(
+    () => versions.find((v) => v.isFinal)?.id ?? null,
+  );
 
   useEffect(() => {
     setTipsDismissed(localStorage.getItem("riffsync:version-tips-dismissed") === "true");
@@ -134,6 +138,34 @@ export function SongDetailClient({
     []
   );
 
+  const [togglingFinal, setTogglingFinal] = useState(false);
+
+  const handleToggleFinal = useCallback(
+    async (version: VersionNode) => {
+      setTogglingFinal(true);
+      try {
+        const res = await fetch(
+          `/api/projects/${projectId}/songs/${songId}/versions/${version.id}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isFinal: !version.isFinal }),
+          },
+        );
+        if (res.ok) {
+          const nowFinal = !version.isFinal;
+          setSelectedVersion((prev) =>
+            prev?.id === version.id ? { ...prev, isFinal: nowFinal } : prev,
+          );
+          setFinalVersionId(nowFinal ? version.id : null);
+        }
+      } finally {
+        setTogglingFinal(false);
+      }
+    },
+    [projectId, songId],
+  );
+
   const startAbComparison = useCallback(() => {
     if (versions.length < 2) return;
     setAbPickStep("A");
@@ -163,12 +195,15 @@ export function SongDetailClient({
     setAbPickStep(null);
   }, []);
 
-  const copyShareLink = useCallback(() => {
-    const url = `${window.location.origin}/projects/${projectId}/music/songs/${songId}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [projectId, songId]);
+  const copyVersionLink = useCallback(
+    (versionId: string) => {
+      const url = `${window.location.origin}/projects/${projectId}/music/songs/${songId}?version=${versionId}`;
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    },
+    [projectId, songId],
+  );
 
   const fileUrl = selectedVersion
     ? `/api/projects/${projectId}/songs/${songId}/versions/${selectedVersion.id}/file`
@@ -204,19 +239,14 @@ export function SongDetailClient({
             A/B Compare
           </Button>
         )}
-        <Button variant="outline" onClick={copyShareLink}>
-          {copied ? (
-            <CheckIcon data-icon="inline-start" />
-          ) : (
-            <LinkIcon data-icon="inline-start" />
-          )}
-          {copied ? "Copied!" : "Share"}
-        </Button>
-        {selectedVersion && fileUrl && (
-          <a href={fileUrl} download>
+        {finalVersionId && (
+          <a
+            href={`/api/projects/${projectId}/songs/${songId}/versions/${finalVersionId}/file`}
+            download
+          >
             <Button variant="outline">
               <DownloadIcon data-icon="inline-start" />
-              Download
+              Download Final
             </Button>
           </a>
         )}
@@ -341,6 +371,40 @@ export function SongDetailClient({
               <span className="font-medium">{selectedVersion.title}</span>
               {selectedVersion.isFinal && <Badge>Final</Badge>}
               <Badge variant="outline">{selectedVersion.fileFormat}</Badge>
+              <div className="ml-auto flex items-center gap-1.5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyVersionLink(selectedVersion.id)}
+                >
+                  {copied ? (
+                    <CheckIcon data-icon="inline-start" />
+                  ) : (
+                    <LinkIcon data-icon="inline-start" />
+                  )}
+                  {copied ? "Copied!" : "Share"}
+                </Button>
+                {fileUrl && (
+                  <a href={fileUrl} download>
+                    <Button variant="ghost" size="sm">
+                      <DownloadIcon data-icon="inline-start" />
+                      Download
+                    </Button>
+                  </a>
+                )}
+                <Button
+                  variant={selectedVersion.isFinal ? "outline" : "secondary"}
+                  size="sm"
+                  disabled={togglingFinal}
+                  onClick={() => handleToggleFinal(selectedVersion)}
+                >
+                  <StarIcon
+                    data-icon="inline-start"
+                    className={selectedVersion.isFinal ? "fill-amber-400 text-amber-400" : ""}
+                  />
+                  {selectedVersion.isFinal ? "Unset Final" : "Set as Final"}
+                </Button>
+              </div>
             </div>
 
             {selectedVersion.description && (

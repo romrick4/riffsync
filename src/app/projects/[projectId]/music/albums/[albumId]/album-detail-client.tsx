@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NewSongDialog } from "@/components/new-song-dialog";
 import {
   DownloadIcon,
   PlusIcon,
@@ -373,6 +374,25 @@ export function AlbumDetailClient({
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Tracklist</h2>
           <div className="flex gap-2">
+            <NewSongDialog
+              projectId={projectId}
+              albumId={album.id}
+              onCreated={(song) => {
+                setAlbum((prev) => ({
+                  ...prev,
+                  songs: [
+                    ...prev.songs,
+                    {
+                      id: song.id,
+                      title: song.title,
+                      trackNumber: prev.songs.length + 1,
+                      hasFinalVersion: false,
+                      versionCount: 0,
+                    },
+                  ],
+                }));
+              }}
+            />
             {unassigned.length > 0 && (
               <Dialog open={addSongOpen} onOpenChange={setAddSongOpen}>
                 <DialogTrigger

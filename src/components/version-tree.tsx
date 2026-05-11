@@ -230,20 +230,22 @@ export function VersionTree({
       (a, b) => a.versionNumber - b.versionNumber
     );
     return (
-      <div className="flex items-start gap-3 overflow-x-auto pb-2">
-        {sorted.map((v, i) => (
-          <div key={v.id} className="flex items-center gap-3">
-            <VersionNodeCard
-              version={v}
-              isSelected={selectedVersionId === v.id}
-              onClick={() => onSelectVersion(v)}
-              onUpload={onUploadFromVersion ? () => onUploadFromVersion(v) : undefined}
-            />
-            {i < sorted.length - 1 && (
-              <div className="h-px w-8 shrink-0 bg-border" />
-            )}
-          </div>
-        ))}
+      <div className="overflow-x-auto">
+        <div className="flex items-start gap-3 px-2 pt-3 pb-2">
+          {sorted.map((v, i) => (
+            <div key={v.id} className="flex items-center gap-3">
+              <VersionNodeCard
+                version={v}
+                isSelected={selectedVersionId === v.id}
+                onClick={() => onSelectVersion(v)}
+                onUpload={onUploadFromVersion ? () => onUploadFromVersion(v) : undefined}
+              />
+              {i < sorted.length - 1 && (
+                <div className="h-px w-8 shrink-0 bg-border" />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
