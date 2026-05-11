@@ -3,7 +3,7 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { StarIcon, UserIcon, CalendarIcon } from "lucide-react";
+import { StarIcon, UserIcon, CalendarIcon, PlusIcon } from "lucide-react";
 
 export interface VersionNode {
   id: string;
@@ -26,6 +26,7 @@ interface VersionTreeProps {
   songId: string;
   onSelectVersion: (version: VersionNode) => void;
   selectedVersionId?: string;
+  onUploadFromVersion?: (version: VersionNode) => void;
 }
 
 interface LayoutNode {
@@ -125,6 +126,7 @@ export function VersionTree({
   versions,
   onSelectVersion,
   selectedVersionId,
+  onUploadFromVersion,
 }: VersionTreeProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -235,6 +237,7 @@ export function VersionTree({
               version={v}
               isSelected={selectedVersionId === v.id}
               onClick={() => onSelectVersion(v)}
+              onUpload={onUploadFromVersion ? () => onUploadFromVersion(v) : undefined}
             />
             {i < sorted.length - 1 && (
               <div className="h-px w-8 shrink-0 bg-border" />
@@ -319,6 +322,7 @@ export function VersionTree({
               version={node.version}
               isSelected={selectedVersionId === node.version.id}
               onClick={() => onSelectVersion(node.version)}
+              onUpload={onUploadFromVersion ? () => onUploadFromVersion(node.version) : undefined}
             />
           </div>
         ))}
@@ -331,51 +335,68 @@ function VersionNodeCard({
   version,
   isSelected,
   onClick,
+  onUpload,
 }: {
   version: VersionNode;
   isSelected: boolean;
   onClick: () => void;
+  onUpload?: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex w-[224px] flex-col gap-1.5 rounded-lg border bg-card p-3.5 text-left text-sm transition-all hover:bg-accent/50",
-        isSelected
-          ? "border-primary ring-2 ring-primary/30"
-          : "border-border hover:border-muted-foreground/40"
-      )}
-    >
-      <div className="flex items-center gap-1.5">
-        <span className="font-mono text-xs text-muted-foreground">
-          v{version.versionNumber}
-        </span>
-        <span className="truncate font-medium text-card-foreground">
-          {version.title}
-        </span>
-        {version.isFinal && (
-          <StarIcon className="ml-auto size-3.5 shrink-0 fill-amber-400 text-amber-400" />
+    <div className="group relative">
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          "flex w-[224px] flex-col gap-1.5 rounded-lg border bg-card p-3.5 text-left text-sm transition-all hover:bg-accent/50",
+          isSelected
+            ? "border-primary ring-2 ring-primary/30"
+            : "border-border hover:border-muted-foreground/40"
         )}
-      </div>
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <UserIcon className="size-3" />
-          {version.uploadedBy.displayName}
-        </span>
-        <span className="flex items-center gap-1">
-          <CalendarIcon className="size-3" />
-          {formatDate(version.createdAt)}
-        </span>
-      </div>
-      <div className="flex items-center gap-1">
-        <Badge
-          variant="outline"
-          className="h-5 px-1.5 text-[10px] leading-none"
+      >
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-xs text-muted-foreground">
+            v{version.versionNumber}
+          </span>
+          <span className="truncate font-medium text-card-foreground">
+            {version.title}
+          </span>
+          {version.isFinal && (
+            <StarIcon className="ml-auto size-3.5 shrink-0 fill-amber-400 text-amber-400" />
+          )}
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <UserIcon className="size-3" />
+            {version.uploadedBy.displayName}
+          </span>
+          <span className="flex items-center gap-1">
+            <CalendarIcon className="size-3" />
+            {formatDate(version.createdAt)}
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Badge
+            variant="outline"
+            className="h-5 px-1.5 text-[10px] leading-none"
+          >
+            {version.fileFormat}
+          </Badge>
+        </div>
+      </button>
+      {onUpload && (
+        <button
+          type="button"
+          title="Upload revision based on this version"
+          onClick={(e) => {
+            e.stopPropagation();
+            onUpload();
+          }}
+          className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full border bg-card text-muted-foreground opacity-0 shadow-sm transition-opacity hover:bg-accent hover:text-accent-foreground group-hover:opacity-100"
         >
-          {version.fileFormat}
-        </Badge>
-      </div>
-    </button>
+          <PlusIcon className="size-3.5" />
+        </button>
+      )}
+    </div>
   );
 }

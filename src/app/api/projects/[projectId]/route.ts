@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 
@@ -40,7 +41,13 @@ export async function GET(
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ project });
+  const { inviteCode, ...projectWithoutCode } = project;
+  const responseProject =
+    membership.role === "OWNER"
+      ? project
+      : projectWithoutCode;
+
+  return NextResponse.json({ project: responseProject });
 }
 
 export async function PATCH(
@@ -66,11 +73,14 @@ export async function PATCH(
   }
 
   try {
-    const { name, description } = await request.json();
+    const { name, description, rotateInviteCode } = await request.json();
 
     const data: Record<string, string | null> = {};
     if (name !== undefined) data.name = name.trim();
     if (description !== undefined) data.description = description?.trim() || null;
+    if (rotateInviteCode === true) {
+      data.inviteCode = crypto.randomBytes(16).toString("hex");
+    }
 
     const project = await prisma.project.update({
       where: { id: projectId },

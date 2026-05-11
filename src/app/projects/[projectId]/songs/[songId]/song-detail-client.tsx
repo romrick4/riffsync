@@ -61,6 +61,7 @@ export function SongDetailClient({
   const [abVersionB, setAbVersionB] = useState<VersionNode | null>(null);
   const [abPickStep, setAbPickStep] = useState<null | "A" | "B">(null);
   const [copied, setCopied] = useState(false);
+  const [uploadFromVersion, setUploadFromVersion] = useState<VersionNode | null>(null);
 
   const fetchComments = useCallback(
     async (versionId: string) => {
@@ -175,6 +176,14 @@ export function SongDetailClient({
           songId={songId}
           existingVersions={existingVersions}
         />
+        <UploadVersionDialog
+          projectId={projectId}
+          songId={songId}
+          existingVersions={existingVersions}
+          defaultParentVersionId={uploadFromVersion?.id}
+          open={uploadFromVersion !== null}
+          onOpenChange={(open) => { if (!open) setUploadFromVersion(null); }}
+        />
         {versions.length >= 2 && (
           <Button variant="outline" onClick={startAbComparison}>
             <GitCompareArrowsIcon data-icon="inline-start" />
@@ -227,6 +236,7 @@ export function SongDetailClient({
           selectedVersionId={
             abPickStep ? undefined : selectedVersion?.id
           }
+          onUploadFromVersion={setUploadFromVersion}
         />
       )}
 

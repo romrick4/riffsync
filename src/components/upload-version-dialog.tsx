@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UploadIcon, FileAudioIcon, XIcon } from "lucide-react";
+import { UploadIcon, FileAudioIcon, XIcon, InfoIcon } from "lucide-react";
 
 interface Version {
   id: string;
@@ -34,6 +34,9 @@ interface UploadVersionDialogProps {
   projectId: string;
   songId: string;
   existingVersions: Version[];
+  defaultParentVersionId?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const ACCEPTED_TYPES = ["audio/wav", "audio/x-wav", "audio/flac", "audio/mpeg", "audio/mp3"];
@@ -46,22 +49,53 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function getLatestVersionId(versions: Version[]): string {
+  if (versions.length === 0) return "";
+  return versions.reduce((a, b) =>
+    a.versionNumber > b.versionNumber ? a : b
+  ).id;
+}
+
 export function UploadVersionDialog({
   projectId,
   songId,
   existingVersions,
+  defaultParentVersionId,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: UploadVersionDialogProps) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = useCallback(
+    (value: boolean) => {
+      if (isControlled) {
+        controlledOnOpenChange?.(value);
+      } else {
+        setInternalOpen(value);
+      }
+    },
+    [isControlled, controlledOnOpenChange]
+  );
+
+  const resolvedDefault = defaultParentVersionId ?? getLatestVersionId(existingVersions);
+
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [parentVersionId, setParentVersionId] = useState<string>("");
+  const [parentVersionId, setParentVersionId] = useState<string>(resolvedDefault);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const prevOpenRef = useRef(false);
+  if (open && !prevOpenRef.current) {
+    setParentVersionId(defaultParentVersionId ?? getLatestVersionId(existingVersions));
+  }
+  prevOpenRef.current = open;
 
   function validateFile(f: File): string | null {
     const ext = f.name.substring(f.name.lastIndexOf(".")).toLowerCase();
@@ -154,7 +188,7 @@ export function UploadVersionDialog({
       setFile(null);
       setTitle("");
       setDescription("");
-      setParentVersionId("");
+      setParentVersionId(resolvedDefault);
       setProgress(0);
       setOpen(false);
       router.refresh();
@@ -174,17 +208,20 @@ export function UploadVersionDialog({
           setFile(null);
           setError(null);
           setProgress(0);
+          setParentVersionId(resolvedDefault);
         }
       }}
     >
-      <DialogTrigger
-        render={
-          <Button>
-            <UploadIcon data-icon="inline-start" />
-            Upload Version
-          </Button>
-        }
-      />
+      {!isControlled && (
+        <DialogTrigger
+          render={
+            <Button>
+              <UploadIcon data-icon="inline-start" />
+              Upload Version
+            </Button>
+          }
+        />
+      )}
       <DialogContent className="sm:max-w-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -279,7 +316,7 @@ export function UploadVersionDialog({
 
             {existingVersions.length > 0 && (
               <div className="flex flex-col gap-2">
-                <Label>Parent Version (optional)</Label>
+                <Label>Continues from</Label>
                 <Select
                   value={parentVersionId}
                   onValueChange={(val) => setParentVersionId(val ?? "")}
@@ -288,14 +325,23 @@ export function UploadVersionDialog({
                     <SelectValue placeholder="Select a parent version..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="">None &mdash; start new branch</SelectItem>
                     {existingVersions.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        v{v.versionNumber} - {v.title}
+                        v{v.versionNumber} &mdash; {v.title}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {parentVersionId === "" && (
+                  <div className="flex gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-300">
+                    <InfoIcon className="mt-0.5 size-3.5 shrink-0" />
+                    <span>
+                      This version won&apos;t be linked to any existing version
+                      and will appear as a separate branch in the version history.
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 

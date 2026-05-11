@@ -21,6 +21,34 @@ function cleanup() {
   }
 }
 
+// Set TRUSTED_PROXY_IPS (comma-separated) to only trust forwarded headers
+// from known reverse proxies (e.g. "127.0.0.1,::1,10.0.0.1").
+// When unset, forwarded headers are ignored entirely for safety.
+const trustedProxies = new Set(
+  (process.env.TRUSTED_PROXY_IPS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
+function getClientIp(request: NextRequest): string {
+  // request.ip is the socket-level IP provided by the runtime (when available)
+  const socketIp = request.ip ?? request.headers.get("x-real-ip") ?? "unknown";
+
+  if (trustedProxies.size > 0 && trustedProxies.has(socketIp)) {
+    const forwarded = request.headers.get("x-forwarded-for");
+    if (forwarded) {
+      // Rightmost untrusted entry is the real client IP
+      const chain = forwarded.split(",").map((s) => s.trim());
+      for (let i = chain.length - 1; i >= 0; i--) {
+        if (!trustedProxies.has(chain[i])) return chain[i];
+      }
+    }
+  }
+
+  return socketIp;
+}
+
 interface RateLimitOptions {
   windowMs: number;
   maxRequests: number;
@@ -33,10 +61,7 @@ export function rateLimit(
 ): NextResponse | null {
   cleanup();
 
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown";
+  const ip = getClientIp(request);
   const key = `${keyPrefix}:${ip}`;
   const now = Date.now();
 

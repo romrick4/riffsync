@@ -30,7 +30,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   }
 
   const comments = await prisma.audioComment.findMany({
-    where: { songVersionId: versionId },
+    where: {
+      songVersionId: versionId,
+      songVersion: { songId },
+    },
     include: {
       user: {
         select: { id: true, username: true, displayName: true },
