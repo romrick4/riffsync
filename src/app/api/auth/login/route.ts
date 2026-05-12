@@ -1,54 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
-import { verifyPassword, createSession, setSessionCookie } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 
-const DUMMY_HASH = "$2a$12$000000000000000000000uGByMaIOmttFQHem7sCKYGLtob1JvXW";
-
 export async function POST(request: NextRequest) {
-  const rateLimited = rateLimit(request, "login", { windowMs: 60_000, maxRequests: 10 });
+  const rateLimited = rateLimit(request, "login", {
+    windowMs: 60_000,
+    maxRequests: 10,
+  });
   if (rateLimited) return rateLimited;
 
   try {
-    const { username, password } = await request.json();
+    const { email, password } = await request.json();
 
-    if (!username || !password) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: "Username and password are required" },
+        { error: "Email and password are required" },
         { status: 400 },
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { username },
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.toLowerCase(),
+      password,
     });
 
-    // Always run bcrypt to prevent timing-based user enumeration
-    const passwordValid = await verifyPassword(
-      password,
-      user?.passwordHash ?? DUMMY_HASH,
-    );
-
-    if (!user || !passwordValid) {
+    if (error || !data.user) {
       return NextResponse.json(
-        { error: "Invalid username or password" },
+        { error: "Wrong email or password. Try again." },
         { status: 401 },
       );
     }
 
-    const token = await createSession(user.id);
-    await setSessionCookie(token);
-
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        username: user.username,
-        displayName: user.displayName,
+    const profile = await prisma.user.findUnique({
+      where: { supabaseId: data.user.id },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        email: true,
       },
     });
+
+    if (!profile) {
+      return NextResponse.json(
+        { error: "Something went wrong on our end. Try again in a moment." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ user: profile });
   } catch {
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Something went wrong on our end. Try again in a moment." },
       { status: 500 },
     );
   }

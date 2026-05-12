@@ -27,9 +27,9 @@ Only the latest release is actively supported with security updates.
 
 ## Security Practices
 
-- Passwords are hashed with bcrypt (cost factor 12)
-- Sessions use signed JWTs (HS256) in httpOnly, Secure, SameSite=Lax cookies
+- Authentication is managed by Supabase Auth (email/password, managed JWTs)
 - All API routes enforce authentication and project membership authorization
-- File uploads are sanitized to prevent path traversal
+- File uploads use presigned URLs with server-side validation
+- Files are stored in Cloudflare R2 with access gated through presigned URLs
 - Rate limiting is applied to authentication and invite code endpoints
 - HTML content is sanitized before rendering to prevent XSS

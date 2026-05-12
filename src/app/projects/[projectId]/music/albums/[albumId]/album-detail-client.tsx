@@ -47,6 +47,7 @@ interface AlbumData {
   title: string;
   description: string | null;
   coverArtPath: string | null;
+  coverArtUrl: string | null;
   releaseDate: string | null;
   genre: string | null;
   secondaryGenre: string | null;
@@ -199,11 +200,11 @@ export function AlbumDetailClient({
       {/* Album header with cover art */}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
         <CoverArtUpload
-          currentPath={album.coverArtPath}
+          currentImageUrl={album.coverArtUrl}
           uploadUrl={`/api/projects/${projectId}/albums/${album.id}/cover-art`}
           deleteUrl={`/api/projects/${projectId}/albums/${album.id}/cover-art`}
-          onUpdated={(path) =>
-            setAlbum((prev) => ({ ...prev, coverArtPath: path }))
+          onUpdated={(url) =>
+            setAlbum((prev) => ({ ...prev, coverArtUrl: url }))
           }
           size="lg"
         />

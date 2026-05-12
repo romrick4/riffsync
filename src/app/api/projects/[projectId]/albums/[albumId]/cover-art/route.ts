@@ -70,7 +70,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     data: { coverArtPath: storageKey },
   });
 
-  return NextResponse.json({ coverArtPath: updated.coverArtPath });
+  const coverArtUrl = await storage.getUrl(storageKey);
+
+  return NextResponse.json({
+    coverArtPath: updated.coverArtPath,
+    coverArtUrl,
+  });
 }
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {

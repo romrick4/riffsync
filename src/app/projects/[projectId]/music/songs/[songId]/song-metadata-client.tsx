@@ -11,7 +11,7 @@ import { SaveIcon } from "lucide-react";
 interface SongMetadataClientProps {
   projectId: string;
   songId: string;
-  coverArtPath: string | null;
+  coverArtUrl: string | null;
   isExplicit: boolean;
   language: string;
   isrc: string | null;
@@ -22,7 +22,7 @@ interface SongMetadataClientProps {
 export function SongMetadataClient({
   projectId,
   songId,
-  coverArtPath: initialCoverArt,
+  coverArtUrl: initialCoverArt,
   isExplicit: initialExplicit,
   language: initialLanguage,
   isrc: initialIsrc,
@@ -30,7 +30,7 @@ export function SongMetadataClient({
   songwriters: initialSongwriters,
 }: SongMetadataClientProps) {
   const router = useRouter();
-  const [coverArtPath, setCoverArtPath] = useState(initialCoverArt);
+  const [coverArtUrl, setCoverArtUrl] = useState(initialCoverArt);
   const [isExplicit, setIsExplicit] = useState(initialExplicit);
   const [language, setLanguage] = useState(initialLanguage);
   const [isrc, setIsrc] = useState(initialIsrc || "");
@@ -71,11 +71,11 @@ export function SongMetadataClient({
     <div className="flex flex-col gap-6 max-w-2xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
         <CoverArtUpload
-          currentPath={coverArtPath}
+          currentImageUrl={coverArtUrl}
           uploadUrl={`/api/projects/${projectId}/songs/${songId}/cover-art`}
           deleteUrl={`/api/projects/${projectId}/songs/${songId}/cover-art`}
-          onUpdated={(path) => {
-            setCoverArtPath(path);
+          onUpdated={(url) => {
+            setCoverArtUrl(url);
             router.refresh();
           }}
           size="lg"

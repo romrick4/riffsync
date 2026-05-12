@@ -45,8 +45,7 @@ interface UploadVersionDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-const ACCEPTED_TYPES = ["audio/wav", "audio/x-wav", "audio/flac", "audio/mpeg", "audio/mp3"];
-const ACCEPTED_EXTENSIONS = [".wav", ".flac", ".mp3"];
+const ACCEPTED_EXTENSIONS = [".wav", ".flac", ".mp3", ".aiff", ".aif", ".m4a"];
 const MAX_SIZE = 200 * 1024 * 1024;
 
 function formatFileSize(bytes: number) {
@@ -93,6 +92,7 @@ export function UploadVersionDialog({
   const [parentVersionId, setParentVersionId] = useState<string>(resolvedDefault);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [uploadPhase, setUploadPhase] = useState<"idle" | "uploading" | "processing">("idle");
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -106,10 +106,10 @@ export function UploadVersionDialog({
   function validateFile(f: File): string | null {
     const ext = f.name.substring(f.name.lastIndexOf(".")).toLowerCase();
     if (!ACCEPTED_EXTENSIONS.includes(ext)) {
-      return "Unsupported format. Please upload a .wav, .flac, or .mp3 file.";
+      return "Unsupported format. Please upload a WAV, FLAC, MP3, AIFF, or M4A file.";
     }
     if (f.size > MAX_SIZE) {
-      return `File is too large (${formatFileSize(f.size)}). Max 200MB.`;
+      return `That file is too large (${formatFileSize(f.size)}). The limit is 200 MB.`;
     }
     return null;
   }
@@ -155,51 +155,77 @@ export function UploadVersionDialog({
 
     setUploading(true);
     setProgress(0);
+    setUploadPhase("uploading");
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("title", title.trim());
-      if (description.trim()) formData.append("description", description.trim());
-      if (parentVersionId) formData.append("parentVersionId", parentVersionId);
+      const initiateRes = await fetch(
+        `/api/projects/${projectId}/songs/${songId}/versions/initiate`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: title.trim(),
+            description: description.trim() || undefined,
+            parentVersionId: parentVersionId || undefined,
+            fileName: file.name,
+            fileSize: file.size,
+          }),
+        },
+      );
 
-      const xhr = new XMLHttpRequest();
+      if (!initiateRes.ok) {
+        const data = await initiateRes.json();
+        throw new Error(data.error || "Something went wrong starting the upload.");
+      }
+
+      const { uploadUrl, versionId } = await initiateRes.json();
+
       await new Promise<void>((resolve, reject) => {
-        xhr.upload.addEventListener("progress", (e) => {
-          if (e.lengthComputable) {
-            setProgress(Math.round((e.loaded / e.total) * 100));
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", (ev) => {
+          if (ev.lengthComputable) {
+            setProgress(Math.round((ev.loaded / ev.total) * 100));
           }
         });
         xhr.addEventListener("load", () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
           } else {
-            try {
-              const data = JSON.parse(xhr.responseText);
-              reject(new Error(data.error || "Upload failed"));
-            } catch {
-              reject(new Error("Upload failed"));
-            }
+            reject(new Error("Upload to storage failed. Try again."));
           }
         });
-        xhr.addEventListener("error", () => reject(new Error("Network error")));
-        xhr.open(
-          "POST",
-          `/api/projects/${projectId}/songs/${songId}/versions`
+        xhr.addEventListener("error", () =>
+          reject(new Error("Network error during upload. Check your connection.")),
         );
-        xhr.send(formData);
+        xhr.open("PUT", uploadUrl);
+        xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+        xhr.send(file);
       });
+
+      setUploadPhase("processing");
+
+      const confirmRes = await fetch(
+        `/api/projects/${projectId}/songs/${songId}/versions/${versionId}/confirm`,
+        { method: "POST" },
+      );
+
+      if (!confirmRes.ok) {
+        const data = await confirmRes.json();
+        throw new Error(data.error || "Something went wrong confirming the upload.");
+      }
 
       setFile(null);
       setTitle("");
       setDescription("");
       setParentVersionId(resolvedDefault);
       setProgress(0);
+      setUploadPhase("idle");
       setOpen(false);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
+      setUploadPhase("idle");
     } finally {
       setUploading(false);
     }
@@ -214,6 +240,7 @@ export function UploadVersionDialog({
           setFile(null);
           setError(null);
           setProgress(0);
+          setUploadPhase("idle");
           setParentVersionId(resolvedDefault);
         }
       }}
@@ -233,7 +260,7 @@ export function UploadVersionDialog({
           <DialogHeader>
             <DialogTitle>Upload New Version</DialogTitle>
             <DialogDescription>
-              Upload an audio file (.wav, .flac, or .mp3). Max 200MB.
+              Upload a recording (WAV, FLAC, MP3, AIFF, or M4A). Max 200 MB.
             </DialogDescription>
           </DialogHeader>
 
@@ -254,7 +281,7 @@ export function UploadVersionDialog({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".wav,.flac,.mp3,audio/wav,audio/flac,audio/mpeg"
+                accept=".wav,.flac,.mp3,.aiff,.aif,.m4a,audio/wav,audio/flac,audio/mpeg,audio/aiff,audio/mp4"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
@@ -287,10 +314,10 @@ export function UploadVersionDialog({
                   <UploadIcon className="size-8 text-muted-foreground/50" />
                   <div className="text-center">
                     <p className="text-sm font-medium">
-                      Drop audio file here or click to browse
+                      Drop a recording here or click to browse
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      WAV, FLAC, or MP3 up to 200MB
+                      WAV, FLAC, MP3, AIFF, or M4A up to 200 MB
                     </p>
                   </div>
                 </>
@@ -374,13 +401,21 @@ export function UploadVersionDialog({
             {uploading && (
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Uploading...</span>
-                  <span>{progress}%</span>
+                  <span>
+                    {uploadPhase === "uploading"
+                      ? "Uploading\u2026"
+                      : "Finishing up\u2026"}
+                  </span>
+                  {uploadPhase === "uploading" && <span>{progress}%</span>}
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-primary transition-all duration-300"
-                    style={{ width: `${progress}%` }}
+                    className={`h-full rounded-full bg-primary transition-all duration-300 ${
+                      uploadPhase === "processing" ? "animate-pulse" : ""
+                    }`}
+                    style={{
+                      width: uploadPhase === "processing" ? "100%" : `${progress}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -394,7 +429,7 @@ export function UploadVersionDialog({
               type="submit"
               disabled={uploading || !file || !title.trim()}
             >
-              {uploading ? "Uploading..." : "Upload"}
+              {uploading ? "Uploading\u2026" : "Upload"}
             </Button>
           </DialogFooter>
         </form>

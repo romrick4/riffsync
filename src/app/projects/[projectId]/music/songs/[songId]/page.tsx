@@ -110,8 +110,9 @@ export default async function SongDetailPage({
     uploadedBy: { displayName: t.uploadedBy.displayName },
   }));
 
+  const storage = (await import("@/lib/storage")).getStorage();
   const coverUrl = song.coverArtPath
-    ? `/api/files/${encodeURIComponent(song.coverArtPath)}`
+    ? await storage.getUrl(song.coverArtPath)
     : null;
 
   return (
@@ -218,7 +219,7 @@ export default async function SongDetailPage({
           <SongMetadataClient
             projectId={projectId}
             songId={songId}
-            coverArtPath={song.coverArtPath}
+            coverArtUrl={coverUrl}
             isExplicit={song.isExplicit}
             language={song.language}
             isrc={song.isrc}

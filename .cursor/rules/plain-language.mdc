@@ -9,10 +9,10 @@ Every word a user reads — button labels, error messages, toast notifications, 
 
 ## Rules
 
-- **No jargon** — Never use terms like "runtime", "payload", "instance", "endpoint", "environment variable", "container", "daemon", "schema", or "migration" in user-facing text.
+- **No jargon** — Never use terms like "runtime", "payload", "instance", "endpoint", "schema", "migration", "deploy", or "server" in user-facing text.
 - **Short sentences** — If a sentence has a comma, consider splitting it into two.
 - **Say what happened, then what to do** — Bad: "Upload failed (413)." Good: "That file is too large. Try a smaller file or compress it first."
-- **Use the user's language** — Say "song" not "asset", "band" not "organization", "recording" not "audio blob", "invite link" not "join token".
+- **Use the user's language** — Say "song" not "asset", "band" not "organization", "recording" not "audio blob", "invite link" not "join code".
 - **Active voice** — "We couldn't save your changes" not "Changes could not be persisted."
 - **No blame** — Never say "you did something wrong." Say "something didn't work" and offer the next step.
 
@@ -22,6 +22,6 @@ Every word a user reads — button labels, error messages, toast notifications, 
 |---|---|
 | "Authentication failed" | "Wrong email or password. Try again." |
 | "Resource not found (404)" | "We couldn't find that page." |
-| "SMTP configuration invalid" | "We couldn't connect to your email provider. Double-check the settings and try again." |
 | "File exceeds maximum size" | "That file is too large. The limit is 50 MB." |
 | "Session expired" | "You've been logged out. Sign in again to continue." |
+| "Internal server error" | "Something went wrong on our end. Try again in a moment." |

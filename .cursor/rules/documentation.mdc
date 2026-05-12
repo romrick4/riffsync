@@ -6,23 +6,22 @@ alwaysApply: false
 
 # Documentation Standards
 
-Every markdown file in this project may be read by someone who has never used a terminal. Write accordingly.
+Every markdown file in this project may be read by someone who has never configured software. Write accordingly.
 
 ## Structure
 
 - **Lead with what the user gets**, not how it works technically. "Upload recordings and see every draft in a timeline" not "RESTful API for audio asset versioning."
-- **Step by step** — Number every action. One action per step. Never combine two things ("clone the repo and install dependencies") into one step.
-- **Show the exact command** — Copy-paste ready. Include placeholder values like `your-server-ip` and explain them inline.
-- **Tell them what success looks like** — After a command, say what they should see. "You'll see a message that says 'RiffSync is running' with your URL."
+- **Step by step** — Number every action. One action per step.
+- **Tell them what success looks like** — After an action, say what they should see. "You'll get a confirmation email with a link to your band's page."
 
 ## Tone
 
-- Conversational, not formal. Write like you're helping a friend set something up over text.
+- Conversational, not formal. Write like you're helping a friend over text.
 - Use "you/your" — speak directly to the reader.
 - Avoid disclaimers and hedge words ("Note that you might need to.."). Just tell them what to do.
 
 ## What to Avoid
 
 - Don't reference internal code structure, file paths inside the codebase, or architecture decisions in user-facing docs.
-- Don't link to developer resources (GitHub issues, API docs, framework documentation) in setup guides.
-- Don't assume familiarity with Git, Docker, DNS, or networking. If you must mention one of these, explain what it means in context.
+- Don't link to developer resources (GitHub issues, API docs, framework documentation) in user-facing pages.
+- Don't mention servers, terminals, config files, or deployment in user-facing docs. RiffSync is a hosted service — users sign up and use it.

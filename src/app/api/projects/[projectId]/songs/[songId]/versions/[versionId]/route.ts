@@ -131,7 +131,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
 
   const version = await prisma.songVersion.findUnique({
     where: { id: versionId, songId },
-    select: { filePath: true },
+    select: { filePath: true, compressedFilePath: true },
   });
 
   if (!version) {
@@ -143,6 +143,13 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     await storage.delete(version.filePath);
   } catch {
     // File may already be gone; continue with DB deletion
+  }
+  if (version.compressedFilePath) {
+    try {
+      await storage.delete(version.compressedFilePath);
+    } catch {
+      // Compressed file may already be gone
+    }
   }
 
   await prisma.songVersion.delete({ where: { id: versionId } });

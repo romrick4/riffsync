@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { ImageIcon, UploadIcon, XIcon } from "lucide-react";
 
 interface CoverArtUploadProps {
-  currentPath: string | null;
+  currentImageUrl: string | null;
   uploadUrl: string;
   deleteUrl: string;
-  onUpdated: (path: string | null) => void;
+  onUpdated: (url: string | null) => void;
   size?: "sm" | "lg";
 }
 
 export function CoverArtUpload({
-  currentPath,
+  currentImageUrl,
   uploadUrl,
   deleteUrl,
   onUpdated,
@@ -26,9 +26,7 @@ export function CoverArtUpload({
   const sizeClasses = size === "lg" ? "size-48" : "size-24";
   const iconSize = size === "lg" ? "size-10" : "size-5";
 
-  const imageUrl = currentPath
-    ? `/api/files/${encodeURIComponent(currentPath)}`
-    : null;
+  const imageUrl = currentImageUrl;
 
   async function handleUpload(file: File) {
     setUploading(true);
@@ -49,7 +47,7 @@ export function CoverArtUpload({
       }
 
       const data = await res.json();
-      onUpdated(data.coverArtPath);
+      onUpdated(data.coverArtUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {

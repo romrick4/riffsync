@@ -31,7 +31,7 @@ export class S3StorageProvider implements StorageProvider {
         Key: key,
         Body: data,
         ContentType: contentType,
-      })
+      }),
     );
   }
 
@@ -40,7 +40,7 @@ export class S3StorageProvider implements StorageProvider {
       new GetObjectCommand({
         Bucket: this.bucket,
         Key: key,
-      })
+      }),
     );
     const stream = response.Body;
     if (!stream) throw new Error(`Empty response body for key: ${key}`);
@@ -56,7 +56,7 @@ export class S3StorageProvider implements StorageProvider {
       new DeleteObjectCommand({
         Bucket: this.bucket,
         Key: key,
-      })
+      }),
     );
   }
 
@@ -68,13 +68,26 @@ export class S3StorageProvider implements StorageProvider {
     return getSignedUrl(this.client, command, { expiresIn: 3600 });
   }
 
+  async getUploadUrl(
+    key: string,
+    contentType: string,
+    expiresIn = 3600,
+  ): Promise<string> {
+    const command = new PutObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+      ContentType: contentType,
+    });
+    return getSignedUrl(this.client, command, { expiresIn });
+  }
+
   async exists(key: string): Promise<boolean> {
     try {
       await this.client.send(
         new HeadObjectCommand({
           Bucket: this.bucket,
           Key: key,
-        })
+        }),
       );
       return true;
     } catch (err: unknown) {

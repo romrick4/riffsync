@@ -51,14 +51,21 @@ enum NotificationType {
   ALBUM_UPDATED
 }
 
+enum UploadStatus {
+  AWAITING_UPLOAD
+  PROCESSING
+  READY
+  FAILED
+}
+
 model User {
-  id           String   @id @default(uuid())
-  username     String   @unique
-  email        String?
-  displayName  String
-  passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(uuid())
+  supabaseId  String   @unique
+  username    String   @unique
+  email       String   @unique
+  displayName String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   projectMembers    ProjectMember[]
   songVersions      SongVersion[]
@@ -162,16 +169,18 @@ model Song {
 }
 
 model SongVersion {
-  id            String   @id @default(uuid())
-  title         String
-  description   String?
-  filePath      String
-  fileName      String
-  fileFormat    FileFormat
-  fileSizeBytes Int
-  isFinal       Boolean  @default(false)
-  versionNumber Int
-  createdAt     DateTime @default(now())
+  id                 String       @id @default(uuid())
+  title              String
+  description        String?
+  filePath           String
+  fileName           String
+  fileFormat         FileFormat
+  fileSizeBytes      Int
+  compressedFilePath String?
+  uploadStatus       UploadStatus @default(AWAITING_UPLOAD)
+  isFinal            Boolean      @default(false)
+  versionNumber      Int
+  createdAt          DateTime     @default(now())
 
   song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
   songId String
@@ -186,7 +195,8 @@ model SongVersion {
   mergeParents  MergeParent[] @relation("MergeChild")
   mergeChildren MergeParent[] @relation("MergeParentVersion")
 
-  audioComments AudioComment[]
+  audioComments  AudioComment[]
+  transcodeJob   TranscodeJob?
 }
 
 model MergeParent {
@@ -339,4 +349,16 @@ model BusyBlock {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
+}
+
+model TranscodeJob {
+  id        String   @id @default(uuid())
+  status    String   @default("PENDING")
+  attempts  Int      @default(0)
+  lastError String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  version   SongVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  versionId String      @unique
 }

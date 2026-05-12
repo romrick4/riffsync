@@ -1,9 +1,16 @@
 import type { NextConfig } from "next";
 
+const r2Domain = process.env.S3_ENDPOINT
+  ? new URL(process.env.S3_ENDPOINT).hostname
+  : "";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
-  serverExternalPackages: ["bcryptjs", "pg", "@prisma/adapter-pg", "archiver"],
+  serverExternalPackages: ["pg", "@prisma/adapter-pg", "archiver"],
   async headers() {
+    const storageOrigins = r2Domain ? `https://${r2Domain}` : "";
+    const supabaseOrigin = supabaseUrl || "";
+
     return [
       {
         source: "/(.*)",
@@ -25,10 +32,10 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
-              "media-src 'self' blob:",
+              `img-src 'self' data: blob: ${storageOrigins}`.trim(),
+              `media-src 'self' blob: ${storageOrigins}`.trim(),
               "font-src 'self'",
-              "connect-src 'self'",
+              `connect-src 'self' ${storageOrigins} ${supabaseOrigin}`.trim(),
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",

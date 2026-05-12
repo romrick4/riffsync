@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { getStorage } from "@/lib/storage";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -47,8 +48,14 @@ export default async function AlbumDetailPage({
     orderBy: { title: "asc" },
   });
 
+  const storage = getStorage();
+  const coverArtUrl = album.coverArtPath
+    ? await storage.getUrl(album.coverArtPath)
+    : null;
+
   const albumData = {
     ...album,
+    coverArtUrl,
     releaseDate: album.releaseDate?.toISOString() ?? null,
     createdAt: album.createdAt.toISOString(),
     updatedAt: album.updatedAt.toISOString(),

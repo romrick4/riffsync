@@ -3,7 +3,13 @@
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -14,10 +20,10 @@ export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteCode = searchParams.get("invite");
+  const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -27,9 +33,6 @@ export function RegisterForm() {
     }
     if (password.length < 8) {
       return "Password must be at least 8 characters";
-    }
-    if (password !== confirmPassword) {
-      return "Passwords do not match";
     }
     return null;
   }
@@ -50,19 +53,19 @@ export function RegisterForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName, username, password }),
+        body: JSON.stringify({ email, password, displayName, username }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Registration failed");
+        setError(data.error || "Something went wrong. Please try again.");
         return;
       }
 
       if (inviteCode) {
         router.push(`/invite/${inviteCode}`);
       } else {
-        router.push("/projects");
+        router.push("/login");
       }
     } catch {
       setError("Something went wrong. Please try again.");
@@ -81,6 +84,18 @@ export function RegisterForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="displayName">Display Name</Label>
             <Input
@@ -122,25 +137,11 @@ export function RegisterForm() {
               At least 8 characters
             </p>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-            />
-          </div>
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" disabled={loading} className="mt-1 w-full">
-            {loading ? "Creating account…" : "Create account"}
+            {loading ? "Creating account\u2026" : "Create account"}
           </Button>
         </form>
 
@@ -150,7 +151,7 @@ export function RegisterForm() {
             href={inviteCode ? `/login?invite=${inviteCode}` : "/login"}
             className="text-primary underline underline-offset-4 hover:text-primary/80"
           >
-            Log in
+            Sign in
           </Link>
         </p>
       </CardContent>

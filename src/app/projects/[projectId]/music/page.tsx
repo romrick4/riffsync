@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { getStorage } from "@/lib/storage";
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -67,6 +68,26 @@ export default async function MusicPage({
     }),
   ]);
 
+  const storage = getStorage();
+
+  const albumsWithUrls = await Promise.all(
+    albums.map(async (album) => ({
+      ...album,
+      coverArtUrl: album.coverArtPath
+        ? await storage.getUrl(album.coverArtPath)
+        : null,
+    })),
+  );
+
+  const singlesWithUrls = await Promise.all(
+    singles.map(async (song) => ({
+      ...song,
+      coverArtUrl: song.coverArtPath
+        ? await storage.getUrl(song.coverArtPath)
+        : null,
+    })),
+  );
+
   const hasContent = albums.length > 0 || singles.length > 0;
 
   return (
@@ -101,13 +122,11 @@ export default async function MusicPage({
             <section className="flex flex-col gap-4">
               <h2 className="text-lg font-semibold tracking-tight">Albums</h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {albums.map((album) => {
+                {albumsWithUrls.map((album) => {
                   const allFinal = album.songs.length > 0 && album.songs.every(
                     (s) => s.versions.length > 0,
                   );
-                  const coverUrl = album.coverArtPath
-                    ? `/api/files/${encodeURIComponent(album.coverArtPath)}`
-                    : null;
+                  const coverUrl = album.coverArtUrl;
 
                   return (
                     <Link
@@ -173,12 +192,10 @@ export default async function MusicPage({
             <section className="flex flex-col gap-4">
               <h2 className="text-lg font-semibold tracking-tight">Singles</h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {singles.map((song) => {
+                {singlesWithUrls.map((song) => {
                   const latestVersion = song.versions[0];
                   const hasFinal = song.versions.some((v) => v.isFinal);
-                  const coverUrl = song.coverArtPath
-                    ? `/api/files/${encodeURIComponent(song.coverArtPath)}`
-                    : null;
+                  const coverUrl = song.coverArtUrl;
 
                   return (
                     <Link
