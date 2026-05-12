@@ -33,7 +33,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     where: { id: versionId, songId },
     include: {
       uploadedBy: {
-        select: { id: true, username: true, displayName: true },
+        select: { id: true, displayName: true },
       },
       parentVersion: {
         select: { id: true, title: true, versionNumber: true },
@@ -44,7 +44,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       audioComments: {
         include: {
           user: {
-            select: { id: true, username: true, displayName: true },
+            select: { id: true, displayName: true },
           },
         },
         orderBy: { timestampSec: "asc" },

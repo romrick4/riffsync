@@ -22,13 +22,13 @@ export async function GET(request: Request, { params }: RouteParams) {
   const poll = await prisma.poll.findUnique({
     where: { id: pollId, projectId },
     include: {
-      createdBy: { select: { id: true, displayName: true, username: true } },
+      createdBy: { select: { id: true, displayName: true } },
       options: {
         include: {
           responses: {
             include: {
               user: {
-                select: { id: true, displayName: true, username: true },
+                select: { id: true, displayName: true },
               },
             },
           },

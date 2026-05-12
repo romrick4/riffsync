@@ -48,7 +48,7 @@ export async function GET(
         : {}),
     },
     include: {
-      createdBy: { select: { id: true, displayName: true, username: true } },
+      createdBy: { select: { id: true, displayName: true } },
       rsvps: {
         select: { status: true, userId: true },
       },
@@ -139,7 +139,7 @@ export async function POST(
       createdById: user.id,
     },
     include: {
-      createdBy: { select: { id: true, displayName: true, username: true } },
+      createdBy: { select: { id: true, displayName: true } },
     },
   });
 

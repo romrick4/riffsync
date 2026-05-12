@@ -14,23 +14,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-const USERNAME_RE = /^[a-zA-Z0-9_]{3,30}$/;
-
 export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteCode = searchParams.get("invite");
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   function validate(): string | null {
-    if (!USERNAME_RE.test(username)) {
-      return "Username must be 3-30 characters (letters, numbers, underscore)";
-    }
     if (password.length < 8) {
       return "Password must be at least 8 characters";
     }
@@ -53,7 +47,7 @@ export function RegisterForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, displayName, username }),
+        body: JSON.stringify({ email, password, displayName }),
       });
 
       if (!res.ok) {
@@ -62,11 +56,9 @@ export function RegisterForm() {
         return;
       }
 
-      if (inviteCode) {
-        router.push(`/invite/${inviteCode}`);
-      } else {
-        router.push("/login");
-      }
+      const verifyParams = new URLSearchParams({ email });
+      if (inviteCode) verifyParams.set("invite", inviteCode);
+      router.push(`/verify?${verifyParams.toString()}`);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -106,21 +98,6 @@ export function RegisterForm() {
               onChange={(e) => setDisplayName(e.target.value)}
               required
             />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              type="text"
-              placeholder="alex_rivera"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoComplete="username"
-            />
-            <p className="text-xs text-muted-foreground">
-              3-30 characters, letters, numbers, and underscores
-            </p>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="password">Password</Label>

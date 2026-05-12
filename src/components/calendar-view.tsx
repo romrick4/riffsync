@@ -22,7 +22,7 @@ export interface CalendarEvent {
   startTime: string;
   endTime: string;
   location: string | null;
-  createdBy: { id: string; displayName: string; username: string };
+  createdBy: { id: string; displayName: string };
   createdAt: string;
   rsvpCounts: { going: number; maybe: number; cant: number };
   userRsvp: "GOING" | "MAYBE" | "CANT_MAKE_IT" | null;
@@ -33,7 +33,7 @@ export interface BusyBlock {
   startTime: string;
   endTime: string;
   note: string | null;
-  user: { id: string; displayName: string; username: string };
+  user: { id: string; displayName: string };
 }
 
 export interface CalendarMember {

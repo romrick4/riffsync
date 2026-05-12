@@ -23,7 +23,6 @@ interface Member {
   joinedAt: string;
   user: {
     id: string;
-    username: string;
     displayName: string;
   };
 }
@@ -91,7 +90,7 @@ export function MembersList({
                 )}
               </p>
               <p className="text-xs text-muted-foreground">
-                @{member.user.username}
+                {member.role === "OWNER" ? "Owner" : "Member"}
               </p>
             </div>
             <Badge variant={member.role === "OWNER" ? "default" : "outline"} className="text-xs">

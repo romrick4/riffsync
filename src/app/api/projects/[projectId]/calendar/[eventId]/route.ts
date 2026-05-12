@@ -24,10 +24,10 @@ export async function GET(request: Request, { params }: RouteParams) {
   const event = await prisma.calendarEvent.findUnique({
     where: { id: eventId, projectId },
     include: {
-      createdBy: { select: { id: true, displayName: true, username: true } },
+      createdBy: { select: { id: true, displayName: true } },
       rsvps: {
         include: {
-          user: { select: { id: true, displayName: true, username: true } },
+          user: { select: { id: true, displayName: true } },
         },
       },
     },
@@ -97,7 +97,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       ...(body.location !== undefined && { location: body.location }),
     },
     include: {
-      createdBy: { select: { id: true, displayName: true, username: true } },
+      createdBy: { select: { id: true, displayName: true } },
     },
   });
 

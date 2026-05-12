@@ -63,7 +63,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       ...(body.note !== undefined && { note: body.note }),
     },
     include: {
-      user: { select: { id: true, displayName: true, username: true } },
+      user: { select: { id: true, displayName: true } },
     },
   });
 

@@ -20,7 +20,6 @@ import { usePushSubscription } from "@/hooks/use-push-subscription";
 interface NavBarProps {
   user: {
     id: string;
-    username: string;
     displayName: string;
   };
 }

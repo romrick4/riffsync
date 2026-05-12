@@ -24,7 +24,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       versions: {
         include: {
           uploadedBy: {
-            select: { id: true, username: true, displayName: true },
+            select: { id: true, displayName: true },
           },
           parentVersion: {
             select: { id: true, title: true, versionNumber: true },
@@ -35,7 +35,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       lyricVersions: {
         include: {
           editedBy: {
-            select: { id: true, username: true, displayName: true },
+            select: { id: true, displayName: true },
           },
         },
         orderBy: { versionNumber: "desc" },
@@ -43,7 +43,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       tabFiles: {
         include: {
           uploadedBy: {
-            select: { id: true, username: true, displayName: true },
+            select: { id: true, displayName: true },
           },
         },
         orderBy: { createdAt: "desc" },

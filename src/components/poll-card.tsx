@@ -15,7 +15,7 @@ export interface PollData {
   id: string;
   question: string;
   isActive: boolean;
-  createdBy: { id: string; displayName: string; username: string };
+  createdBy: { id: string; displayName: string };
   createdAt: string;
   totalVotes: number;
   userVotedOptionId: string | null;

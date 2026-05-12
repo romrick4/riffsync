@@ -21,7 +21,7 @@ export default async function PollsPage({
   const polls = await prisma.poll.findMany({
     where: { projectId },
     include: {
-      createdBy: { select: { id: true, displayName: true, username: true } },
+      createdBy: { select: { id: true, displayName: true } },
       options: {
         include: {
           responses: { select: { userId: true } },

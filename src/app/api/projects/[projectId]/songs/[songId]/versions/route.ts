@@ -35,7 +35,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     where: { songId },
     include: {
       uploadedBy: {
-        select: { id: true, username: true, displayName: true },
+        select: { id: true, displayName: true },
       },
       parentVersion: {
         select: { id: true, title: true, versionNumber: true },

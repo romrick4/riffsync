@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseAdminClient,
+} from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
@@ -11,11 +14,11 @@ export async function POST(request: NextRequest) {
   if (rateLimited) return rateLimited;
 
   try {
-    const { email, password, displayName, username } = await request.json();
+    const { email, password, displayName } = await request.json();
 
-    if (!email || !password || !displayName || !username) {
+    if (!email || !password || !displayName) {
       return NextResponse.json(
-        { error: "Email, password, display name, and username are required" },
+        { error: "Email, password, and display name are required" },
         { status: 400 },
       );
     }
@@ -38,30 +41,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) {
-      return NextResponse.json(
-        {
-          error:
-            "Username must be 3-30 characters (letters, numbers, underscore)",
-        },
-        { status: 400 },
-      );
-    }
-
     if (password.length < 8 || password.length > 128) {
       return NextResponse.json(
         { error: "Password must be between 8 and 128 characters" },
         { status: 400 },
-      );
-    }
-
-    const existingUsername = await prisma.user.findUnique({
-      where: { username },
-    });
-    if (existingUsername) {
-      return NextResponse.json(
-        { error: "Username is already taken" },
-        { status: 409 },
       );
     }
 
@@ -75,13 +58,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createSupabaseAdminClient();
+    const adminClient = await createSupabaseAdminClient();
     const { data: authData, error: authError } =
-      await supabase.auth.admin.createUser({
+      await adminClient.auth.admin.createUser({
         email: email.toLowerCase(),
         password,
-        email_confirm: true,
-        user_metadata: { display_name: displayName, username },
+        email_confirm: false,
+        user_metadata: { display_name: displayName },
       });
 
     if (authError || !authData.user) {
@@ -92,23 +75,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         supabaseId: authData.user.id,
         email: email.toLowerCase(),
         displayName: displayName.trim(),
-        username,
       },
     });
 
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        username: user.username,
-        displayName: user.displayName,
-        email: user.email,
-      },
+    const supabase = await createSupabaseServerClient();
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: email.toLowerCase(),
     });
+
+    if (otpError) {
+      console.error("[register] Failed to send verification code:", otpError);
+    }
+
+    return NextResponse.json({ email: email.toLowerCase() });
   } catch {
     return NextResponse.json(
       { error: "Something went wrong on our end. Try again in a moment." },

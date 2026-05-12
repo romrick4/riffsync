@@ -28,7 +28,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     where: { songId },
     include: {
       editedBy: {
-        select: { id: true, username: true, displayName: true },
+        select: { id: true, displayName: true },
       },
     },
     orderBy: { versionNumber: "desc" },
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     },
     include: {
       editedBy: {
-        select: { id: true, username: true, displayName: true },
+        select: { id: true, displayName: true },
       },
     },
   });

@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
       where: { supabaseId: data.user.id },
       select: {
         id: true,
-        username: true,
         displayName: true,
         email: true,
       },

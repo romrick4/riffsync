@@ -8,7 +8,6 @@ export interface ProjectMember {
   joinedAt: string;
   user: {
     id: string;
-    username: string;
     displayName: string;
   };
 }

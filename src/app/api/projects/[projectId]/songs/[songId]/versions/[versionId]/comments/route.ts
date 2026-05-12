@@ -36,7 +36,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     },
     include: {
       user: {
-        select: { id: true, username: true, displayName: true },
+        select: { id: true, displayName: true },
       },
     },
     orderBy: { timestampSec: "asc" },
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     },
     include: {
       user: {
-        select: { id: true, username: true, displayName: true },
+        select: { id: true, displayName: true },
       },
     },
   });

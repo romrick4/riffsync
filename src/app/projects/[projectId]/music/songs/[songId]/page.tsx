@@ -35,7 +35,7 @@ export default async function SongDetailPage({
       versions: {
         include: {
           uploadedBy: {
-            select: { id: true, username: true, displayName: true },
+            select: { id: true, displayName: true },
           },
           parentVersion: {
             select: { id: true, title: true, versionNumber: true },
@@ -49,7 +49,7 @@ export default async function SongDetailPage({
       lyricVersions: {
         include: {
           editedBy: {
-            select: { id: true, username: true, displayName: true },
+            select: { id: true, displayName: true },
           },
         },
         orderBy: { versionNumber: "desc" },

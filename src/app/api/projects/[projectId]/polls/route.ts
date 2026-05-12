@@ -24,7 +24,7 @@ export async function GET(
   const polls = await prisma.poll.findMany({
     where: { projectId },
     include: {
-      createdBy: { select: { id: true, displayName: true, username: true } },
+      createdBy: { select: { id: true, displayName: true } },
       options: {
         include: {
           responses: { select: { userId: true } },
@@ -106,7 +106,7 @@ export async function POST(
       },
     },
     include: {
-      createdBy: { select: { id: true, displayName: true, username: true } },
+      createdBy: { select: { id: true, displayName: true } },
       options: true,
     },
   });

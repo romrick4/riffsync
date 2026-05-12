@@ -24,7 +24,7 @@ export default async function ProjectDashboard({
       members: {
         include: {
           user: {
-            select: { id: true, username: true, displayName: true },
+            select: { id: true, displayName: true },
           },
         },
         orderBy: { joinedAt: "asc" },
@@ -114,9 +114,11 @@ export default async function ProjectDashboard({
                     <p className="truncate text-sm font-medium">
                       {member.user.displayName}
                     </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      @{member.user.username}
-                    </p>
+                    {member.role === "OWNER" && (
+                      <p className="truncate text-xs text-muted-foreground">
+                        Owner
+                      </p>
+                    )}
                   </div>
                   {member.role === "OWNER" && (
                     <Badge variant="outline" className="text-xs shrink-0">

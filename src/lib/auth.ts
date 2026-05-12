@@ -28,7 +28,6 @@ export async function getCurrentUser() {
     where: { supabaseId: user.id },
     select: {
       id: true,
-      username: true,
       displayName: true,
       email: true,
       createdAt: true,

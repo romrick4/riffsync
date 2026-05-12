@@ -28,7 +28,7 @@ export async function GET(
       members: {
         include: {
           user: {
-            select: { id: true, username: true, displayName: true },
+            select: { id: true, displayName: true },
           },
         },
         orderBy: { joinedAt: "asc" },

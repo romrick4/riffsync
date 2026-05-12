@@ -64,7 +64,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     data: { uploadStatus: "PROCESSING" },
     include: {
       uploadedBy: {
-        select: { id: true, username: true, displayName: true },
+        select: { id: true, displayName: true },
       },
     },
   });

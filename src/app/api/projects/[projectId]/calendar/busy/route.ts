@@ -46,7 +46,7 @@ export async function GET(
       ...overlapFilter,
     },
     include: {
-      user: { select: { id: true, displayName: true, username: true } },
+      user: { select: { id: true, displayName: true } },
     },
     orderBy: { startTime: "asc" },
   });
@@ -107,7 +107,7 @@ export async function POST(
       userId: user.id,
     },
     include: {
-      user: { select: { id: true, displayName: true, username: true } },
+      user: { select: { id: true, displayName: true } },
     },
   });
 

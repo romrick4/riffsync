@@ -33,7 +33,7 @@ export default async function CalendarPage({
       },
       include: {
         createdBy: {
-          select: { id: true, displayName: true, username: true },
+          select: { id: true, displayName: true },
         },
         rsvps: { select: { status: true, userId: true } },
       },
@@ -46,7 +46,7 @@ export default async function CalendarPage({
         endTime: { gte: monthStart },
       },
       include: {
-        user: { select: { id: true, displayName: true, username: true } },
+        user: { select: { id: true, displayName: true } },
       },
       orderBy: { startTime: "asc" },
     }),
