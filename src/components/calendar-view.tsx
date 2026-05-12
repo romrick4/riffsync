@@ -238,7 +238,7 @@ export function CalendarView({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={prevMonth}>
             <ChevronLeftIcon className="size-4" />
@@ -250,14 +250,14 @@ export function CalendarView({
             <ChevronRightIcon className="size-4" />
           </Button>
         </div>
-        <div className="flex gap-2">
+        <div className="flex w-full gap-2 sm:w-auto">
           <Button
             variant="outline"
             onClick={() => {
               setEditBusyBlock(null);
               setBusyDialogOpen(true);
             }}
-            className="w-full sm:w-auto"
+            className="flex-1 sm:flex-none"
           >
             Mark Busy
           </Button>
@@ -266,7 +266,7 @@ export function CalendarView({
               setEditEvent(null);
               setEventDialogOpen(true);
             }}
-            className="w-full sm:w-auto"
+            className="flex-1 sm:flex-none"
           >
             Add Event
           </Button>

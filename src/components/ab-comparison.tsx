@@ -259,20 +259,20 @@ function TrackPanel({
           : "border-border bg-card/50 opacity-60"
       )}
     >
-      <div className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <Badge
             variant={isActive ? "default" : "outline"}
-            className="h-5 w-5 justify-center p-0 text-xs"
+            className="h-5 w-5 shrink-0 justify-center p-0 text-xs"
           >
             {label}
           </Badge>
-          <span className="text-xs font-medium">{title}</span>
-          <span className="rounded bg-muted px-1 py-0.5 font-mono text-xs uppercase text-muted-foreground">
+          <span className="truncate text-xs font-medium">{title}</span>
+          <span className="shrink-0 rounded bg-muted px-1 py-0.5 font-mono text-xs uppercase text-muted-foreground">
             {format}
           </span>
         </div>
-        <span className="text-xs tabular-nums text-muted-foreground">
+        <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
       </div>

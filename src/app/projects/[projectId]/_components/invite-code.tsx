@@ -21,11 +21,11 @@ export function InviteCode({ code }: { code: string }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <code className="rounded-md bg-muted px-3 py-1.5 font-mono text-sm truncate">
+    <div className="flex min-w-0 items-center gap-2">
+      <code className="min-w-0 truncate rounded-md bg-muted px-3 py-1.5 font-mono text-sm">
         {inviteLink}
       </code>
-      <Button variant="ghost" size="icon-sm" onClick={handleCopy}>
+      <Button variant="ghost" size="icon-sm" className="shrink-0" onClick={handleCopy}>
         {copied ? <Check className="size-3.5" /> : <LinkIcon className="size-3.5" />}
       </Button>
     </div>

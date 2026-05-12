@@ -120,7 +120,7 @@ export default async function ProjectSettingsPage({
           </CardHeader>
           <CardContent>
             <Separator className="mb-4" />
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-medium">Delete Project</p>
                 <p className="text-xs text-muted-foreground">

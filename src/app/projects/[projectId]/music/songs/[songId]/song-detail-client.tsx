@@ -254,8 +254,8 @@ export function SongDetailClient({
 
       {/* A/B pick prompt */}
       {abPickStep && (
-        <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
-          <span>
+        <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
+          <span className="flex-1">
             Select version <strong>{abPickStep}</strong> from the tree below
             {abPickStep === "B" && abVersionA && (
               <span className="text-muted-foreground">
@@ -264,7 +264,7 @@ export function SongDetailClient({
               </span>
             )}
           </span>
-          <Button variant="ghost" size="icon-xs" onClick={exitAbMode}>
+          <Button variant="ghost" size="icon-xs" className="shrink-0" onClick={exitAbMode}>
             <XIcon className="size-3" />
           </Button>
         </div>
@@ -371,40 +371,40 @@ export function SongDetailClient({
               <span className="font-medium">{selectedVersion.title}</span>
               {selectedVersion.isFinal && <Badge>Final</Badge>}
               <Badge variant="outline">{selectedVersion.fileFormat}</Badge>
-              <div className="ml-auto flex items-center gap-1.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyVersionLink(selectedVersion.id)}
-                >
-                  {copied ? (
-                    <CheckIcon data-icon="inline-start" />
-                  ) : (
-                    <LinkIcon data-icon="inline-start" />
-                  )}
-                  {copied ? "Copied!" : "Share"}
-                </Button>
-                {fileUrl && (
-                  <a href={fileUrl} download>
-                    <Button variant="ghost" size="sm">
-                      <DownloadIcon data-icon="inline-start" />
-                      Download
-                    </Button>
-                  </a>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyVersionLink(selectedVersion.id)}
+              >
+                {copied ? (
+                  <CheckIcon data-icon="inline-start" />
+                ) : (
+                  <LinkIcon data-icon="inline-start" />
                 )}
-                <Button
-                  variant={selectedVersion.isFinal ? "outline" : "secondary"}
-                  size="sm"
-                  disabled={togglingFinal}
-                  onClick={() => handleToggleFinal(selectedVersion)}
-                >
-                  <StarIcon
-                    data-icon="inline-start"
-                    className={selectedVersion.isFinal ? "fill-amber-400 text-amber-400" : ""}
-                  />
-                  {selectedVersion.isFinal ? "Unset Final" : "Set as Final"}
-                </Button>
-              </div>
+                {copied ? "Copied!" : "Share"}
+              </Button>
+              {fileUrl && (
+                <a href={fileUrl} download>
+                  <Button variant="ghost" size="sm">
+                    <DownloadIcon data-icon="inline-start" />
+                    Download
+                  </Button>
+                </a>
+              )}
+              <Button
+                variant={selectedVersion.isFinal ? "outline" : "secondary"}
+                size="sm"
+                disabled={togglingFinal}
+                onClick={() => handleToggleFinal(selectedVersion)}
+              >
+                <StarIcon
+                  data-icon="inline-start"
+                  className={selectedVersion.isFinal ? "fill-amber-400 text-amber-400" : ""}
+                />
+                {selectedVersion.isFinal ? "Unset Final" : "Set as Final"}
+              </Button>
             </div>
 
             {selectedVersion.description && (

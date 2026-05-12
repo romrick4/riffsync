@@ -111,7 +111,7 @@ export function TextTabEditor({ songId, projectId, tabs }: TextTabEditorProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-wrap justify-end gap-2">
         <AddTextTabDialog projectId={projectId} songId={songId} />
         <UploadTabFileDialog projectId={projectId} songId={songId} />
       </div>

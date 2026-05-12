@@ -371,9 +371,9 @@ export function AlbumDetailClient({
 
       {/* Tracklist */}
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-semibold tracking-tight">Tracklist</h2>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <NewSongDialog
               projectId={projectId}
               albumId={album.id}
