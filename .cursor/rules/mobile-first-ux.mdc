@@ -1,0 +1,18 @@
+---
+description: Always consider mobile layout when making UI changes
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# Mobile-First UX
+
+Every UI change must work on small screens (320px–428px wide) before scaling up to desktop.
+
+## Rules
+
+- **Check wrapping** — Any horizontal row of buttons, badges, or metadata must use `flex-wrap` and remain usable when items wrap to a second line.
+- **Condense labels on small screens** — Action buttons that have both an icon and a text label should hide the label on mobile when space is tight: `<span className="hidden sm:inline">Label</span>`.
+- **Touch targets** — Interactive elements must be at least 44x44px on mobile (use `size-10` / `p-2.5` or larger).
+- **No horizontal overflow** — Layouts must not force horizontal scrolling on mobile unless the content is explicitly scrollable (e.g. a version tree or data table).
+- **Stack on mobile, row on desktop** — Use `flex-col sm:flex-row` for side-by-side layouts that won't fit a small screen.
+- **Test mental model** — Before finishing, mentally walk through the change at 375px width. If anything overlaps, truncates awkwardly, or requires precise tapping, fix it.

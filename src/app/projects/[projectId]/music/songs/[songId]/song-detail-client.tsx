@@ -280,7 +280,7 @@ export function SongDetailClient({
             {abPickStep === "B" && abVersionA && (
               <span className="text-muted-foreground">
                 {" "}
-                (A = v{abVersionA.versionNumber} {abVersionA.title})
+                (A = {abVersionA.title})
               </span>
             )}
           </span>
@@ -365,13 +365,13 @@ export function SongDetailClient({
           <ABComparison
             versionA={{
               id: abVersionA.id,
-              title: `v${abVersionA.versionNumber} ${abVersionA.title}`,
+              title: abVersionA.title,
               src: `/api/projects/${projectId}/songs/${songId}/versions/${abVersionA.id}/file`,
               format: abVersionA.fileFormat,
             }}
             versionB={{
               id: abVersionB.id,
-              title: `v${abVersionB.versionNumber} ${abVersionB.title}`,
+              title: abVersionB.title,
               src: `/api/projects/${projectId}/songs/${songId}/versions/${abVersionB.id}/file`,
               format: abVersionB.fileFormat,
             }}
@@ -385,14 +385,11 @@ export function SongDetailClient({
           <div className="flex flex-col gap-4">
             {/* Version metadata */}
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <Badge variant="outline" className="font-mono">
-                v{selectedVersion.versionNumber}
-              </Badge>
               <span className="font-medium">{selectedVersion.title}</span>
               {selectedVersion.isFinal && <Badge>Final</Badge>}
               <Badge variant="outline">{selectedVersion.fileFormat}</Badge>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
               <Button
                 variant="ghost"
                 size="sm"
@@ -427,12 +424,12 @@ export function SongDetailClient({
               </Button>
               <DeleteConfirmDialog
                 title="Delete this recording?"
-                description={`"v${selectedVersion.versionNumber} ${selectedVersion.title}" and all its comments will be permanently deleted. This can't be undone.`}
+                description={`"${selectedVersion.title}" and all its comments will be permanently deleted. This can't be undone.`}
                 confirmLabel="Delete Recording"
                 trigger={
                   <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
                     <Trash2Icon data-icon="inline-start" />
-                    Delete
+                    <span className="hidden sm:inline">Delete</span>
                   </Button>
                 }
                 onConfirm={() => handleDeleteVersion(selectedVersion)}
@@ -463,7 +460,7 @@ export function SongDetailClient({
             {/* Audio player */}
             <AudioPlayer
               src={`/api/projects/${projectId}/songs/${songId}/versions/${selectedVersion.id}/file`}
-              title={`v${selectedVersion.versionNumber} ${selectedVersion.title}`}
+              title={selectedVersion.title}
               format={selectedVersion.fileFormat}
               comments={commentMarkers}
               onTimestampClick={handleTimestampClick}

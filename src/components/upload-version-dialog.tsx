@@ -373,7 +373,7 @@ export function UploadVersionDialog({
                         ? "None \u2014 start new branch"
                         : (() => {
                             const v = existingVersions.find((v) => v.id === parentVersionId);
-                            return v ? `v${v.versionNumber} \u2014 ${v.title}` : "Select a parent version...";
+                            return v ? v.title : "Select a version...";
                           })()}
                     </SelectValue>
                   </SelectTrigger>
@@ -381,7 +381,7 @@ export function UploadVersionDialog({
                     <SelectItem value="">None &mdash; start new branch</SelectItem>
                     {existingVersions.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        v{v.versionNumber} &mdash; {v.title}
+                        {v.title}
                       </SelectItem>
                     ))}
                   </SelectContent>

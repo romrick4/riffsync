@@ -395,9 +395,6 @@ function VersionNodeCard({
         )}
       >
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-xs text-muted-foreground">
-            v{version.versionNumber}
-          </span>
           <span className="truncate font-medium text-card-foreground">
             {version.title}
           </span>

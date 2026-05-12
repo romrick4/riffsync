@@ -44,7 +44,7 @@ export function DeleteSongButton({
       trigger={
         <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
           <Trash2Icon data-icon="inline-start" />
-          Delete
+          <span className="hidden sm:inline">Delete</span>
         </Button>
       }
       onConfirm={handleDelete}

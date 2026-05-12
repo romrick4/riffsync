@@ -187,7 +187,7 @@ async function DashboardContent({ projectId }: { projectId: string }) {
                       <p className="truncate text-sm font-medium">{song.title}</p>
                       {latestVersion ? (
                         <p className="truncate text-xs text-muted-foreground">
-                          v{latestVersion.versionNumber} by{" "}
+                          {latestVersion.title ?? "Latest"} by{" "}
                           {latestVersion.uploadedBy.displayName} &middot;{" "}
                           {formatDistanceToNow(latestVersion.createdAt, {
                             addSuffix: true,
