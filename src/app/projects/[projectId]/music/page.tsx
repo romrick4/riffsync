@@ -22,6 +22,12 @@ export default async function MusicPage({
 }) {
   const { projectId } = await params;
 
+  const albums = await prisma.album.findMany({
+    where: { projectId },
+    select: { id: true, title: true },
+    orderBy: { title: "asc" },
+  });
+
   return (
     <div className="flex flex-1 flex-col gap-6 md:gap-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -33,7 +39,7 @@ export default async function MusicPage({
         </div>
         <div className="flex items-center gap-2">
           <NewAlbumDialog projectId={projectId} />
-          <NewSongDialog projectId={projectId} />
+          <NewSongDialog projectId={projectId} albums={albums} />
         </div>
       </div>
 

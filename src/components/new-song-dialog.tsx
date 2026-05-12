@@ -11,6 +11,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,18 +27,23 @@ import { PlusIcon } from "lucide-react";
 export function NewSongDialog({
   projectId,
   albumId,
+  albums,
   onCreated,
 }: {
   projectId: string;
   albumId?: string;
+  albums?: { id: string; title: string }[];
   onCreated?: (song: { id: string; title: string }) => void;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedAlbumId, setSelectedAlbumId] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const showAlbumPicker = !albumId && albums && albums.length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,7 +59,7 @@ export function NewSongDialog({
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim() || undefined,
-          albumId: albumId || undefined,
+          albumId: albumId || selectedAlbumId || undefined,
         }),
       });
 
@@ -59,6 +71,7 @@ export function NewSongDialog({
       const song = await res.json();
       setTitle("");
       setDescription("");
+      setSelectedAlbumId("");
       setOpen(false);
       onCreated?.(song);
       router.refresh();
@@ -107,6 +120,31 @@ export function NewSongDialog({
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
+            {showAlbumPicker && (
+              <div className="flex flex-col gap-2">
+                <Label>Add to album</Label>
+                <Select
+                  value={selectedAlbumId}
+                  onValueChange={(val) => setSelectedAlbumId(val ?? "")}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Single (no album)">
+                      {selectedAlbumId
+                        ? albums.find((a) => a.id === selectedAlbumId)?.title
+                        : "Single (no album)"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Single (no album)</SelectItem>
+                    {albums.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {error && (
               <p className="text-sm text-destructive">{error}</p>
             )}

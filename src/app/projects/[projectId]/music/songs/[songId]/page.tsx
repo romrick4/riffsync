@@ -132,21 +132,30 @@ export default async function SongDetailPage({
           />
         )}
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">
+          <div className="flex items-center gap-2">
+            <h1 className="min-w-0 truncate text-2xl font-semibold tracking-tight">
               {song.title}
             </h1>
             {song.trackNumber && (
-              <Badge variant="outline" className="font-mono">
+              <Badge variant="outline" className="shrink-0 font-mono">
                 Track {song.trackNumber}
               </Badge>
             )}
+            {isOwner && (
+              <div className="ml-auto shrink-0">
+                <DeleteSongButton
+                  projectId={projectId}
+                  songId={songId}
+                  albumId={song.album?.id}
+                />
+              </div>
+            )}
           </div>
-          <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
             {song.album && (
               <Link
                 href={`/projects/${projectId}/music/albums/${song.album.id}`}
-                className="flex items-center gap-1 hover:text-foreground transition-colors"
+                className="flex shrink-0 items-center gap-1 whitespace-nowrap hover:text-foreground transition-colors"
               >
                 <DiscAlbumIcon className="size-3.5" />
                 {song.album.title}
@@ -156,18 +165,11 @@ export default async function SongDetailPage({
             {song.description && (
               <>
                 <span>&middot;</span>
-                <span>{song.description}</span>
+                <span className="line-clamp-1">{song.description}</span>
               </>
             )}
           </div>
         </div>
-        {isOwner && (
-          <DeleteSongButton
-            projectId={projectId}
-            songId={songId}
-            albumId={song.album?.id}
-          />
-        )}
       </div>
 
       <Tabs defaultValue="versions">
