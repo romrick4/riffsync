@@ -131,15 +131,30 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     );
   }
 
-  const versions = await prisma.songVersion.findMany({
-    where: { songId },
-    select: { filePath: true },
-  });
+  const [versions, song] = await Promise.all([
+    prisma.songVersion.findMany({
+      where: { songId },
+      select: { filePath: true, compressedFilePath: true },
+    }),
+    prisma.song.findUnique({
+      where: { id: songId, projectId },
+      select: { coverArtPath: true },
+    }),
+  ]);
+
+  if (!song) {
+    return NextResponse.json({ error: "Song not found" }, { status: 404 });
+  }
 
   const storage = getStorage();
-  await Promise.allSettled(
-    versions.map((v) => storage.delete(v.filePath))
-  );
+  const fileDeletes = versions.flatMap((v) => {
+    const keys = [v.filePath];
+    if (v.compressedFilePath) keys.push(v.compressedFilePath);
+    return keys;
+  });
+  if (song.coverArtPath) fileDeletes.push(song.coverArtPath);
+
+  await Promise.allSettled(fileDeletes.map((key) => storage.delete(key)));
 
   await prisma.song.delete({ where: { id: songId, projectId } });
 

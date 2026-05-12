@@ -26,12 +26,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { NewSongDialog } from "@/components/new-song-dialog";
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { toast } from "sonner";
 import {
   DownloadIcon,
   PlusIcon,
   SettingsIcon,
   AlertTriangleIcon,
   MusicIcon,
+  Trash2Icon,
 } from "lucide-react";
 
 interface AlbumSong {
@@ -92,6 +95,7 @@ export function AlbumDetailClient({
   );
   const [metaExplicit, setMetaExplicit] = useState(album.isExplicit);
   const [metaSaving, setMetaSaving] = useState(false);
+  const [deleteSongsChecked, setDeleteSongsChecked] = useState(false);
 
   const songsWithoutFinal = album.songs.filter((s) => !s.hasFinalVersion);
   const allReady = album.songs.length > 0 && songsWithoutFinal.length === 0 && album.coverArtPath;
@@ -193,6 +197,21 @@ export function AlbumDetailClient({
     } finally {
       setMetaSaving(false);
     }
+  }
+
+  async function handleDeleteAlbum() {
+    const qs = deleteSongsChecked ? "?deleteSongs=true" : "";
+    const res = await fetch(
+      `/api/projects/${projectId}/albums/${album.id}${qs}`,
+      { method: "DELETE" },
+    );
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error ?? "Something went wrong. Try again in a moment.");
+      throw new Error("delete failed");
+    }
+    toast.success("Album deleted");
+    router.push(`/projects/${projectId}/music`);
   }
 
   return (
@@ -348,6 +367,39 @@ export function AlbumDetailClient({
                 Download for Distribution
               </Button>
             </a>
+
+            {isOwner && (
+              <DeleteConfirmDialog
+                title="Delete this album?"
+                description="This will permanently delete the album. This can't be undone."
+                confirmLabel="Delete Album"
+                trigger={
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                    <Trash2Icon data-icon="inline-start" />
+                    Delete
+                  </Button>
+                }
+                onConfirm={handleDeleteAlbum}
+              >
+                {album.songs.length > 0 && (
+                  <label className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={deleteSongsChecked}
+                      onChange={(e) => setDeleteSongsChecked(e.target.checked)}
+                      className="mt-0.5 size-4 rounded border accent-destructive"
+                    />
+                    <span>
+                      <span className="font-medium">Also delete all {album.songs.length} {album.songs.length === 1 ? "song" : "songs"} in this album</span>
+                      <br />
+                      <span className="text-muted-foreground">
+                        All recordings, lyrics, and tabs for these songs will be gone forever. If unchecked, the songs will become singles.
+                      </span>
+                    </span>
+                  </label>
+                )}
+              </DeleteConfirmDialog>
+            )}
           </div>
         </div>
       </div>

@@ -99,7 +99,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   return NextResponse.json(album);
 }
 
-export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -115,6 +115,9 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     );
   }
 
+  const deleteSongs =
+    new URL(request.url).searchParams.get("deleteSongs") === "true";
+
   const album = await prisma.album.findUnique({
     where: { id: albumId, projectId },
     select: { coverArtPath: true },
@@ -124,14 +127,37 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Album not found" }, { status: 404 });
   }
 
-  // Detach songs (don't delete them)
-  await prisma.song.updateMany({
-    where: { albumId },
-    data: { albumId: null, trackNumber: null },
-  });
+  const storage = getStorage();
+
+  if (deleteSongs) {
+    const songs = await prisma.song.findMany({
+      where: { albumId },
+      select: {
+        id: true,
+        coverArtPath: true,
+        versions: { select: { filePath: true, compressedFilePath: true } },
+      },
+    });
+
+    const fileKeys: string[] = [];
+    for (const song of songs) {
+      if (song.coverArtPath) fileKeys.push(song.coverArtPath);
+      for (const v of song.versions) {
+        fileKeys.push(v.filePath);
+        if (v.compressedFilePath) fileKeys.push(v.compressedFilePath);
+      }
+    }
+
+    await Promise.allSettled(fileKeys.map((key) => storage.delete(key)));
+    await prisma.song.deleteMany({ where: { albumId } });
+  } else {
+    await prisma.song.updateMany({
+      where: { albumId },
+      data: { albumId: null, trackNumber: null },
+    });
+  }
 
   if (album.coverArtPath) {
-    const storage = getStorage();
     await storage.delete(album.coverArtPath).catch(() => {});
   }
 

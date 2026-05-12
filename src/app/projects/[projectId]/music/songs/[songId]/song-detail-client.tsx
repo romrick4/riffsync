@@ -6,8 +6,10 @@ import { AudioPlayer } from "@/components/audio-player";
 import { AudioComments } from "@/components/audio-comments";
 import { ABComparison } from "@/components/ab-comparison";
 import { UploadVersionDialog } from "@/components/upload-version-dialog";
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   DownloadIcon,
   LinkIcon,
@@ -22,6 +24,7 @@ import {
   ArrowRightIcon,
   PlusIcon,
   StarIcon,
+  Trash2Icon,
 } from "lucide-react";
 
 interface CommentData {
@@ -162,6 +165,23 @@ export function SongDetailClient({
       } finally {
         setTogglingFinal(false);
       }
+    },
+    [projectId, songId],
+  );
+
+  const handleDeleteVersion = useCallback(
+    async (version: VersionNode) => {
+      const res = await fetch(
+        `/api/projects/${projectId}/songs/${songId}/versions/${version.id}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error ?? "Something went wrong. Try again in a moment.");
+        throw new Error("delete failed");
+      }
+      toast.success("Recording deleted");
+      window.location.reload();
     },
     [projectId, songId],
   );
@@ -405,6 +425,18 @@ export function SongDetailClient({
                 />
                 {selectedVersion.isFinal ? "Unset Final" : "Set as Final"}
               </Button>
+              <DeleteConfirmDialog
+                title="Delete this recording?"
+                description={`"v${selectedVersion.versionNumber} ${selectedVersion.title}" and all its comments will be permanently deleted. This can't be undone.`}
+                confirmLabel="Delete Recording"
+                trigger={
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                    <Trash2Icon data-icon="inline-start" />
+                    Delete
+                  </Button>
+                }
+                onConfirm={() => handleDeleteVersion(selectedVersion)}
+              />
             </div>
 
             {selectedVersion.description && (

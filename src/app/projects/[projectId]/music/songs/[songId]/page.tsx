@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+import { getProjectMembership } from "@/lib/project-data";
 import { redirect } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,6 +9,7 @@ import { ArrowLeftIcon, PlayCircleIcon, DiscAlbumIcon } from "lucide-react";
 import Link from "next/link";
 import { SongDetailClient } from "./song-detail-client";
 import { SongMetadataClient } from "./song-metadata-client";
+import { DeleteSongButton } from "@/components/delete-song-button";
 import { LyricsSection } from "@/components/lyrics-section";
 import { TextTabEditor } from "@/components/text-tab-editor";
 import { UploadVersionDialog } from "@/components/upload-version-dialog";
@@ -18,6 +21,8 @@ export default async function SongDetailPage({
   params: Promise<{ projectId: string; songId: string }>;
 }) {
   const { projectId, songId } = await params;
+
+  const user = await getCurrentUser();
 
   const song = await prisma.song.findUnique({
     where: { id: songId, projectId },
@@ -57,6 +62,11 @@ export default async function SongDetailPage({
   });
 
   if (!song) redirect(`/projects/${projectId}/music`);
+
+  const membership = user
+    ? await getProjectMembership(projectId, user.id)
+    : null;
+  const isOwner = membership?.role === "OWNER";
 
   const versionNodes: VersionNode[] = song.versions.map((v: typeof song.versions[number]) => ({
     id: v.id,
@@ -151,6 +161,13 @@ export default async function SongDetailPage({
             )}
           </div>
         </div>
+        {isOwner && (
+          <DeleteSongButton
+            projectId={projectId}
+            songId={songId}
+            albumId={song.album?.id}
+          />
+        )}
       </div>
 
       <Tabs defaultValue="versions">
