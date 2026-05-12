@@ -93,7 +93,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ email: email.toLowerCase() });
-  } catch {
+  } catch (err) {
+    console.error("[register] Unhandled error:", err);
     return NextResponse.json(
       { error: "Something went wrong on our end. Try again in a moment." },
       { status: 500 },
