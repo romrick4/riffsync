@@ -225,7 +225,7 @@ export function AlbumDetailClient({
             {album.artistName && <span>by {album.artistName}</span>}
             {album.releaseDate && (
               <span>
-                Release: {new Date(album.releaseDate).toLocaleDateString()}
+                Release: {new Date(album.releaseDate).toLocaleDateString("en-US")}
               </span>
             )}
             {album.upc && <span>UPC: {album.upc}</span>}

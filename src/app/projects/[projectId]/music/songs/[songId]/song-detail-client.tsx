@@ -420,7 +420,7 @@ export function SongDetailClient({
               </span>
               <span className="flex items-center gap-1.5">
                 <CalendarIcon className="size-3.5" />
-                {new Date(selectedVersion.createdAt).toLocaleDateString()}
+                {new Date(selectedVersion.createdAt).toLocaleDateString("en-US")}
               </span>
               <span className="flex items-center gap-1.5">
                 <HardDriveIcon className="size-3.5" />

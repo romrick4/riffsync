@@ -224,7 +224,7 @@ export default async function MusicPage({
                             {latestVersion && (
                               <span>
                                 Updated{" "}
-                                {new Date(latestVersion.createdAt).toLocaleDateString()}
+                                {new Date(latestVersion.createdAt).toLocaleDateString("en-US")}
                               </span>
                             )}
                           </div>

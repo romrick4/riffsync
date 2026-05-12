@@ -32,13 +32,11 @@ const trustedProxies = new Set(
 );
 
 function getClientIp(request: NextRequest): string {
-  // request.ip is the socket-level IP provided by the runtime (when available)
-  const socketIp = request.ip ?? request.headers.get("x-real-ip") ?? "unknown";
+  const socketIp = request.headers.get("x-real-ip") ?? "unknown";
 
   if (trustedProxies.size > 0 && trustedProxies.has(socketIp)) {
     const forwarded = request.headers.get("x-forwarded-for");
     if (forwarded) {
-      // Rightmost untrusted entry is the real client IP
       const chain = forwarded.split(",").map((s) => s.trim());
       for (let i = chain.length - 1; i >= 0; i--) {
         if (!trustedProxies.has(chain[i])) return chain[i];

@@ -257,7 +257,7 @@ export function TextTabEditor({ songId, projectId, tabs }: TextTabEditorProps) {
 
                 <div className="mt-2 text-xs text-muted-foreground">
                   Uploaded by {tab.uploadedBy.displayName} on{" "}
-                  {new Date(tab.createdAt).toLocaleDateString()}
+                  {new Date(tab.createdAt).toLocaleDateString("en-US")}
                 </div>
               </CardContent>
             </Card>

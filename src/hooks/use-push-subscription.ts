@@ -53,7 +53,7 @@ export function usePushSubscription() {
 
       const subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(key),
+        applicationServerKey: urlBase64ToUint8Array(key).buffer as ArrayBuffer,
       });
 
       const subRes = await fetch("/api/push/subscribe", {

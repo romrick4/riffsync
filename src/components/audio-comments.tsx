@@ -40,7 +40,7 @@ function relativeTime(dateStr: string) {
   if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
   if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
   if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
-  return new Date(dateStr).toLocaleDateString();
+  return new Date(dateStr).toLocaleDateString("en-US");
 }
 
 const PROXIMITY_SEC = 3;

@@ -77,14 +77,14 @@ function dateSpansDay(start: Date, end: Date, year: number, month: number, day: 
 }
 
 function formatTime(dateStr: string) {
-  return new Intl.DateTimeFormat("default", {
+  return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
   }).format(new Date(dateStr));
 }
 
 function formatShortDate(dateStr: string) {
-  return new Intl.DateTimeFormat("default", {
+  return new Intl.DateTimeFormat("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -192,7 +192,7 @@ export function CalendarView({
 
   const selectedBusy = selectedDay ? (busyByDay.get(selectedDay) ?? []) : busyBlocks;
 
-  const monthLabel = new Date(year, month).toLocaleString("default", {
+  const monthLabel = new Date(year, month).toLocaleString("en-US", {
     month: "long",
     year: "numeric",
   });
@@ -383,7 +383,7 @@ export function CalendarView({
       <div>
         <h3 className="mb-3 text-sm font-medium text-muted-foreground">
           {selectedDay
-            ? `Events on ${new Date(year, month, selectedDay).toLocaleDateString("default", { weekday: "long", month: "long", day: "numeric" })}`
+            ? `Events on ${new Date(year, month, selectedDay).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}`
             : "All events this month"}
         </h3>
         {selectedEvents.length === 0 ? (

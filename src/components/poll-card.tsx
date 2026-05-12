@@ -74,7 +74,7 @@ export function PollCard({
     }
   }
 
-  const createdDate = new Intl.DateTimeFormat("default", {
+  const createdDate = new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
   }).format(new Date(poll.createdAt));

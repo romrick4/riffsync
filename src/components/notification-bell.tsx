@@ -98,7 +98,7 @@ function relativeTime(dateStr: string): string {
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
 
-  return new Date(dateStr).toLocaleDateString();
+  return new Date(dateStr).toLocaleDateString("en-US");
 }
 
 export function NotificationBell() {

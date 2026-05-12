@@ -116,7 +116,7 @@ export function LyricsHistory({
                       </span>
                       <span className="flex items-center gap-1">
                         <CalendarIcon className="size-3" />
-                        {new Date(version.createdAt).toLocaleDateString()}
+                        {new Date(version.createdAt).toLocaleDateString("en-US")}
                       </span>
                     </div>
                   </div>

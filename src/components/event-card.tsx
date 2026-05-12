@@ -36,14 +36,14 @@ const RSVP_OPTIONS = [
 ] as const;
 
 function formatTime(dateStr: string) {
-  return new Intl.DateTimeFormat("default", {
+  return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
   }).format(new Date(dateStr));
 }
 
 function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("default", {
+  return new Intl.DateTimeFormat("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
