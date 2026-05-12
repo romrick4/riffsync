@@ -15,8 +15,6 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-
 export function VerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,11 +35,14 @@ export function VerifyForm() {
     setLoading(true);
 
     try {
+      const { createSupabaseBrowserClient } = await import(
+        "@/lib/supabase/client"
+      );
       const supabase = createSupabaseBrowserClient();
       const { error: verifyError } = await supabase.auth.verifyOtp({
         email,
         token: code,
-        type: "email",
+        type: "magiclink",
       });
 
       if (verifyError) {
@@ -67,12 +68,13 @@ export function VerifyForm() {
     setError("");
 
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { error: resendError } = await supabase.auth.signInWithOtp({
-        email,
+      const res = await fetch("/api/auth/resend-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       });
 
-      if (resendError) {
+      if (!res.ok) {
         setError("We couldn't send a new code right now. Try again shortly.");
         return;
       }
