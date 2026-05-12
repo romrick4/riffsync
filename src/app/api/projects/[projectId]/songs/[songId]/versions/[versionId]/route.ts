@@ -131,7 +131,11 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
 
   const version = await prisma.songVersion.findUnique({
     where: { id: versionId, songId },
-    select: { filePath: true, compressedFilePath: true },
+    select: {
+      filePath: true,
+      compressedFilePath: true,
+      parentVersionId: true,
+    },
   });
 
   if (!version) {
@@ -152,7 +156,13 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     }
   }
 
-  await prisma.songVersion.delete({ where: { id: versionId } });
+  await prisma.$transaction([
+    prisma.songVersion.updateMany({
+      where: { parentVersionId: versionId },
+      data: { parentVersionId: version.parentVersionId },
+    }),
+    prisma.songVersion.delete({ where: { id: versionId } }),
+  ]);
 
   return NextResponse.json({ success: true });
 }

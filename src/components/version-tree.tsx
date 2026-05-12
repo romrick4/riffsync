@@ -270,7 +270,15 @@ export function VersionTree({
                 onUpload={onUploadFromVersion ? () => onUploadFromVersion(v) : undefined}
               />
               {i < sorted.length - 1 && (
-                <div className="h-px w-8 shrink-0 bg-border" />
+                <svg
+                  viewBox="0 0 32 16"
+                  fill="none"
+                  className="w-8 shrink-0 text-muted-foreground/60"
+                  aria-hidden="true"
+                >
+                  <line x1="0" y1="8" x2="26" y2="8" stroke="currentColor" strokeWidth="2" />
+                  <path d="M22 4 L28 8 L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               )}
             </div>
           ))}
