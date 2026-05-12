@@ -80,7 +80,7 @@ export async function notify({
   // 3. Email (if SMTP is configured)
   if (isEmailConfigured()) {
     const users = await prisma.user.findMany({
-      where: { id: { in: recipientIds }, email: { not: null } },
+      where: { id: { in: recipientIds } },
       select: { email: true },
     });
 
