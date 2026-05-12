@@ -56,7 +56,7 @@ export default async function ProjectDashboard({
   if (!project) notFound();
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">{project.name}</h1>
         {project.description && (
@@ -90,8 +90,8 @@ export default async function ProjectDashboard({
         </Link>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        <section>
+      <div className="grid min-w-0 gap-5 md:grid-cols-2">
+        <section className="min-w-0">
           <h2 className="mb-2.5 text-sm font-medium text-muted-foreground">Members</h2>
           <div className="space-y-1">
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -134,7 +134,7 @@ export default async function ProjectDashboard({
           </div>
         </section>
 
-        <section>
+        <section className="min-w-0">
           <h2 className="mb-2.5 text-sm font-medium text-muted-foreground">Recent Activity</h2>
           {project.songs.length === 0 &&
           project.calendarEvents.length === 0 ? (
