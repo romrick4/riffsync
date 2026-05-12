@@ -1,3 +1,5 @@
+export const unstable_instant = { prefetch: "static" };
+
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getStorage } from "@/lib/storage";

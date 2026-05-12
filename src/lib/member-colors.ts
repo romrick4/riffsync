@@ -1,5 +1,5 @@
 const MEMBER_COLORS = [
-  { dot: "bg-violet-500", bg: "bg-violet-500/15", text: "text-violet-400", border: "border-violet-500/25", label: "Violet" },
+  { dot: "bg-red-500", bg: "bg-red-500/15", text: "text-red-400", border: "border-red-500/25", label: "Red" },
   { dot: "bg-sky-500", bg: "bg-sky-500/15", text: "text-sky-400", border: "border-sky-500/25", label: "Sky" },
   { dot: "bg-amber-500", bg: "bg-amber-500/15", text: "text-amber-400", border: "border-amber-500/25", label: "Amber" },
   { dot: "bg-rose-500", bg: "bg-rose-500/15", text: "text-rose-400", border: "border-rose-500/25", label: "Rose" },

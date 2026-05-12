@@ -1,3 +1,6 @@
+export const unstable_instant = { prefetch: "static" };
+
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
@@ -13,8 +16,19 @@ export default async function CalendarPage({
 
   const { projectId } = await params;
 
+  return (
+    <div className="mx-auto w-full max-w-4xl px-4 py-8">
+      <h1 className="mb-6 text-2xl font-bold">Calendar</h1>
+      <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-muted/50" />}>
+        <CalendarContent projectId={projectId} userId={user.id} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function CalendarContent({ projectId, userId }: { projectId: string; userId: string }) {
   const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId: user.id } },
+    where: { projectId_userId: { projectId, userId } },
   });
   if (!membership) redirect("/");
 
@@ -65,7 +79,7 @@ export default async function CalendarPage({
     const cant = event.rsvps.filter(
       (r) => r.status === "CANT_MAKE_IT",
     ).length;
-    const userRsvp = event.rsvps.find((r) => r.userId === user.id);
+    const userRsvp = event.rsvps.find((r) => r.userId === userId);
 
     return {
       id: event.id,
@@ -97,18 +111,15 @@ export default async function CalendarPage({
   }));
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold">Calendar</h1>
-      <CalendarView
-        projectId={projectId}
-        currentUserId={user.id}
-        isOwner={membership.role === "OWNER"}
-        members={members}
-        initialEvents={serializedEvents}
-        initialBusyBlocks={serializedBusy}
-        initialYear={year}
-        initialMonth={month}
-      />
-    </div>
+    <CalendarView
+      projectId={projectId}
+      currentUserId={userId}
+      isOwner={membership.role === "OWNER"}
+      members={members}
+      initialEvents={serializedEvents}
+      initialBusyBlocks={serializedBusy}
+      initialYear={year}
+      initialMonth={month}
+    />
   );
 }

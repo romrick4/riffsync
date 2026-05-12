@@ -1,3 +1,5 @@
+export const unstable_instant = { prefetch: "static" };
+
 import { redirect, notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";

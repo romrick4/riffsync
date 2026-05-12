@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="mx-auto max-w-2xl text-center">
-        <h1 className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-300 bg-clip-text text-6xl font-bold tracking-tight text-transparent sm:text-7xl">
-          RiffSync
+        <h1>
+          <Logo size="xl" className="justify-center" />
         </h1>
         <p className="mt-4 text-xl font-medium text-muted-foreground sm:text-2xl">
           Your band&apos;s creative hub

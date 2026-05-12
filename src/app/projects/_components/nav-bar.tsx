@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogOut, BellRing, BellOff } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -52,11 +53,8 @@ export function NavBar({ user }: NavBarProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link
-          href="/projects"
-          className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-300 bg-clip-text text-lg font-bold text-transparent"
-        >
-          RiffSync
+        <Link href="/projects">
+          <Logo size="sm" />
         </Link>
 
         <div className="flex items-center gap-2">

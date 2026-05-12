@@ -1,8 +1,6 @@
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { ProjectProvider } from "./_components/project-context";
 import { Separator } from "@/components/ui/separator";
 
 const tabs = [
@@ -25,31 +23,6 @@ export default async function ProjectDetailLayout({
 
   const { projectId } = await params;
 
-  const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId: user.id } },
-  });
-
-  if (!membership) notFound();
-
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
-    include: {
-      members: {
-        include: {
-          user: {
-            select: { id: true, displayName: true },
-          },
-        },
-        orderBy: { joinedAt: "asc" },
-      },
-      _count: { select: { songs: true, albums: true } },
-    },
-  });
-
-  if (!project) notFound();
-
-  const serializedProject = JSON.parse(JSON.stringify(project));
-
   return (
     <div>
       <nav className="relative -mx-4 sm:-mx-0">
@@ -67,9 +40,7 @@ export default async function ProjectDetailLayout({
         <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent sm:hidden" />
       </nav>
       <Separator className="mt-1 mb-6" />
-      <ProjectProvider project={serializedProject}>
-        {children}
-      </ProjectProvider>
+      {children}
     </div>
   );
 }

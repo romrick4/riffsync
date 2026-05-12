@@ -1,3 +1,6 @@
+export const unstable_instant = { prefetch: "static" };
+
+import { Suspense } from "react";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
@@ -18,6 +21,34 @@ export default async function ProjectDashboard({
 
   const { projectId } = await params;
 
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardContent projectId={projectId} />
+    </Suspense>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-w-0 space-y-5">
+      <div className="h-8 w-48 animate-pulse rounded bg-muted" />
+      <div className="flex items-center gap-0 divide-x divide-border rounded-lg border bg-card/50">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="flex flex-1 flex-col items-center gap-1 py-3">
+            <div className="h-3 w-12 animate-pulse rounded bg-muted" />
+            <div className="h-6 w-8 animate-pulse rounded bg-muted" />
+          </div>
+        ))}
+      </div>
+      <div className="grid gap-5 md:grid-cols-2">
+        <div className="h-48 animate-pulse rounded-lg bg-muted/50" />
+        <div className="h-48 animate-pulse rounded-lg bg-muted/50" />
+      </div>
+    </div>
+  );
+}
+
+async function DashboardContent({ projectId }: { projectId: string }) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {

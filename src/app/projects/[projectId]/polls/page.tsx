@@ -1,3 +1,6 @@
+export const unstable_instant = { prefetch: "static" };
+
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
@@ -13,8 +16,19 @@ export default async function PollsPage({
 
   const { projectId } = await params;
 
+  return (
+    <div className="mx-auto w-full max-w-2xl px-4 py-8">
+      <h1 className="mb-6 text-2xl font-bold">Polls</h1>
+      <Suspense fallback={<div className="h-64 animate-pulse rounded-lg bg-muted/50" />}>
+        <PollsContent projectId={projectId} userId={user.id} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function PollsContent({ projectId, userId }: { projectId: string; userId: string }) {
   const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId: user.id } },
+    where: { projectId_userId: { projectId, userId } },
   });
   if (!membership) redirect("/");
 
@@ -38,7 +52,7 @@ export default async function PollsPage({
     );
     const userVotedOptionId =
       poll.options.find((opt) =>
-        opt.responses.some((r) => r.userId === user.id),
+        opt.responses.some((r) => r.userId === userId),
       )?.id ?? null;
 
     return {
@@ -57,10 +71,5 @@ export default async function PollsPage({
     };
   });
 
-  return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold">Polls</h1>
-      <PollsList projectId={projectId} initialPolls={serialized} />
-    </div>
-  );
+  return <PollsList projectId={projectId} initialPolls={serialized} />;
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import {
   Card,
   CardContent,
@@ -76,8 +77,8 @@ export function ConfirmResetForm() {
     return (
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-300 bg-clip-text text-2xl font-bold text-transparent">
-            RiffSync
+          <CardTitle>
+            <Logo size="lg" className="justify-center" />
           </CardTitle>
           <CardDescription>Password updated</CardDescription>
         </CardHeader>
@@ -94,8 +95,8 @@ export function ConfirmResetForm() {
     return (
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-300 bg-clip-text text-2xl font-bold text-transparent">
-            RiffSync
+          <CardTitle>
+            <Logo size="lg" className="justify-center" />
           </CardTitle>
           <CardDescription>Verifying your reset link&hellip;</CardDescription>
         </CardHeader>
@@ -109,8 +110,8 @@ export function ConfirmResetForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <CardTitle className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-300 bg-clip-text text-2xl font-bold text-transparent">
-          RiffSync
+        <CardTitle>
+          <Logo size="lg" className="justify-center" />
         </CardTitle>
         <CardDescription>Choose a new password</CardDescription>
       </CardHeader>

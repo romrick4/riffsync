@@ -22,7 +22,7 @@ interface Notification {
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   NEW_VERSION: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-4 text-purple-400">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-4 text-red-400">
       <path d="M9 18V5l12-2v13" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="6" cy="18" r="3" />
       <circle cx="18" cy="16" r="3" />
@@ -60,7 +60,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
     </svg>
   ),
   INVITE_RECEIVED: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-4 text-indigo-400">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-4 text-rose-400">
       <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="8.5" cy="7" r="4" />
       <line x1="20" y1="8" x2="20" y2="14" strokeLinecap="round" />
