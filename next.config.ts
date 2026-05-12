@@ -6,7 +6,6 @@ const r2Domain = process.env.S3_ENDPOINT
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
   serverExternalPackages: ["pg", "@prisma/adapter-pg", "archiver"],
   async headers() {
     const storageOrigins = r2Domain ? `https://${r2Domain}` : "";

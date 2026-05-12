@@ -1,5 +1,3 @@
-export const unstable_instant = { prefetch: "static" };
-
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
