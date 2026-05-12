@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { PollsList } from "@/components/polls-list";
@@ -9,26 +8,20 @@ export default async function PollsPage({
 }: {
   params: Promise<{ projectId: string }>;
 }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
   const { projectId } = await params;
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold">Polls</h1>
       <Suspense fallback={<div className="h-64 animate-pulse rounded-lg bg-muted/50" />}>
-        <PollsContent projectId={projectId} userId={user.id} />
+        <PollsContent projectId={projectId} />
       </Suspense>
     </div>
   );
 }
 
-async function PollsContent({ projectId, userId }: { projectId: string; userId: string }) {
-  const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId } },
-  });
-  if (!membership) redirect("/");
+async function PollsContent({ projectId }: { projectId: string }) {
+  const user = (await getCurrentUser())!;
 
   const polls = await prisma.poll.findMany({
     where: { projectId },
@@ -50,7 +43,7 @@ async function PollsContent({ projectId, userId }: { projectId: string; userId: 
     );
     const userVotedOptionId =
       poll.options.find((opt) =>
-        opt.responses.some((r) => r.userId === userId),
+        opt.responses.some((r) => r.userId === user.id),
       )?.id ?? null;
 
     return {

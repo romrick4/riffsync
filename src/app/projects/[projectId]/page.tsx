@@ -1,8 +1,8 @@
 import { Suspense } from "react";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getProjectWithMembers } from "@/lib/project-data";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Music, Users, Calendar, Link as LinkIcon } from "lucide-react";
@@ -14,9 +14,6 @@ export default async function ProjectDashboard({
 }: {
   params: Promise<{ projectId: string }>;
 }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
   const { projectId } = await params;
 
   return (

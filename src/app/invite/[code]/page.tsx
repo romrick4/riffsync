@@ -11,14 +11,15 @@ export default async function InvitePage({
 }) {
   const { code } = await params;
 
-  const project = await prisma.project.findUnique({
-    where: { inviteCode: code },
-    select: { id: true, name: true, inviteCode: true },
-  });
+  const [project, user] = await Promise.all([
+    prisma.project.findUnique({
+      where: { inviteCode: code },
+      select: { id: true, name: true, inviteCode: true },
+    }),
+    getCurrentUser(),
+  ]);
 
   if (!project) notFound();
-
-  const user = await getCurrentUser();
 
   if (!user) {
     return <InviteLanding projectName={project.name} inviteCode={code} />;

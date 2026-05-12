@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -18,15 +17,7 @@ export default async function SongDetailPage({
 }: {
   params: Promise<{ projectId: string; songId: string }>;
 }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
   const { projectId, songId } = await params;
-
-  const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId: user.id } },
-  });
-  if (!membership) redirect("/");
 
   const song = await prisma.song.findUnique({
     where: { id: songId, projectId },

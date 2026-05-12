@@ -1,6 +1,7 @@
-import { redirect, notFound } from "next/navigation";
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getProjectMembership, getProjectWithMembers } from "@/lib/project-data";
 import {
   Card,
   CardContent,
@@ -19,34 +20,19 @@ export default async function ProjectSettingsPage({
 }: {
   params: Promise<{ projectId: string }>;
 }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
   const { projectId } = await params;
 
-  const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId: user.id } },
-  });
-
-  if (!membership) notFound();
-
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
-    include: {
-      members: {
-        include: {
-          user: {
-            select: { id: true, displayName: true },
-          },
-        },
-        orderBy: { joinedAt: "asc" },
-      },
-    },
-  });
+  const [user, project] = await Promise.all([
+    getCurrentUser(),
+    getProjectWithMembers(projectId),
+  ]);
 
   if (!project) notFound();
 
-  const isOwner = membership.role === "OWNER";
+  const membership = await getProjectMembership(projectId, user!.id);
+  if (!membership) notFound();
+
+  const isOwner = membership!.role === "OWNER";
   const serializedMembers = JSON.parse(JSON.stringify(project.members));
 
   return (
@@ -104,7 +90,7 @@ export default async function ProjectSettingsPage({
           <MembersList
             projectId={projectId}
             members={serializedMembers}
-            currentUserId={user.id}
+            currentUserId={user!.id}
             isOwner={isOwner}
           />
         </CardContent>

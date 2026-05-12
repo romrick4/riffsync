@@ -1,6 +1,7 @@
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
+import { getProjectMembership } from "@/lib/project-data";
 import { Separator } from "@/components/ui/separator";
 
 const tabs = [
@@ -22,6 +23,9 @@ export default async function ProjectDetailLayout({
   if (!user) redirect("/login");
 
   const { projectId } = await params;
+
+  const membership = await getProjectMembership(projectId, user.id);
+  if (!membership) notFound();
 
   return (
     <div>

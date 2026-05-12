@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { getProjectMembership } from "@/lib/project-data";
 import { CalendarView } from "@/components/calendar-view";
 
 export default async function CalendarPage({
@@ -9,26 +9,21 @@ export default async function CalendarPage({
 }: {
   params: Promise<{ projectId: string }>;
 }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
   const { projectId } = await params;
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold">Calendar</h1>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-muted/50" />}>
-        <CalendarContent projectId={projectId} userId={user.id} />
+        <CalendarContent projectId={projectId} />
       </Suspense>
     </div>
   );
 }
 
-async function CalendarContent({ projectId, userId }: { projectId: string; userId: string }) {
-  const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId } },
-  });
-  if (!membership) redirect("/");
+async function CalendarContent({ projectId }: { projectId: string }) {
+  const user = (await getCurrentUser())!;
+  const membership = await getProjectMembership(projectId, user.id);
 
   const now = new Date();
   const year = now.getFullYear();
@@ -77,7 +72,7 @@ async function CalendarContent({ projectId, userId }: { projectId: string; userI
     const cant = event.rsvps.filter(
       (r) => r.status === "CANT_MAKE_IT",
     ).length;
-    const userRsvp = event.rsvps.find((r) => r.userId === userId);
+    const userRsvp = event.rsvps.find((r) => r.userId === user.id);
 
     return {
       id: event.id,
@@ -111,8 +106,8 @@ async function CalendarContent({ projectId, userId }: { projectId: string; userI
   return (
     <CalendarView
       projectId={projectId}
-      currentUserId={userId}
-      isOwner={membership.role === "OWNER"}
+      currentUserId={user.id}
+      isOwner={membership?.role === "OWNER"}
       members={members}
       initialEvents={serializedEvents}
       initialBusyBlocks={serializedBusy}

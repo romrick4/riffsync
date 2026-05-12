@@ -2,21 +2,23 @@ import { cache } from "react";
 import { prisma } from "@/lib/db";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export async function getSession(): Promise<{ userId: string } | null> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+export const getSession = cache(
+  async (): Promise<{ userId: string } | null> => {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
 
-  const profile = await prisma.user.findUnique({
-    where: { supabaseId: user.id },
-    select: { id: true },
-  });
-  if (!profile) return null;
+    const profile = await prisma.user.findUnique({
+      where: { supabaseId: user.id },
+      select: { id: true },
+    });
+    if (!profile) return null;
 
-  return { userId: profile.id };
-}
+    return { userId: profile.id };
+  },
+);
 
 export const getCurrentUser = cache(async () => {
   const supabase = await createSupabaseServerClient();

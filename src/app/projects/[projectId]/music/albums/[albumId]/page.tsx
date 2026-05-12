@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getStorage } from "@/lib/storage";
+import { getProjectMembership } from "@/lib/project-data";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,43 +13,40 @@ export default async function AlbumDetailPage({
 }: {
   params: Promise<{ projectId: string; albumId: string }>;
 }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
   const { projectId, albumId } = await params;
 
-  const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId: user.id } },
-  });
-  if (!membership) redirect("/");
-
-  const album = await prisma.album.findUnique({
-    where: { id: albumId, projectId },
-    include: {
-      project: { select: { name: true } },
-      songs: {
-        include: {
-          versions: {
-            where: { isFinal: true },
-            select: { id: true },
-            take: 1,
+  const [user, album, unassignedSongs] = await Promise.all([
+    getCurrentUser(),
+    prisma.album.findUnique({
+      where: { id: albumId, projectId },
+      include: {
+        project: { select: { name: true } },
+        songs: {
+          include: {
+            versions: {
+              where: { isFinal: true },
+              select: { id: true },
+              take: 1,
+            },
+            _count: { select: { versions: true } },
           },
-          _count: { select: { versions: true } },
+          orderBy: { trackNumber: "asc" },
         },
-        orderBy: { trackNumber: "asc" },
       },
-    },
-  });
+    }),
+    prisma.song.findMany({
+      where: { projectId, albumId: null },
+      select: { id: true, title: true },
+      orderBy: { title: "asc" },
+    }),
+  ]);
 
   if (!album) redirect(`/projects/${projectId}/music`);
 
-  const unassignedSongs = await prisma.song.findMany({
-    where: { projectId, albumId: null },
-    select: { id: true, title: true },
-    orderBy: { title: "asc" },
-  });
-
-  const storage = getStorage();
+  const [storage, membership] = await Promise.all([
+    Promise.resolve(getStorage()),
+    getProjectMembership(projectId, user!.id),
+  ]);
   const coverArtUrl = album.coverArtPath
     ? await storage.getUrl(album.coverArtPath)
     : null;
@@ -93,7 +91,7 @@ export default async function AlbumDetailPage({
         projectId={projectId}
         projectName={album.project.name}
         unassignedSongs={unassignedSongs}
-        isOwner={membership.role === "OWNER"}
+        isOwner={membership?.role === "OWNER"}
       />
     </div>
   );

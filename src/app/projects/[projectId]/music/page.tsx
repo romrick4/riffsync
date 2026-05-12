@@ -1,9 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
 import { getStorage } from "@/lib/storage";
-import { redirect } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -22,9 +20,6 @@ export default async function MusicPage({
 }: {
   params: Promise<{ projectId: string }>;
 }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
   const { projectId } = await params;
 
   return (
@@ -51,18 +46,13 @@ export default async function MusicPage({
           </div>
         }
       >
-        <MusicContent projectId={projectId} userId={user.id} />
+        <MusicContent projectId={projectId} />
       </Suspense>
     </div>
   );
 }
 
-async function MusicContent({ projectId, userId }: { projectId: string; userId: string }) {
-  const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId, userId } },
-  });
-  if (!membership) redirect("/");
-
+async function MusicContent({ projectId }: { projectId: string }) {
   const [albums, singles] = await Promise.all([
     prisma.album.findMany({
       where: { projectId },
@@ -102,23 +92,24 @@ async function MusicContent({ projectId, userId }: { projectId: string; userId: 
 
   const storage = getStorage();
 
-  const albumsWithUrls = await Promise.all(
-    albums.map(async (album) => ({
-      ...album,
-      coverArtUrl: album.coverArtPath
-        ? await storage.getUrl(album.coverArtPath)
-        : null,
-    })),
-  );
-
-  const singlesWithUrls = await Promise.all(
-    singles.map(async (song) => ({
-      ...song,
-      coverArtUrl: song.coverArtPath
-        ? await storage.getUrl(song.coverArtPath)
-        : null,
-    })),
-  );
+  const [albumsWithUrls, singlesWithUrls] = await Promise.all([
+    Promise.all(
+      albums.map(async (album) => ({
+        ...album,
+        coverArtUrl: album.coverArtPath
+          ? await storage.getUrl(album.coverArtPath)
+          : null,
+      })),
+    ),
+    Promise.all(
+      singles.map(async (song) => ({
+        ...song,
+        coverArtUrl: song.coverArtPath
+          ? await storage.getUrl(song.coverArtPath)
+          : null,
+      })),
+    ),
+  ]);
 
   const hasContent = albums.length > 0 || singles.length > 0;
 
