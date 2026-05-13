@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Logo } from "@/components/logo";
 import {
   GitCompare,
@@ -16,7 +15,7 @@ const features = [
     icon: GitCompare,
     name: "Song versions",
     description:
-      "Upload recordings, see every draft in a timeline, compare versions side by side.",
+      "Upload recordings, see every draft in a timeline, compare side by side.",
   },
   {
     icon: AudioWaveform,
@@ -28,7 +27,7 @@ const features = [
     icon: FileText,
     name: "Lyrics editor",
     description:
-      "Write and edit lyrics together. Full history so you can restore any previous version.",
+      "Write and edit lyrics together. Restore any previous version instantly.",
   },
   {
     icon: Music4,
@@ -52,7 +51,7 @@ const features = [
 
 export default function MarketingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="dot-grid min-h-screen">
       <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
           <Logo size="sm" />
@@ -66,16 +65,23 @@ export default function MarketingPage() {
       </nav>
 
       <main>
-        <section className="px-6 pb-24 pt-28 sm:pb-32 sm:pt-40">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="bg-gradient-to-r from-red-400 via-rose-400 to-orange-300 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
+        {/* Hero */}
+        <section className="relative overflow-hidden px-6 pb-24 pt-28 sm:pb-32 sm:pt-40">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          >
+            <div className="h-[480px] w-[640px] rounded-full bg-gradient-to-tr from-red-400/20 via-rose-400/15 to-orange-300/20 blur-3xl" />
+          </div>
+
+          <div className="relative mx-auto max-w-3xl text-center">
+            <h1 className="animate-fade-in-up bg-gradient-to-r from-red-400 via-rose-400 to-orange-300 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
               One place for your band.
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Songs, lyrics, tabs, scheduling, and decisions. Stop digging
-              through group chats and shared drives.
+            <p className="animate-fade-in-up mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground [animation-delay:150ms]">
+              Songs, scheduling, and decisions — without the group-chat chaos.
             </p>
-            <div className="mt-10">
+            <div className="animate-fade-in-up mt-10 [animation-delay:300ms]">
               <a
                 href={`${appUrl}/register`}
                 className="inline-flex h-11 items-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
@@ -86,18 +92,47 @@ export default function MarketingPage() {
           </div>
         </section>
 
+        {/* Features */}
         <section className="border-t border-border/50 px-6 py-24 sm:py-32">
           <div className="mx-auto max-w-5xl">
-            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <div key={feature.name}>
-                  <feature.icon className="size-5 text-muted-foreground" />
-                  <h3 className="mt-3 text-sm font-semibold">{feature.name}</h3>
+            <p className="animate-fade-in-up mb-12 text-center text-sm font-medium uppercase tracking-widest text-muted-foreground [animation-delay:400ms]">
+              Built for how bands actually work
+            </p>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature, i) => (
+                <div
+                  key={feature.name}
+                  className="animate-fade-in-up rounded-xl border border-border/50 bg-card/50 p-6 transition-colors hover:border-primary/30"
+                  style={{ animationDelay: `${450 + i * 80}ms` }}
+                >
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-400/15 via-rose-400/10 to-orange-300/15">
+                    <feature.icon className="size-5 text-foreground/80" />
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold">
+                    {feature.name}
+                  </h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                     {feature.description}
                   </p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Closing CTA */}
+        <section className="px-6 py-24 sm:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Ready when your band is.
+            </h2>
+            <div className="mt-8">
+              <a
+                href={`${appUrl}/register`}
+                className="inline-flex h-11 items-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+              >
+                Start your band
+              </a>
             </div>
           </div>
         </section>

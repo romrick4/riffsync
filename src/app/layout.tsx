@@ -26,6 +26,20 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "RiffSync",
   description: "Your band's creative hub for songs, scheduling, and decisions.",
+  openGraph: {
+    title: "RiffSync",
+    description:
+      "Songs, scheduling, and decisions — without the group-chat chaos.",
+    siteName: "RiffSync",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RiffSync",
+    description:
+      "Songs, scheduling, and decisions — without the group-chat chaos.",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
