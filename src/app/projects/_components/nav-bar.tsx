@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, BellRing, BellOff } from "lucide-react";
+import { LogOut, BellRing, BellOff, LoaderIcon } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,10 +28,12 @@ interface NavBarProps {
 
 export function NavBar({ user }: NavBarProps) {
   const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
   const { isSubscribed, isSupported, subscribe, unsubscribe } =
     usePushSubscription();
 
   async function handleLogout() {
+    setLoggingOut(true);
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
   }
@@ -85,9 +88,13 @@ export function NavBar({ user }: NavBarProps) {
                   {isSubscribed ? "Disable push notifications" : "Enable push notifications"}
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="size-4" />
-                Log out
+              <DropdownMenuItem onClick={handleLogout} disabled={loggingOut}>
+                {loggingOut ? (
+                  <LoaderIcon className="size-4 animate-spin" />
+                ) : (
+                  <LogOut className="size-4" />
+                )}
+                {loggingOut ? "Logging out\u2026" : "Log out"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

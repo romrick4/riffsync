@@ -42,13 +42,13 @@ export function DeleteProjectButton({
       if (!res.ok) {
         const data = await res.json();
         toast.error(data.error ?? "Failed to delete project");
+        setDeleting(false);
         return;
       }
       toast.success("Project deleted");
       router.push("/projects");
     } catch {
       toast.error("Failed to delete project");
-    } finally {
       setDeleting(false);
     }
   }

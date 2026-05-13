@@ -39,6 +39,7 @@ export function LoginForm() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || "Wrong email or password. Try again.");
+        setLoading(false);
         return;
       }
 
@@ -49,7 +50,6 @@ export function LoginForm() {
       }
     } catch {
       setError("Something went wrong. Please try again.");
-    } finally {
       setLoading(false);
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/logo";
 import {
@@ -48,6 +48,7 @@ export function VerifyForm() {
 
       if (verifyError) {
         setError("That code didn't work. Check your email and try again.");
+        setLoading(false);
         return;
       }
 
@@ -58,7 +59,6 @@ export function VerifyForm() {
       }
     } catch {
       setError("Something went wrong. Please try again.");
-    } finally {
       setLoading(false);
     }
   }
@@ -88,10 +88,11 @@ export function VerifyForm() {
     }
   }
 
-  if (!email) {
-    router.push("/register");
-    return null;
-  }
+  useEffect(() => {
+    if (!email) router.push("/register");
+  }, [email, router]);
+
+  if (!email) return null;
 
   return (
     <Card className="w-full max-w-sm">

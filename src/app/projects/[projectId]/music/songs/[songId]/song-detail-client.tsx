@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { VersionTree, type VersionNode } from "@/components/version-tree";
 import { AudioPlayer } from "@/components/audio-player";
 import { AudioComments } from "@/components/audio-comments";
@@ -55,6 +56,7 @@ export function SongDetailClient({
   versions,
   existingVersions,
 }: SongDetailClientProps) {
+  const router = useRouter();
   const [selectedVersion, setSelectedVersion] = useState<VersionNode | null>(
     () => {
       const final = versions.find((v) => v.isFinal);
@@ -181,9 +183,9 @@ export function SongDetailClient({
         throw new Error("delete failed");
       }
       toast.success("Recording deleted");
-      window.location.reload();
+      router.refresh();
     },
-    [projectId, songId],
+    [projectId, songId, router],
   );
 
   const startAbComparison = useCallback(() => {

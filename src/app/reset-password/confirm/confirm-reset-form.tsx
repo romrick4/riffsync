@@ -61,14 +61,14 @@ export function ConfirmResetForm() {
         setError(
           "We couldn\u2019t update your password. The link may have expired \u2014 try requesting a new one.",
         );
+        setLoading(false);
         return;
       }
 
       setSuccess(true);
-      setTimeout(() => router.push("/projects"), 2000);
+      setTimeout(() => router.push("/projects"), 750);
     } catch {
       setError("Something went wrong. Please try again.");
-    } finally {
       setLoading(false);
     }
   }

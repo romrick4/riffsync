@@ -54,6 +54,7 @@ export function RegisterForm() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || "Something went wrong. Please try again.");
+        setLoading(false);
         return;
       }
 
@@ -62,7 +63,6 @@ export function RegisterForm() {
       router.push(`/verify?${verifyParams.toString()}`);
     } catch {
       setError("Something went wrong. Please try again.");
-    } finally {
       setLoading(false);
     }
   }
