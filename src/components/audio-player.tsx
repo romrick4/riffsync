@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipTrigger,
@@ -51,9 +52,14 @@ export function AudioPlayer({
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const pendingPlayRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
+
+    setIsLoading(false);
+    pendingPlayRef.current = false;
 
     let ws: import("wavesurfer.js").default;
     let cancelled = false;
@@ -73,14 +79,18 @@ export function AudioPlayer({
         barRadius: 2,
         height: 64,
         normalize: true,
-        url: src,
       });
 
       ws.on("ready", () => {
         if (cancelled) return;
         setDuration(ws.getDuration());
         setIsReady(true);
+        setIsLoading(false);
         ws.setVolume(volume);
+        if (pendingPlayRef.current) {
+          pendingPlayRef.current = false;
+          ws.play();
+        }
       });
 
       ws.on("timeupdate", (time: number) => setCurrentTime(time));
@@ -109,8 +119,18 @@ export function AudioPlayer({
   }, [src]);
 
   const togglePlay = useCallback(() => {
-    wsRef.current?.playPause();
-  }, []);
+    const ws = wsRef.current;
+    if (!ws) return;
+
+    if (!isReady && !isLoading) {
+      setIsLoading(true);
+      pendingPlayRef.current = true;
+      ws.load(src);
+      return;
+    }
+
+    ws.playPause();
+  }, [isReady, isLoading, src]);
 
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,8 +175,20 @@ export function AudioPlayer({
         </span>
       </div>
 
-      <div className="relative">
-        <div ref={containerRef} className="w-full" />
+      <div className="relative min-h-16">
+        <div ref={containerRef} className={cn("w-full", !isReady && "invisible")} />
+
+        {!isReady && (
+          <div className="absolute inset-0">
+            {isLoading ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            ) : (
+              <WaveformSkeleton />
+            )}
+          </div>
+        )}
 
         {isReady && comments && comments.length > 0 && duration > 0 && (
           <CommentMarkers
@@ -165,12 +197,6 @@ export function AudioPlayer({
             onSeek={seekTo}
           />
         )}
-
-        {!isReady && (
-          <div className="flex h-16 items-center justify-center">
-            <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          </div>
-        )}
       </div>
 
       <div className="flex items-center gap-3">
@@ -178,9 +204,11 @@ export function AudioPlayer({
           variant="ghost"
           size="icon-sm"
           onClick={togglePlay}
-          disabled={!isReady}
+          disabled={isLoading}
         >
-          {isPlaying ? (
+          {isLoading ? (
+            <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          ) : isPlaying ? (
             <PauseIcon className="size-4" />
           ) : (
             <PlayIcon className="size-4" />
@@ -206,6 +234,23 @@ export function AudioPlayer({
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+function WaveformSkeleton() {
+  return (
+    <div className="flex h-full items-end gap-[3px]">
+      {Array.from({ length: 70 }, (_, i) => {
+        const h = 20 + Math.abs(Math.sin(i * 0.45) * 35 + Math.cos(i * 1.3) * 20);
+        return (
+          <div
+            key={i}
+            className="min-w-[2px] flex-1 rounded-full bg-muted-foreground/15"
+            style={{ height: `${Math.min(h, 90)}%` }}
+          />
+        );
+      })}
     </div>
   );
 }

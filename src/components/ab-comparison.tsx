@@ -37,11 +37,16 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
   const [timeB, setTimeB] = useState(0);
   const [durationA, setDurationA] = useState(0);
   const [durationB, setDurationB] = useState(0);
+  const [hasStartedLoad, setHasStartedLoad] = useState(false);
+  const pendingPlayRef = useRef(false);
 
   useEffect(() => {
     let wsA: import("wavesurfer.js").default;
     let wsB: import("wavesurfer.js").default;
     let cancelled = false;
+
+    setHasStartedLoad(false);
+    pendingPlayRef.current = false;
 
     (async () => {
       const WaveSurfer = (await import("wavesurfer.js")).default;
@@ -59,7 +64,6 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
           barRadius: 2,
           height: 48,
           normalize: true,
-          url: versionA.src,
         });
         wsA.on("ready", () => {
           if (!cancelled) {
@@ -84,7 +88,6 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
           barRadius: 2,
           height: 48,
           normalize: true,
-          url: versionB.src,
         });
         wsB.on("ready", () => {
           if (!cancelled) {
@@ -108,10 +111,34 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [versionA.src, versionB.src]);
 
+  useEffect(() => {
+    if (readyA && readyB && pendingPlayRef.current) {
+      pendingPlayRef.current = false;
+      const wsA = wsARef.current;
+      const wsB = wsBRef.current;
+      if (!wsA || !wsB) return;
+
+      if (activeTrack === "A") {
+        wsA.play();
+      } else {
+        wsB.play();
+      }
+      setIsPlaying(true);
+    }
+  }, [readyA, readyB, activeTrack]);
+
   const togglePlayback = useCallback(() => {
     const wsA = wsARef.current;
     const wsB = wsBRef.current;
     if (!wsA || !wsB) return;
+
+    if (!hasStartedLoad) {
+      setHasStartedLoad(true);
+      pendingPlayRef.current = true;
+      wsA.load(versionA.src);
+      wsB.load(versionB.src);
+      return;
+    }
 
     if (isPlaying) {
       wsA.pause();
@@ -127,7 +154,7 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
       }
       setIsPlaying(true);
     }
-  }, [isPlaying, activeTrack]);
+  }, [isPlaying, activeTrack, hasStartedLoad, versionA.src, versionB.src]);
 
   const switchTrack = useCallback(() => {
     const next = activeTrack === "A" ? "B" : "A";
@@ -169,9 +196,11 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
             variant="ghost"
             size="icon-sm"
             onClick={togglePlayback}
-            disabled={!bothReady}
+            disabled={hasStartedLoad && !bothReady}
           >
-            {isPlaying ? (
+            {hasStartedLoad && !bothReady ? (
+              <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : isPlaying ? (
               <PauseIcon className="size-4" />
             ) : (
               <PlayIcon className="size-4" />
@@ -210,6 +239,7 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
           containerRef={containerARef}
           isActive={activeTrack === "A"}
           isReady={readyA}
+          isLoading={hasStartedLoad && !readyA}
           currentTime={timeA}
           duration={durationA}
           accentColor="oklch(0.637 0.207 277)"
@@ -221,11 +251,29 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
           containerRef={containerBRef}
           isActive={activeTrack === "B"}
           isReady={readyB}
+          isLoading={hasStartedLoad && !readyB}
           currentTime={timeB}
           duration={durationB}
           accentColor="oklch(0.556 0.15 300)"
         />
       </div>
+    </div>
+  );
+}
+
+function WaveformSkeleton() {
+  return (
+    <div className="flex h-full items-end gap-[3px]">
+      {Array.from({ length: 70 }, (_, i) => {
+        const h = 20 + Math.abs(Math.sin(i * 0.45) * 35 + Math.cos(i * 1.3) * 20);
+        return (
+          <div
+            key={i}
+            className="min-w-[2px] flex-1 rounded-full bg-muted-foreground/15"
+            style={{ height: `${Math.min(h, 90)}%` }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -237,6 +285,7 @@ function TrackPanel({
   containerRef,
   isActive,
   isReady,
+  isLoading,
   currentTime,
   duration,
 }: {
@@ -246,6 +295,7 @@ function TrackPanel({
   containerRef: React.RefObject<HTMLDivElement | null>;
   isActive: boolean;
   isReady: boolean;
+  isLoading: boolean;
   currentTime: number;
   duration: number;
   accentColor: string;
@@ -276,12 +326,20 @@ function TrackPanel({
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
       </div>
-      <div ref={containerRef} className="w-full" />
-      {!isReady && (
-        <div className="flex h-12 items-center justify-center">
-          <div className="size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        </div>
-      )}
+      <div className="relative min-h-12">
+        <div ref={containerRef} className={cn("w-full", !isReady && "invisible")} />
+        {!isReady && (
+          <div className="absolute inset-0">
+            {isLoading ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            ) : (
+              <WaveformSkeleton />
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
