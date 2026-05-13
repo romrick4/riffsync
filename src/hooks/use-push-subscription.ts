@@ -30,8 +30,7 @@ export function usePushSubscription() {
       return;
     }
 
-    navigator.serviceWorker
-      .register("/sw.js")
+    navigator.serviceWorker.ready
       .then((reg) => reg.pushManager.getSubscription())
       .then((sub) => {
         setIsSubscribed(!!sub);

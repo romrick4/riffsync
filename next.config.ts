@@ -36,6 +36,7 @@ const nextConfig: NextConfig = {
               `media-src 'self' blob: ${storageOrigins}`.trim(),
               "font-src 'self'",
               `connect-src 'self' ${storageOrigins} ${supabaseOrigin}`.trim(),
+              "worker-src 'self'",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",

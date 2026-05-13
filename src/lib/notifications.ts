@@ -77,8 +77,11 @@ export async function notify({
     await Promise.allSettled(pushPromises);
   }
 
-  // 3. Email (if SMTP is configured)
-  if (isEmailConfigured()) {
+  // 3. Email (only when explicitly enabled and SMTP is configured)
+  if (
+    process.env.ENABLE_NOTIFICATION_EMAILS === "true" &&
+    isEmailConfigured()
+  ) {
     const users = await prisma.user.findMany({
       where: { id: { in: recipientIds } },
       select: { email: true },

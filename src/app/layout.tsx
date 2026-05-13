@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PWAProvider } from "@/components/pwa-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,9 +15,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#1a1a1a",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   title: "RiffSync",
-  description: "Band collaboration platform",
+  description: "Your band's creative hub for songs, scheduling, and decisions.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "RiffSync",
+  },
+  applicationName: "RiffSync",
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
@@ -31,10 +49,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
       <body suppressHydrationWarning className="min-h-screen bg-background text-foreground">
-        <TooltipProvider>
-          {children}
-        </TooltipProvider>
-        <Toaster />
+        <PWAProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+          <Toaster />
+        </PWAProvider>
       </body>
     </html>
   );
