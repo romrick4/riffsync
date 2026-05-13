@@ -142,10 +142,13 @@ export function CalendarView({
   }, [projectId, year, month]);
 
   useEffect(() => {
-    if (year !== initialYear || month !== initialMonth) {
+    if (year === initialYear && month === initialMonth) {
+      setEvents(initialEvents);
+      setBusyBlocks(initialBusyBlocks);
+    } else {
       fetchData();
     }
-  }, [year, month, initialYear, initialMonth, fetchData]);
+  }, [year, month, initialYear, initialMonth, initialEvents, initialBusyBlocks, fetchData]);
 
   function prevMonth() {
     setSelectedDay(null);
