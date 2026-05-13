@@ -38,15 +38,25 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
   const [durationA, setDurationA] = useState(0);
   const [durationB, setDurationB] = useState(0);
   const [hasStartedLoad, setHasStartedLoad] = useState(false);
-  const pendingPlayRef = useRef(false);
+  const [pendingAutoPlay, setPendingAutoPlay] = useState(false);
+  const [prevSrcA, setPrevSrcA] = useState(versionA.src);
+  const [prevSrcB, setPrevSrcB] = useState(versionB.src);
+
+  if (versionA.src !== prevSrcA || versionB.src !== prevSrcB) {
+    setPrevSrcA(versionA.src);
+    setPrevSrcB(versionB.src);
+    setHasStartedLoad(false);
+    setPendingAutoPlay(false);
+    setReadyA(false);
+    setReadyB(false);
+  }
 
   useEffect(() => {
+    if (!hasStartedLoad) return;
+
     let wsA: import("wavesurfer.js").default;
     let wsB: import("wavesurfer.js").default;
     let cancelled = false;
-
-    setHasStartedLoad(false);
-    pendingPlayRef.current = false;
 
     (async () => {
       const WaveSurfer = (await import("wavesurfer.js")).default;
@@ -64,6 +74,7 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
           barRadius: 2,
           height: 48,
           normalize: true,
+          url: versionA.src,
         });
         wsA.on("ready", () => {
           if (!cancelled) {
@@ -88,6 +99,7 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
           barRadius: 2,
           height: 48,
           normalize: true,
+          url: versionB.src,
         });
         wsB.on("ready", () => {
           if (!cancelled) {
@@ -109,11 +121,11 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
       wsBRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [versionA.src, versionB.src]);
+  }, [versionA.src, versionB.src, hasStartedLoad]);
 
   useEffect(() => {
-    if (readyA && readyB && pendingPlayRef.current) {
-      pendingPlayRef.current = false;
+    if (readyA && readyB && pendingAutoPlay) {
+      setPendingAutoPlay(false);
       const wsA = wsARef.current;
       const wsB = wsBRef.current;
       if (!wsA || !wsB) return;
@@ -125,20 +137,18 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
       }
       setIsPlaying(true);
     }
-  }, [readyA, readyB, activeTrack]);
+  }, [readyA, readyB, activeTrack, pendingAutoPlay]);
 
   const togglePlayback = useCallback(() => {
+    if (!hasStartedLoad) {
+      setHasStartedLoad(true);
+      setPendingAutoPlay(true);
+      return;
+    }
+
     const wsA = wsARef.current;
     const wsB = wsBRef.current;
     if (!wsA || !wsB) return;
-
-    if (!hasStartedLoad) {
-      setHasStartedLoad(true);
-      pendingPlayRef.current = true;
-      wsA.load(versionA.src);
-      wsB.load(versionB.src);
-      return;
-    }
 
     if (isPlaying) {
       wsA.pause();
@@ -154,7 +164,7 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
       }
       setIsPlaying(true);
     }
-  }, [isPlaying, activeTrack, hasStartedLoad, versionA.src, versionB.src]);
+  }, [isPlaying, activeTrack, hasStartedLoad]);
 
   const switchTrack = useCallback(() => {
     const next = activeTrack === "A" ? "B" : "A";
@@ -327,7 +337,9 @@ function TrackPanel({
         </span>
       </div>
       <div className="relative min-h-12">
-        <div ref={containerRef} className={cn("w-full", !isReady && "invisible")} />
+        {(isLoading || isReady) && (
+          <div ref={containerRef} className={cn("w-full", !isReady && "invisible")} />
+        )}
         {!isReady && (
           <div className="absolute inset-0">
             {isLoading ? (

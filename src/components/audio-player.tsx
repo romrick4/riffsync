@@ -53,13 +53,18 @@ export function AudioPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const pendingPlayRef = useRef(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [prevSrc, setPrevSrc] = useState(src);
+
+  if (src !== prevSrc) {
+    setPrevSrc(src);
+    setShouldLoad(false);
+    setIsReady(false);
+    setIsLoading(false);
+  }
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    setIsLoading(false);
-    pendingPlayRef.current = false;
+    if (!shouldLoad || !containerRef.current) return;
 
     let ws: import("wavesurfer.js").default;
     let cancelled = false;
@@ -79,6 +84,7 @@ export function AudioPlayer({
         barRadius: 2,
         height: 64,
         normalize: true,
+        url: src,
       });
 
       ws.on("ready", () => {
@@ -87,10 +93,7 @@ export function AudioPlayer({
         setIsReady(true);
         setIsLoading(false);
         ws.setVolume(volume);
-        if (pendingPlayRef.current) {
-          pendingPlayRef.current = false;
-          ws.play();
-        }
+        ws.play();
       });
 
       ws.on("timeupdate", (time: number) => setCurrentTime(time));
@@ -114,23 +117,20 @@ export function AudioPlayer({
       wsRef.current = null;
       setIsReady(false);
       setIsPlaying(false);
+      setIsLoading(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src]);
+  }, [src, shouldLoad]);
 
   const togglePlay = useCallback(() => {
-    const ws = wsRef.current;
-    if (!ws) return;
-
-    if (!isReady && !isLoading) {
+    if (!shouldLoad) {
+      setShouldLoad(true);
       setIsLoading(true);
-      pendingPlayRef.current = true;
-      ws.load(src);
       return;
     }
 
-    ws.playPause();
-  }, [isReady, isLoading, src]);
+    wsRef.current?.playPause();
+  }, [shouldLoad]);
 
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,7 +176,9 @@ export function AudioPlayer({
       </div>
 
       <div className="relative min-h-16">
-        <div ref={containerRef} className={cn("w-full", !isReady && "invisible")} />
+        {shouldLoad && (
+          <div ref={containerRef} className={cn("w-full", !isReady && "invisible")} />
+        )}
 
         {!isReady && (
           <div className="absolute inset-0">
