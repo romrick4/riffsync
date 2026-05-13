@@ -24,8 +24,11 @@ interface Comment {
 
 export interface AudioPlayerProps {
   src: string;
+  resolveUrl?: () => Promise<string | null>;
   title: string;
   format: string;
+  peaks?: number[] | null;
+  durationSec?: number | null;
   comments?: Comment[];
   onTimestampClick?: (timestampSec: number) => void;
 }
@@ -38,8 +41,11 @@ function formatTime(sec: number) {
 
 export function AudioPlayer({
   src,
+  resolveUrl,
   title,
   format,
+  peaks,
+  durationSec,
   comments,
   onTimestampClick,
 }: AudioPlayerProps) {
@@ -47,13 +53,15 @@ export function AudioPlayer({
   const wsRef = useRef<import("wavesurfer.js").default | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(durationSec ?? 0);
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [prevSrc, setPrevSrc] = useState(src);
+
+  const hasPeaks = peaks && peaks.length > 0 && durationSec && durationSec > 0;
 
   if (src !== prevSrc) {
     setPrevSrc(src);
@@ -62,8 +70,9 @@ export function AudioPlayer({
     setIsLoading(false);
   }
 
+  // Pre-render waveform from peaks when available (before user clicks play)
   useEffect(() => {
-    if (!shouldLoad || !containerRef.current) return;
+    if (!hasPeaks || !containerRef.current || shouldLoad) return;
 
     let ws: import("wavesurfer.js").default;
     let cancelled = false;
@@ -83,7 +92,51 @@ export function AudioPlayer({
         barRadius: 2,
         height: 64,
         normalize: true,
-        url: src,
+        peaks: [peaks],
+        duration: durationSec,
+        interact: false,
+      });
+
+      wsRef.current = ws;
+    })();
+
+    return () => {
+      cancelled = true;
+      ws?.destroy();
+      wsRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src, hasPeaks]);
+
+  useEffect(() => {
+    if (!shouldLoad || !containerRef.current) return;
+
+    let ws: import("wavesurfer.js").default;
+    let cancelled = false;
+
+    (async () => {
+      const audioUrl = resolveUrl ? (await resolveUrl() ?? src) : src;
+      if (cancelled) return;
+
+      const WaveSurfer = (await import("wavesurfer.js")).default;
+      if (cancelled || !containerRef.current) return;
+
+      // Destroy the preview-only instance if it exists
+      wsRef.current?.destroy();
+
+      ws = WaveSurfer.create({
+        container: containerRef.current,
+        waveColor: "oklch(0.4 0 0)",
+        progressColor: "oklch(0.585 0.233 277)",
+        cursorColor: "oklch(0.585 0.233 277)",
+        cursorWidth: 2,
+        barWidth: 2,
+        barGap: 1,
+        barRadius: 2,
+        height: 64,
+        normalize: true,
+        url: audioUrl,
+        ...(hasPeaks ? { peaks: [peaks], duration: durationSec } : {}),
       });
 
       ws.on("ready", () => {
@@ -177,7 +230,7 @@ export function AudioPlayer({
       <div className="relative min-h-16">
         <div ref={containerRef} className="w-full" />
 
-        {!isReady && (
+        {!isReady && !hasPeaks && (
           <div className="absolute inset-0 bg-card">
             {isLoading ? (
               <div className="flex h-full items-center justify-center">

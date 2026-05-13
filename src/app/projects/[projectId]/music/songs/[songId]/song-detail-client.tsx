@@ -11,6 +11,7 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { getAudioUrl } from "@/app/actions/audio";
 import {
   DownloadIcon,
   LinkIcon,
@@ -370,12 +371,18 @@ export function SongDetailClient({
               title: abVersionA.title,
               src: `/api/projects/${projectId}/songs/${songId}/versions/${abVersionA.id}/file`,
               format: abVersionA.fileFormat,
+              peaks: abVersionA.waveformPeaks,
+              durationSec: abVersionA.durationSec,
+              resolveUrl: () => getAudioUrl(projectId, songId, abVersionA.id),
             }}
             versionB={{
               id: abVersionB.id,
               title: abVersionB.title,
               src: `/api/projects/${projectId}/songs/${songId}/versions/${abVersionB.id}/file`,
               format: abVersionB.fileFormat,
+              peaks: abVersionB.waveformPeaks,
+              durationSec: abVersionB.durationSec,
+              resolveUrl: () => getAudioUrl(projectId, songId, abVersionB.id),
             }}
           />
         </div>
@@ -462,8 +469,11 @@ export function SongDetailClient({
             {/* Audio player */}
             <AudioPlayer
               src={`/api/projects/${projectId}/songs/${songId}/versions/${selectedVersion.id}/file`}
+              resolveUrl={() => getAudioUrl(projectId, songId, selectedVersion.id)}
               title={selectedVersion.title}
               format={selectedVersion.fileFormat}
+              peaks={selectedVersion.waveformPeaks}
+              durationSec={selectedVersion.durationSec}
               comments={commentMarkers}
               onTimestampClick={handleTimestampClick}
             />

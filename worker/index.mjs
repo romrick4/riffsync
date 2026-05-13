@@ -100,6 +100,62 @@ function runFFmpeg(inputPath, outputPath) {
   });
 }
 
+const PEAK_COUNT = 1000;
+
+function extractPeaksAndDuration(filePath) {
+  return new Promise((resolve, reject) => {
+    execFile(
+      "ffprobe",
+      [
+        "-v", "error",
+        "-show_entries", "format=duration",
+        "-of", "json",
+        filePath,
+      ],
+      { timeout: 30_000 },
+      (err, stdout) => {
+        if (err) return reject(new Error(`ffprobe failed: ${err.message}`));
+        const durationSec = parseFloat(JSON.parse(stdout).format.duration);
+        if (!durationSec || durationSec <= 0) {
+          return reject(new Error("Could not determine audio duration"));
+        }
+
+        execFile(
+          "ffmpeg",
+          [
+            "-i", filePath,
+            "-ac", "1",
+            "-filter:a", `aresample=8000,asetnsamples=${Math.ceil(8000 * durationSec / PEAK_COUNT)}`,
+            "-f", "f32le",
+            "-acodec", "pcm_f32le",
+            "-y", "pipe:1",
+          ],
+          { timeout: 60_000, maxBuffer: 50 * 1024 * 1024, encoding: "buffer" },
+          (err2, rawBuf) => {
+            if (err2) return reject(new Error(`Peak extraction failed: ${err2.message}`));
+
+            const floats = new Float32Array(rawBuf.buffer, rawBuf.byteOffset, rawBuf.byteLength / 4);
+            const samplesPerPeak = Math.max(1, Math.floor(floats.length / PEAK_COUNT));
+            const peaks = [];
+
+            for (let i = 0; i < PEAK_COUNT && i * samplesPerPeak < floats.length; i++) {
+              let max = 0;
+              const end = Math.min((i + 1) * samplesPerPeak, floats.length);
+              for (let j = i * samplesPerPeak; j < end; j++) {
+                const abs = Math.abs(floats[j]);
+                if (abs > max) max = abs;
+              }
+              peaks.push(Math.round(max * 10000) / 10000);
+            }
+
+            resolve({ peaks, durationSec });
+          },
+        );
+      },
+    );
+  });
+}
+
 async function claimJob() {
   const result = await pool.query(
     `UPDATE "TranscodeJob"
@@ -163,11 +219,23 @@ async function processJob(job) {
     console.log(`[transcode] Uploading compressed file to ${compressedKey}`);
     await uploadToR2(compressedKey, compressedData, "audio/mp4");
 
+    console.log(`[transcode] Extracting waveform peaks`);
+    let peaks = null;
+    let durationSec = null;
+    try {
+      const result = await extractPeaksAndDuration(outputPath);
+      peaks = result.peaks;
+      durationSec = result.durationSec;
+    } catch (peakErr) {
+      console.warn(`[transcode] Peak extraction failed (non-fatal): ${peakErr.message}`);
+    }
+
     await pool.query(
       `UPDATE "SongVersion"
-       SET "compressedFilePath" = $1, "uploadStatus" = 'READY'
-       WHERE id = $2`,
-      [compressedKey, versionId],
+       SET "compressedFilePath" = $1, "uploadStatus" = 'READY',
+           "waveformPeaks" = $2, "durationSec" = $3
+       WHERE id = $4`,
+      [compressedKey, peaks ? JSON.stringify(peaks) : null, durationSec, versionId],
     );
 
     await pool.query(

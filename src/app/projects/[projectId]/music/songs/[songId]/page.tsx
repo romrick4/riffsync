@@ -84,6 +84,8 @@ export default async function SongDetailPage({
     parentVersionId: v.parentVersionId,
     mergeParentIds: v.mergeParents.map((mp: { parentVersionId: string }) => mp.parentVersionId),
     audioUrl: `/api/projects/${projectId}/songs/${songId}/versions/${v.id}/file`,
+    waveformPeaks: v.waveformPeaks as number[] | null,
+    durationSec: v.durationSec,
   }));
 
   const versionListForDialog = song.versions.map((v: typeof song.versions[number]) => ({

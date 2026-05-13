@@ -179,6 +179,8 @@ model SongVersion {
   uploadStatus       UploadStatus @default(AWAITING_UPLOAD)
   isFinal            Boolean      @default(false)
   versionNumber      Int
+  waveformPeaks      Json?
+  durationSec        Float?
   createdAt          DateTime     @default(now())
 
   song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)

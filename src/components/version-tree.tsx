@@ -18,6 +18,8 @@ export interface VersionNode {
   parentVersionId: string | null;
   mergeParentIds: string[];
   audioUrl: string;
+  waveformPeaks?: number[] | null;
+  durationSec?: number | null;
 }
 
 interface VersionTreeProps {

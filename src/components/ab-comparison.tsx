@@ -12,9 +12,19 @@ import {
   ToggleRightIcon,
 } from "lucide-react";
 
+export interface ABVersionData {
+  id: string;
+  title: string;
+  src: string;
+  format: string;
+  peaks?: number[] | null;
+  durationSec?: number | null;
+  resolveUrl?: () => Promise<string | null>;
+}
+
 export interface ABComparisonProps {
-  versionA: { id: string; title: string; src: string; format: string };
-  versionB: { id: string; title: string; src: string; format: string };
+  versionA: ABVersionData;
+  versionB: ABVersionData;
 }
 
 function formatTime(sec: number) {
@@ -59,8 +69,17 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
     let cancelled = false;
 
     (async () => {
+      const [urlA, urlB] = await Promise.all([
+        versionA.resolveUrl ? versionA.resolveUrl().then((u) => u ?? versionA.src) : versionA.src,
+        versionB.resolveUrl ? versionB.resolveUrl().then((u) => u ?? versionB.src) : versionB.src,
+      ]);
+      if (cancelled) return;
+
       const WaveSurfer = (await import("wavesurfer.js")).default;
       if (cancelled) return;
+
+      const hasPeaksA = versionA.peaks && versionA.peaks.length > 0 && versionA.durationSec && versionA.durationSec > 0;
+      const hasPeaksB = versionB.peaks && versionB.peaks.length > 0 && versionB.durationSec && versionB.durationSec > 0;
 
       if (containerARef.current) {
         wsA = WaveSurfer.create({
@@ -74,7 +93,8 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
           barRadius: 2,
           height: 48,
           normalize: true,
-          url: versionA.src,
+          url: urlA,
+          ...(hasPeaksA ? { peaks: [versionA.peaks!], duration: versionA.durationSec! } : {}),
         });
         wsA.on("ready", () => {
           if (!cancelled) {
@@ -99,7 +119,8 @@ export function ABComparison({ versionA, versionB }: ABComparisonProps) {
           barRadius: 2,
           height: 48,
           normalize: true,
-          url: versionB.src,
+          url: urlB,
+          ...(hasPeaksB ? { peaks: [versionB.peaks!], duration: versionB.durationSec! } : {}),
         });
         wsB.on("ready", () => {
           if (!cancelled) {
