@@ -10,7 +10,8 @@
     "setup": "node scripts/setup.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
@@ -60,10 +61,12 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sharp": "^0.31.1",
     "@types/web-push": "^3.6.4",
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
