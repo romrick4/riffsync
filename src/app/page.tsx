@@ -52,8 +52,8 @@ const features = [
 export default function MarketingPage() {
   return (
     <div className="dot-grid min-h-screen">
-      <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
+      <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 pt-[env(safe-area-inset-top)] backdrop-blur-lg">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-[max(1.5rem,env(safe-area-inset-right))]">
           <Logo size="sm" />
           <a
             href={appUrl}

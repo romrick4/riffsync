@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, Share, X } from "lucide-react";
+import { BellRing, Share, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePWA } from "@/components/pwa-provider";
 
@@ -42,22 +42,22 @@ export function PWAInstallBanner() {
   }
 
   return (
-    <div className="border-b border-border bg-card px-4 py-3">
+    <div className="border-b border-border bg-card px-[max(1rem,env(safe-area-inset-right))] py-3">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          {isIOS() ? (
+          {showIOSGuide ? (
             <Share className="size-5 shrink-0 text-primary" />
           ) : (
-            <Download className="size-5 shrink-0 text-primary" />
+            <BellRing className="size-5 shrink-0 text-primary" />
           )}
           {showIOSGuide ? (
             <p className="text-sm">
-              Tap the <strong>Share</strong> button in Safari, then tap{" "}
+              Tap <strong>Share</strong> in Safari, then{" "}
               <strong>&ldquo;Add to Home Screen&rdquo;</strong>.
             </p>
           ) : (
             <p className="text-sm">
-              Add RiffSync to your home screen for the best experience.
+              Install RiffSync to get notified when someone uploads a recording, leaves a comment, or books a show.
             </p>
           )}
         </div>

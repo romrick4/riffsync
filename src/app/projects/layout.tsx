@@ -15,7 +15,7 @@ export default async function ProjectsLayout({
     <div className="flex min-h-screen flex-col">
       <NavBar user={user} />
       <PWAInstallBanner />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-[max(1rem,env(safe-area-inset-right))] py-6 sm:px-[max(1.5rem,env(safe-area-inset-right))]">
         {children}
       </main>
     </div>
