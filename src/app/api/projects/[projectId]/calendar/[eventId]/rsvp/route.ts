@@ -36,12 +36,12 @@ export async function POST(
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Something went wrong. Try again." }, { status: 400 });
   }
 
   if (!body.status || !VALID_STATUSES.includes(body.status)) {
     return NextResponse.json(
-      { error: "status must be GOING, MAYBE, or CANT_MAKE_IT" },
+      { error: "Pick a valid response: Going, Maybe, or Can't." },
       { status: 400 },
     );
   }

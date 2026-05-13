@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import {
   CalendarIcon,
   ClockIcon,
@@ -12,6 +14,7 @@ import {
   UsersIcon,
   PencilIcon,
   TrashIcon,
+  StarIcon,
 } from "lucide-react";
 import type { CalendarEvent } from "@/components/calendar-view";
 
@@ -55,25 +58,38 @@ export function EventCard({
   projectId,
   currentUserId,
   isOwner,
+  highlight,
   onRsvpChange,
   onEdit,
-  onDelete,
+  onDataChange,
 }: {
   event: CalendarEvent;
   projectId: string;
   currentUserId: string;
   isOwner: boolean;
+  highlight?: boolean;
   onRsvpChange: () => void;
   onEdit: () => void;
-  onDelete: () => void;
+  onDataChange: () => void;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const canDelete = isOwner || event.createdBy.id === currentUserId;
+  const isShow = event.eventType === "SHOW";
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [highlighted, setHighlighted] = useState(highlight);
+
+  useEffect(() => {
+    if (highlight && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      const timeout = setTimeout(() => setHighlighted(false), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [highlight]);
 
   async function handleRsvp(status: string) {
     setSubmitting(true);
     try {
-      await fetch(
+      const res = await fetch(
         `/api/projects/${projectId}/calendar/${event.id}/rsvp`,
         {
           method: "POST",
@@ -81,19 +97,48 @@ export function EventCard({
           body: JSON.stringify({ status }),
         },
       );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Something went wrong. Try again.");
+        return;
+      }
       onRsvpChange();
     } finally {
       setSubmitting(false);
     }
   }
 
+  async function handleDelete() {
+    const res = await fetch(
+      `/api/projects/${projectId}/calendar/${event.id}`,
+      { method: "DELETE" },
+    );
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error || "Something went wrong. Try again.");
+      throw new Error("delete failed");
+    }
+    toast.success("Event deleted");
+    onDataChange();
+  }
+
   return (
-    <Card>
+    <Card
+      ref={cardRef}
+      className={cn(
+        "transition-all duration-500",
+        isShow && "border-green-500/30 bg-green-500/[0.03]",
+        highlighted && "ring-2 ring-primary/60 shadow-lg shadow-primary/10",
+      )}
+    >
       <CardContent className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 space-y-1">
             <div className="flex items-center gap-2">
-              <h4 className="truncate font-medium">{event.title}</h4>
+              {isShow && <StarIcon className="size-4 shrink-0 fill-green-400 text-green-400" />}
+              <h4 className={cn("truncate font-medium", isShow && "text-green-300")}>
+                {event.title}
+              </h4>
               <Badge
                 className={cn(
                   "shrink-0 border",
@@ -114,9 +159,17 @@ export function EventCard({
               <PencilIcon className="size-3.5" />
             </Button>
             {canDelete && (
-              <Button variant="ghost" size="icon-sm" onClick={onDelete}>
-                <TrashIcon className="size-3.5" />
-              </Button>
+              <DeleteConfirmDialog
+                title="Delete this event?"
+                description="This event and all RSVPs will be permanently removed. This can't be undone."
+                confirmLabel="Delete Event"
+                trigger={
+                  <Button variant="ghost" size="icon-sm">
+                    <TrashIcon className="size-3.5" />
+                  </Button>
+                }
+                onConfirm={handleDelete}
+              />
             )}
           </div>
         </div>

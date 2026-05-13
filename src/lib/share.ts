@@ -30,3 +30,7 @@ export function getProjectUrl(projectId: string): string {
 export function getEventUrl(projectId: string, eventId: string): string {
   return `/projects/${projectId}/calendar?event=${eventId}`;
 }
+
+export function getPollUrl(projectId: string, pollId: string): string {
+  return `/projects/${projectId}/polls?poll=${pollId}`;
+}

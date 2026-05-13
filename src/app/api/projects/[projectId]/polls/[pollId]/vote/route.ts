@@ -28,19 +28,19 @@ export async function POST(
     return NextResponse.json({ error: "Poll not found" }, { status: 404 });
   }
   if (!poll.isActive) {
-    return NextResponse.json({ error: "Poll is closed" }, { status: 400 });
+    return NextResponse.json({ error: "This poll is closed. Votes are no longer accepted." }, { status: 400 });
   }
 
   let body: { optionId?: string };
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Something went wrong. Try again." }, { status: 400 });
   }
 
   if (!body.optionId) {
     return NextResponse.json(
-      { error: "optionId is required" },
+      { error: "Pick an option to vote." },
       { status: 400 },
     );
   }
@@ -48,7 +48,7 @@ export async function POST(
   const validOption = poll.options.some((o) => o.id === body.optionId);
   if (!validOption) {
     return NextResponse.json(
-      { error: "Invalid option for this poll" },
+      { error: "That option doesn't exist on this poll." },
       { status: 400 },
     );
   }

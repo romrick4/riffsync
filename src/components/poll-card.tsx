@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { MoreHorizontalIcon, LockIcon, UnlockIcon, TrashIcon } from "lucide-react";
 
 interface PollOption {
   id: string;
@@ -16,6 +26,7 @@ export interface PollData {
   question: string;
   isActive: boolean;
   createdBy: { id: string; displayName: string };
+  createdById: string;
   createdAt: string;
   totalVotes: number;
   userVotedOptionId: string | null;
@@ -25,15 +36,38 @@ export interface PollData {
 export function PollCard({
   poll: initialPoll,
   projectId,
+  currentUserId,
+  isOwner,
+  highlight,
+  onPollChanged,
 }: {
   poll: PollData;
   projectId: string;
+  currentUserId: string;
+  isOwner: boolean;
+  highlight?: boolean;
+  onPollChanged: () => void;
 }) {
   const [poll, setPoll] = useState(initialPoll);
   const [submitting, setSubmitting] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [highlighted, setHighlighted] = useState(highlight);
+
+  useEffect(() => {
+    setPoll(initialPoll);
+  }, [initialPoll]);
+
+  useEffect(() => {
+    if (highlight && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      const timeout = setTimeout(() => setHighlighted(false), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [highlight]);
 
   const hasVoted = poll.userVotedOptionId !== null;
   const showResults = hasVoted || !poll.isActive;
+  const canManage = isOwner || poll.createdById === currentUserId;
 
   async function handleVote(optionId: string) {
     if (!poll.isActive || submitting) return;
@@ -49,29 +83,61 @@ export function PollCard({
         },
       );
 
-      if (res.ok) {
-        const oldVotedOption = poll.userVotedOptionId;
-        const newTotal =
-          oldVotedOption === null ? poll.totalVotes + 1 : poll.totalVotes;
-
-        setPoll({
-          ...poll,
-          userVotedOptionId: optionId,
-          totalVotes: newTotal,
-          options: poll.options.map((opt) => ({
-            ...opt,
-            voteCount:
-              opt.id === optionId
-                ? opt.voteCount + 1
-                : opt.id === oldVotedOption
-                  ? opt.voteCount - 1
-                  : opt.voteCount,
-          })),
-        });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Something went wrong. Try again.");
+        return;
       }
+
+      const oldVotedOption = poll.userVotedOptionId;
+      const newTotal =
+        oldVotedOption === null ? poll.totalVotes + 1 : poll.totalVotes;
+
+      setPoll({
+        ...poll,
+        userVotedOptionId: optionId,
+        totalVotes: newTotal,
+        options: poll.options.map((opt) => ({
+          ...opt,
+          voteCount:
+            opt.id === optionId
+              ? opt.voteCount + 1
+              : opt.id === oldVotedOption
+                ? opt.voteCount - 1
+                : opt.voteCount,
+        })),
+      });
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleToggleActive() {
+    const res = await fetch(
+      `/api/projects/${projectId}/polls/${poll.id}`,
+      { method: "PATCH" },
+    );
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error || "Something went wrong. Try again.");
+      return;
+    }
+    toast.success(poll.isActive ? "Poll closed" : "Poll reopened");
+    onPollChanged();
+  }
+
+  async function handleDelete() {
+    const res = await fetch(
+      `/api/projects/${projectId}/polls/${poll.id}`,
+      { method: "DELETE" },
+    );
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error || "Something went wrong. Try again.");
+      throw new Error("delete failed");
+    }
+    toast.success("Poll deleted");
+    onPollChanged();
   }
 
   const createdDate = new Intl.DateTimeFormat("en-US", {
@@ -80,7 +146,13 @@ export function PollCard({
   }).format(new Date(poll.createdAt));
 
   return (
-    <Card>
+    <Card
+      ref={cardRef}
+      className={cn(
+        "transition-all duration-500",
+        highlighted && "ring-2 ring-primary/60 shadow-lg shadow-primary/10",
+      )}
+    >
       <CardContent className="space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -90,11 +162,54 @@ export function PollCard({
               {poll.totalVotes} {poll.totalVotes === 1 ? "vote" : "votes"}
             </p>
           </div>
-          {!poll.isActive && (
-            <Badge variant="secondary" className="shrink-0">
-              Closed
-            </Badge>
-          )}
+          <div className="flex shrink-0 items-center gap-1">
+            {!poll.isActive && (
+              <Badge variant="secondary" className="shrink-0">
+                Closed
+              </Badge>
+            )}
+            {canManage && (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button variant="ghost" size="icon-sm" />
+                  }
+                >
+                  <MoreHorizontalIcon className="size-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleToggleActive}>
+                    {poll.isActive ? (
+                      <>
+                        <LockIcon className="size-4" />
+                        Close poll
+                      </>
+                    ) : (
+                      <>
+                        <UnlockIcon className="size-4" />
+                        Reopen poll
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                  <DeleteConfirmDialog
+                    title="Delete this poll?"
+                    description="All votes will be permanently removed. This can't be undone."
+                    confirmLabel="Delete Poll"
+                    trigger={
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        <TrashIcon className="size-4" />
+                        Delete poll
+                      </DropdownMenuItem>
+                    }
+                    onConfirm={handleDelete}
+                  />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
 
         <div className="space-y-2">

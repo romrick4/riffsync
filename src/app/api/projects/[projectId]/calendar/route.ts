@@ -111,20 +111,27 @@ export async function POST(
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Something went wrong. Try again." }, { status: 400 });
   }
 
   const { title, description, eventType, startTime, endTime, location } = body;
 
   if (!title || !eventType || !startTime || !endTime) {
     return NextResponse.json(
-      { error: "title, eventType, startTime, and endTime are required" },
+      { error: "Fill in a title, event type, start time, and end time." },
       { status: 400 },
     );
   }
 
   if (!VALID_EVENT_TYPES.includes(eventType)) {
-    return NextResponse.json({ error: "Invalid event type" }, { status: 400 });
+    return NextResponse.json({ error: "Pick a valid event type." }, { status: 400 });
+  }
+
+  if (new Date(endTime) <= new Date(startTime)) {
+    return NextResponse.json(
+      { error: "The end time needs to be after the start time." },
+      { status: 400 },
+    );
   }
 
   const event = await prisma.calendarEvent.create({
@@ -147,7 +154,7 @@ export async function POST(
   notify({
     type: "EVENT_CREATED",
     message: `${user.displayName} created event "${title}"`,
-    linkUrl: `/projects/${projectId}/calendar`,
+    linkUrl: `/projects/${projectId}/calendar?event=${event.id}`,
     recipientIds,
   }).catch(() => {});
 

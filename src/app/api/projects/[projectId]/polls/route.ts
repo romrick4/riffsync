@@ -48,6 +48,7 @@ export async function GET(
       question: poll.question,
       isActive: poll.isActive,
       createdBy: poll.createdBy,
+      createdById: poll.createdById,
       createdAt: poll.createdAt,
       totalVotes,
       userVotedOptionId,
@@ -84,14 +85,21 @@ export async function POST(
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Something went wrong. Try again." }, { status: 400 });
   }
 
   const { question, options } = body;
 
   if (!question || !options || options.length < 2) {
     return NextResponse.json(
-      { error: "question and at least 2 options are required" },
+      { error: "Add a question and at least 2 options." },
+      { status: 400 },
+    );
+  }
+
+  if (options.length > 10) {
+    return NextResponse.json(
+      { error: "Polls can have up to 10 options." },
       { status: 400 },
     );
   }
@@ -115,7 +123,7 @@ export async function POST(
   notify({
     type: "POLL_CREATED",
     message: `${user.displayName} created a poll: "${question}"`,
-    linkUrl: `/projects/${projectId}/polls`,
+    linkUrl: `/projects/${projectId}/polls?poll=${poll.id}`,
     recipientIds,
   }).catch(() => {});
 

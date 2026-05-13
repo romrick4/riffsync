@@ -75,11 +75,20 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Something went wrong. Try again." }, { status: 400 });
   }
 
   if (body.eventType && !VALID_EVENT_TYPES.includes(body.eventType)) {
-    return NextResponse.json({ error: "Invalid event type" }, { status: 400 });
+    return NextResponse.json({ error: "Pick a valid event type." }, { status: 400 });
+  }
+
+  const effectiveStart = body.startTime ? new Date(body.startTime) : event.startTime;
+  const effectiveEnd = body.endTime ? new Date(body.endTime) : event.endTime;
+  if (effectiveEnd <= effectiveStart) {
+    return NextResponse.json(
+      { error: "The end time needs to be after the start time." },
+      { status: 400 },
+    );
   }
 
   const updated = await prisma.calendarEvent.update({
@@ -111,7 +120,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       data: members.map((m) => ({
         type: NotificationType.EVENT_UPDATED,
         message: `${user.displayName} updated event "${updated.title}"`,
-        linkUrl: `/projects/${projectId}/calendar`,
+        linkUrl: `/projects/${projectId}/calendar?event=${eventId}`,
         userId: m.userId,
       })),
     });
@@ -146,7 +155,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   const isCreator = event.createdById === user.id;
   if (!isOwner && !isCreator) {
     return NextResponse.json(
-      { error: "Only the event creator or project owner can delete events" },
+      { error: "Only the person who created this event or a band owner can delete it." },
       { status: 403 },
     );
   }

@@ -6,22 +6,28 @@ import { CalendarView } from "@/components/calendar-view";
 
 export default async function CalendarPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ projectId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { projectId } = await params;
+  const { event: highlightEventId } = await searchParams;
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold">Calendar</h1>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-muted/50" />}>
-        <CalendarContent projectId={projectId} />
+        <CalendarContent
+          projectId={projectId}
+          highlightEventId={typeof highlightEventId === "string" ? highlightEventId : undefined}
+        />
       </Suspense>
     </div>
   );
 }
 
-async function CalendarContent({ projectId }: { projectId: string }) {
+async function CalendarContent({ projectId, highlightEventId }: { projectId: string; highlightEventId?: string }) {
   const user = (await getCurrentUser())!;
   const membership = await getProjectMembership(projectId, user.id);
 
@@ -113,6 +119,7 @@ async function CalendarContent({ projectId }: { projectId: string }) {
       initialBusyBlocks={serializedBusy}
       initialYear={year}
       initialMonth={month}
+      highlightEventId={highlightEventId}
     />
   );
 }

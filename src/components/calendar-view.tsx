@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -100,6 +101,7 @@ export function CalendarView({
   initialBusyBlocks,
   initialYear,
   initialMonth,
+  highlightEventId,
 }: {
   projectId: string;
   currentUserId: string;
@@ -109,12 +111,19 @@ export function CalendarView({
   initialBusyBlocks: BusyBlock[];
   initialYear: number;
   initialMonth: number;
+  highlightEventId?: string;
 }) {
   const [year, setYear] = useState(initialYear);
   const [month, setMonth] = useState(initialMonth);
   const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
   const [busyBlocks, setBusyBlocks] = useState<BusyBlock[]>(initialBusyBlocks);
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number | null>(() => {
+    if (highlightEventId) {
+      const target = initialEvents.find((e) => e.id === highlightEventId);
+      if (target) return new Date(target.startTime).getDate();
+    }
+    return null;
+  });
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [busyDialogOpen, setBusyDialogOpen] = useState(false);
   const [editEvent, setEditEvent] = useState<CalendarEvent | null>(null);
@@ -164,9 +173,16 @@ export function CalendarView({
 
   const eventsByDay = new Map<number, CalendarEvent[]>();
   for (const event of events) {
-    const d = new Date(event.startTime).getDate();
-    if (!eventsByDay.has(d)) eventsByDay.set(d, []);
-    eventsByDay.get(d)!.push(event);
+    const start = new Date(event.startTime);
+    const end = new Date(event.endTime);
+    for (let d = 1; d <= daysInMonth; d++) {
+      if (dateSpansDay(start, end, year, month, d)) {
+        if (!eventsByDay.has(d)) eventsByDay.set(d, []);
+        if (!eventsByDay.get(d)!.some((e) => e.id === event.id)) {
+          eventsByDay.get(d)!.push(event);
+        }
+      }
+    }
   }
 
   const busyByDay = new Map<number, BusyBlock[]>();
@@ -197,10 +213,18 @@ export function CalendarView({
     year: "numeric",
   });
 
-  function handleEventCreated() {
+  function handleEventCreated(eventType?: string, isEdit?: boolean) {
     setEventDialogOpen(false);
     setEditEvent(null);
     fetchData();
+
+    if (!isEdit && eventType === "SHOW") {
+      toast.success("Show added! Time to rock.");
+    } else if (!isEdit) {
+      toast.success("Event added to the calendar.");
+    } else {
+      toast.success("Event updated.");
+    }
   }
 
   function handleBusyCreated() {
@@ -217,22 +241,6 @@ export function CalendarView({
   function openEditBusy(block: BusyBlock) {
     setEditBusyBlock(block);
     setBusyDialogOpen(true);
-  }
-
-  async function handleDeleteEvent(eventId: string) {
-    const res = await fetch(
-      `/api/projects/${projectId}/calendar/${eventId}`,
-      { method: "DELETE" },
-    );
-    if (res.ok) fetchData();
-  }
-
-  async function handleDeleteBusy(blockId: string) {
-    const res = await fetch(
-      `/api/projects/${projectId}/calendar/busy/${blockId}`,
-      { method: "DELETE" },
-    );
-    if (res.ok) fetchData();
   }
 
   return (
@@ -309,6 +317,7 @@ export function CalendarView({
             const dayEvents = day ? (eventsByDay.get(day) ?? []) : [];
             const dayBusy = day ? (busyByDay.get(day) ?? []) : [];
             const uniqueBusyUsers = [...new Set(dayBusy.map((b) => b.user.id))];
+            const hasShow = dayEvents.some((e) => e.eventType === "SHOW");
 
             return (
               <button
@@ -326,6 +335,7 @@ export function CalendarView({
                     : "cursor-pointer hover:bg-muted/40",
                   isSelected && "bg-accent",
                   isToday && "ring-1 ring-inset ring-primary/40",
+                  hasShow && "bg-green-500/5",
                 )}
               >
                 {day !== null && (
@@ -344,8 +354,9 @@ export function CalendarView({
                         <span
                           key={ev.id}
                           className={cn(
-                            "size-2 rounded-full",
+                            "rounded-full",
                             EVENT_TYPE_COLORS[ev.eventType],
+                            ev.eventType === "SHOW" ? "size-2.5" : "size-2",
                           )}
                         />
                       ))}
@@ -399,9 +410,10 @@ export function CalendarView({
                 projectId={projectId}
                 currentUserId={currentUserId}
                 isOwner={isOwner}
+                highlight={event.id === highlightEventId}
                 onRsvpChange={fetchData}
                 onEdit={() => openEditEvent(event)}
-                onDelete={() => handleDeleteEvent(event.id)}
+                onDataChange={fetchData}
               />
             ))}
           </div>
@@ -409,11 +421,15 @@ export function CalendarView({
       </div>
 
       {/* Busy blocks list */}
-      {selectedBusy.length > 0 && (
-        <div>
-          <h3 className="mb-3 text-sm font-medium text-muted-foreground">
-            {selectedDay ? "Busy times on this day" : "All busy times this month"}
-          </h3>
+      <div>
+        <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+          {selectedDay ? "Busy times on this day" : "All busy times this month"}
+        </h3>
+        {selectedBusy.length === 0 ? (
+          <p className="py-4 text-center text-sm text-muted-foreground">
+            Nobody&apos;s marked as busy{selectedDay ? " on this day" : " this month"}
+          </p>
+        ) : (
           <div className="space-y-2">
             {selectedBusy.map((block) => {
               const color = memberColorMap.get(block.user.id);
@@ -455,7 +471,14 @@ export function CalendarView({
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => handleDeleteBusy(block.id)}
+                        onClick={() => {
+                          fetch(
+                            `/api/projects/${projectId}/calendar/busy/${block.id}`,
+                            { method: "DELETE" },
+                          ).then((res) => {
+                            if (res.ok) fetchData();
+                          });
+                        }}
                       >
                         <XIcon className="size-3.5" />
                       </Button>
@@ -465,11 +488,12 @@ export function CalendarView({
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Dialogs */}
+      {/* Dialogs — key forces remount when switching between create/edit */}
       <EventDialog
+        key={editEvent?.id ?? "create"}
         projectId={projectId}
         open={eventDialogOpen}
         onOpenChange={(open) => {

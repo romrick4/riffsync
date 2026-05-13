@@ -8,9 +8,15 @@ import { CreatePollDialog } from "@/components/create-poll-dialog";
 export function PollsList({
   projectId,
   initialPolls,
+  currentUserId,
+  isOwner,
+  highlightPollId,
 }: {
   projectId: string;
   initialPolls: PollData[];
+  currentUserId: string;
+  isOwner: boolean;
+  highlightPollId?: string;
 }) {
   const [polls, setPolls] = useState(initialPolls);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -48,7 +54,15 @@ export function PollsList({
       {activePolls.length > 0 && (
         <div className="space-y-3">
           {activePolls.map((poll) => (
-            <PollCard key={poll.id} poll={poll} projectId={projectId} />
+            <PollCard
+              key={poll.id}
+              poll={poll}
+              projectId={projectId}
+              currentUserId={currentUserId}
+              isOwner={isOwner}
+              highlight={poll.id === highlightPollId}
+              onPollChanged={fetchPolls}
+            />
           ))}
         </div>
       )}
@@ -59,7 +73,15 @@ export function PollsList({
             Closed Polls
           </h2>
           {closedPolls.map((poll) => (
-            <PollCard key={poll.id} poll={poll} projectId={projectId} />
+            <PollCard
+              key={poll.id}
+              poll={poll}
+              projectId={projectId}
+              currentUserId={currentUserId}
+              isOwner={isOwner}
+              highlight={poll.id === highlightPollId}
+              onPollChanged={fetchPolls}
+            />
           ))}
         </div>
       )}

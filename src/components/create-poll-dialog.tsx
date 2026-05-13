@@ -32,6 +32,7 @@ export function CreatePollDialog({
   const [error, setError] = useState("");
 
   function addOption() {
+    if (options.length >= 10) return;
     setOptions([...options, ""]);
   }
 
@@ -126,16 +127,18 @@ export function CreatePollDialog({
                 </div>
               ))}
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addOption}
-              className="mt-1"
-            >
-              <PlusIcon className="size-3.5" data-icon="inline-start" />
-              Add Option
-            </Button>
+            {options.length < 10 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addOption}
+                className="mt-1"
+              >
+                <PlusIcon className="size-3.5" data-icon="inline-start" />
+                Add Option
+              </Button>
+            )}
           </div>
 
           {error && (

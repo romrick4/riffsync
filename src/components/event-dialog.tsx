@@ -35,7 +35,7 @@ interface EventDialogProps {
   projectId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (eventType?: string, isEdit?: boolean) => void;
   editEvent?: {
     id: string;
     title: string;
@@ -130,6 +130,11 @@ export function EventDialog({
       return;
     }
 
+    if (new Date(endTime) <= new Date(startTime)) {
+      setError("The end time needs to be after the start time.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const url = editEvent
@@ -155,13 +160,15 @@ export function EventDialog({
         return;
       }
 
+      const savedEventType = eventType;
+      const wasEdit = !!editEvent;
       setTitle("");
       setEventType("REHEARSAL");
       setStartTime("");
       setEndTime("");
       setLocation("");
       setDescription("");
-      onSuccess();
+      onSuccess(savedEventType, wasEdit);
     } finally {
       setSubmitting(false);
     }

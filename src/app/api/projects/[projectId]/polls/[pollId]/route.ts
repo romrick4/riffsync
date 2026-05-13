@@ -70,7 +70,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   const isCreator = poll.createdById === user.id;
   if (!isOwner && !isCreator) {
     return NextResponse.json(
-      { error: "Only the poll creator or project owner can modify this poll" },
+      { error: "Only the person who created this poll or a band owner can change it." },
       { status: 403 },
     );
   }
@@ -109,7 +109,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   const isCreator = poll.createdById === user.id;
   if (!isOwner && !isCreator) {
     return NextResponse.json(
-      { error: "Only the poll creator or project owner can delete this poll" },
+      { error: "Only the person who created this poll or a band owner can delete it." },
       { status: 403 },
     );
   }
