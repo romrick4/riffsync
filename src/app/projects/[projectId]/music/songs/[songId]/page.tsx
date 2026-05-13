@@ -22,50 +22,53 @@ export default async function SongDetailPage({
 }) {
   const { projectId, songId } = await params;
 
-  const user = await getCurrentUser();
-
-  const song = await prisma.song.findUnique({
-    where: { id: songId, projectId },
-    include: {
-      album: { select: { id: true, title: true } },
-      versions: {
-        include: {
-          uploadedBy: {
-            select: { id: true, displayName: true },
+  const [user, song] = await Promise.all([
+    getCurrentUser(),
+    prisma.song.findUnique({
+      where: { id: songId, projectId },
+      include: {
+        album: { select: { id: true, title: true } },
+        versions: {
+          include: {
+            uploadedBy: {
+              select: { id: true, displayName: true },
+            },
+            parentVersion: {
+              select: { id: true, title: true, versionNumber: true },
+            },
+            mergeParents: {
+              select: { parentVersionId: true },
+            },
           },
-          parentVersion: {
-            select: { id: true, title: true, versionNumber: true },
-          },
-          mergeParents: {
-            select: { parentVersionId: true },
-          },
+          orderBy: { versionNumber: "desc" },
         },
-        orderBy: { versionNumber: "desc" },
-      },
-      lyricVersions: {
-        include: {
-          editedBy: {
-            select: { id: true, displayName: true },
+        lyricVersions: {
+          include: {
+            editedBy: {
+              select: { id: true, displayName: true },
+            },
           },
+          orderBy: { versionNumber: "desc" },
         },
-        orderBy: { versionNumber: "desc" },
-      },
-      tabFiles: {
-        include: {
-          uploadedBy: {
-            select: { id: true, displayName: true },
+        tabFiles: {
+          include: {
+            uploadedBy: {
+              select: { id: true, displayName: true },
+            },
           },
+          orderBy: { createdAt: "desc" },
         },
-        orderBy: { createdAt: "desc" },
       },
-    },
-  });
+    }),
+  ]);
 
   if (!song) redirect(`/projects/${projectId}/music`);
 
-  const membership = user
-    ? await getProjectMembership(projectId, user.id)
-    : null;
+  const storage = (await import("@/lib/storage")).getStorage();
+  const [membership, coverUrl] = await Promise.all([
+    user ? getProjectMembership(projectId, user.id) : null,
+    song.coverArtPath ? storage.getUrl(song.coverArtPath) : null,
+  ]);
   const isOwner = membership?.role === "OWNER";
 
   const versionNodes: VersionNode[] = song.versions.map((v: typeof song.versions[number]) => ({
@@ -112,11 +115,6 @@ export default async function SongDetailPage({
     createdAt: t.createdAt.toISOString(),
     uploadedBy: { displayName: t.uploadedBy.displayName },
   }));
-
-  const storage = (await import("@/lib/storage")).getStorage();
-  const coverUrl = song.coverArtPath
-    ? await storage.getUrl(song.coverArtPath)
-    : null;
 
   return (
     <div className="flex flex-1 flex-col gap-6">
