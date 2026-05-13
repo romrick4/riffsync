@@ -15,7 +15,9 @@ import {
   PencilIcon,
   TrashIcon,
   StarIcon,
+  LinkIcon,
 } from "lucide-react";
+import { getEventUrl } from "@/lib/share";
 import type { CalendarEvent } from "@/components/calendar-view";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -155,6 +157,17 @@ export function EventCard({
             )}
           </div>
           <div className="flex shrink-0 gap-1">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => {
+                const url = `${window.location.origin}${getEventUrl(projectId, event.id)}`;
+                navigator.clipboard.writeText(url);
+                toast.success("Link copied!");
+              }}
+            >
+              <LinkIcon className="size-3.5" />
+            </Button>
             <Button variant="ghost" size="icon-sm" onClick={onEdit}>
               <PencilIcon className="size-3.5" />
             </Button>

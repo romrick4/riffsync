@@ -45,6 +45,7 @@ interface EventDialogProps {
     endTime: string;
     location: string | null;
   };
+  defaultStartTime?: string;
   busyBlocks?: BusyBlock[];
   memberColorMap?: Map<string, MemberColor>;
   members?: CalendarMember[];
@@ -72,6 +73,7 @@ export function EventDialog({
   onOpenChange,
   onSuccess,
   editEvent,
+  defaultStartTime,
   busyBlocks = [],
   memberColorMap,
   members = [],
@@ -81,11 +83,13 @@ export function EventDialog({
     editEvent?.eventType ?? "REHEARSAL",
   );
   const [startTime, setStartTime] = useState(
-    editEvent ? toLocalDatetime(editEvent.startTime) : "",
+    editEvent ? toLocalDatetime(editEvent.startTime) : (defaultStartTime ?? ""),
   );
-  const [endTime, setEndTime] = useState(
-    editEvent ? toLocalDatetime(editEvent.endTime) : "",
-  );
+  const [endTime, setEndTime] = useState(() => {
+    if (editEvent) return toLocalDatetime(editEvent.endTime);
+    if (defaultStartTime) return defaultStartTime.replace(/T\d{2}:\d{2}$/, "T21:00");
+    return "";
+  });
   const [location, setLocation] = useState(editEvent?.location ?? "");
   const [description, setDescription] = useState(
     editEvent?.description ?? "",

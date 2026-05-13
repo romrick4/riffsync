@@ -493,7 +493,7 @@ export function CalendarView({
 
       {/* Dialogs — key forces remount when switching between create/edit */}
       <EventDialog
-        key={editEvent?.id ?? "create"}
+        key={editEvent?.id ?? `create-${selectedDay ?? "none"}`}
         projectId={projectId}
         open={eventDialogOpen}
         onOpenChange={(open) => {
@@ -512,6 +512,11 @@ export function CalendarView({
                 endTime: editEvent.endTime,
                 location: editEvent.location,
               }
+            : undefined
+        }
+        defaultStartTime={
+          !editEvent && selectedDay
+            ? `${year}-${String(month + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}T19:00`
             : undefined
         }
         busyBlocks={busyBlocks}

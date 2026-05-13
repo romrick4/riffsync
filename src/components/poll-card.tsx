@@ -13,7 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { MoreHorizontalIcon, LockIcon, UnlockIcon, TrashIcon } from "lucide-react";
+import { MoreHorizontalIcon, LockIcon, UnlockIcon, TrashIcon, LinkIcon } from "lucide-react";
+import { getPollUrl } from "@/lib/share";
 
 interface PollOption {
   id: string;
@@ -168,6 +169,17 @@ export function PollCard({
                 Closed
               </Badge>
             )}
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => {
+                const url = `${window.location.origin}${getPollUrl(projectId, poll.id)}`;
+                navigator.clipboard.writeText(url);
+                toast.success("Link copied!");
+              }}
+            >
+              <LinkIcon className="size-3.5" />
+            </Button>
             {canManage && (
               <DropdownMenu>
                 <DropdownMenuTrigger
