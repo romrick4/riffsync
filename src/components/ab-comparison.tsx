@@ -337,11 +337,9 @@ function TrackPanel({
         </span>
       </div>
       <div className="relative min-h-12">
-        {(isLoading || isReady) && (
-          <div ref={containerRef} className={cn("w-full", !isReady && "invisible")} />
-        )}
+        <div ref={containerRef} className="w-full" />
         {!isReady && (
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-card">
             {isLoading ? (
               <div className="flex h-full items-center justify-center">
                 <div className="size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
