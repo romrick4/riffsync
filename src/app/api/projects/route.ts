@@ -2,16 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { slugify } from "@/lib/slugify";
 
 function generateInviteCode(): string {
   return nanoid(12);
-}
-
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 export async function GET() {
@@ -50,9 +44,11 @@ export async function POST(request: NextRequest) {
     let slug = slugify(name.trim());
     if (!slug) slug = "project";
 
-    const existingSlug = await prisma.project.findUnique({ where: { slug } });
-    if (existingSlug) {
-      slug = `${slug}-${nanoid(6)}`;
+    const baseSlug = slug;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const existing = await prisma.project.findUnique({ where: { slug } });
+      if (!existing) break;
+      slug = `${baseSlug}-${nanoid(6)}`;
     }
 
     const inviteCode = generateInviteCode();

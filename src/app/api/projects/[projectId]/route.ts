@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { slugify } from "@/lib/slugify";
 
 export async function GET(
   _request: NextRequest,
@@ -73,13 +74,40 @@ export async function PATCH(
   }
 
   try {
-    const { name, description, rotateInviteCode } = await request.json();
+    const { name, description, slug, rotateInviteCode } = await request.json();
 
     const data: Record<string, string | null> = {};
     if (name !== undefined) data.name = name.trim();
     if (description !== undefined) data.description = description?.trim() || null;
     if (rotateInviteCode === true) {
       data.inviteCode = nanoid(12);
+    }
+
+    if (slug !== undefined) {
+      const normalized = slugify(String(slug));
+      if (normalized.length < 2) {
+        return NextResponse.json(
+          { error: "URL must be at least 2 characters." },
+          { status: 400 },
+        );
+      }
+      if (normalized.length > 48) {
+        return NextResponse.json(
+          { error: "URL must be 48 characters or fewer." },
+          { status: 400 },
+        );
+      }
+      const existing = await prisma.project.findUnique({
+        where: { slug: normalized },
+        select: { id: true },
+      });
+      if (existing && existing.id !== projectId) {
+        return NextResponse.json(
+          { error: "That URL is already taken. Try a different one." },
+          { status: 409 },
+        );
+      }
+      data.slug = normalized;
     }
 
     const project = await prisma.project.update({
@@ -93,7 +121,7 @@ export async function PATCH(
     return NextResponse.json({ project });
   } catch {
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Something went wrong. Try again in a moment." },
       { status: 500 },
     );
   }

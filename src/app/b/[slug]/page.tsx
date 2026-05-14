@@ -28,10 +28,17 @@ async function getBandPageData(slug: string) {
       description: true,
       logoPath: true,
       bandPage: {
-        include: {
+        select: {
+          id: true,
+          isPublished: true,
+          bio: true,
+          contactEmail: true,
+          heroImagePath: true,
+          socialLinks: true,
           tracks: {
             orderBy: { position: "asc" },
-            include: {
+            select: {
+              id: true,
               song: {
                 select: {
                   id: true,

@@ -49,6 +49,9 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
   const [copied, setCopied] = useState(false);
 
   const [isPublished, setIsPublished] = useState(false);
+  const [slug, setSlug] = useState(projectSlug);
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [savingSlug, setSavingSlug] = useState(false);
   const [bio, setBio] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -57,7 +60,8 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
   const [website, setWebsite] = useState("");
   const [tracks, setTracks] = useState<TrackData[]>([]);
 
-  const publicUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/b/${projectSlug}`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const publicUrl = `${origin}/b/${slug}`;
   const loadedRef = useRef(false);
 
   useEffect(() => {
@@ -132,6 +136,46 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function handleSlugInput(value: string) {
+    const normalized = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+    setSlug(normalized);
+    setSlugError(null);
+  }
+
+  async function saveSlug() {
+    const trimmed = slug.replace(/^-+|-+$/g, "");
+    if (trimmed === projectSlug) return;
+    if (trimmed.length < 2) {
+      setSlugError("Must be at least 2 characters.");
+      return;
+    }
+
+    setSavingSlug(true);
+    setSlugError(null);
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: trimmed }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setSlugError(data.error ?? "Something went wrong.");
+        setSlug(projectSlug);
+        return;
+      }
+
+      toast.success("URL updated.");
+      router.refresh();
+    } catch {
+      setSlugError("Something went wrong. Try again.");
+      setSlug(projectSlug);
+    } finally {
+      setSavingSlug(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -158,22 +202,43 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
         </div>
       </div>
 
-      {isPublished && (
-        <div className="flex items-center gap-2 rounded-lg border bg-muted/50 p-3">
-          <span className="min-w-0 flex-1 truncate text-sm">{publicUrl}</span>
+      <div className="space-y-2">
+        <Label htmlFor="bp-slug">Page URL</Label>
+        <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center overflow-hidden rounded-lg border bg-muted/50">
+            <span className="shrink-0 border-r bg-muted px-3 py-2 text-sm text-muted-foreground">
+              /b/
+            </span>
+            <input
+              id="bp-slug"
+              type="text"
+              value={slug}
+              onChange={(e) => handleSlugInput(e.target.value)}
+              onBlur={saveSlug}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveSlug(); } }}
+              disabled={savingSlug}
+              className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm outline-none"
+              maxLength={48}
+            />
+          </div>
           <Button type="button" variant="ghost" size="icon-sm" onClick={handleCopyUrl}>
             {copied ? <CheckIcon className="size-4" /> : <CopyIcon className="size-4" />}
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            render={<a href={publicUrl} target="_blank" rel="noopener noreferrer" />}
-          >
-            <ExternalLinkIcon className="size-4" />
-          </Button>
+          {isPublished && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              render={<a href={publicUrl} target="_blank" rel="noopener noreferrer" />}
+            >
+              <ExternalLinkIcon className="size-4" />
+            </Button>
+          )}
         </div>
-      )}
+        {slugError && (
+          <p className="text-xs text-destructive">{slugError}</p>
+        )}
+      </div>
 
       <Separator />
 
