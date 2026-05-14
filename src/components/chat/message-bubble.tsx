@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useRef, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { MessageContent } from "./message-content";
 
@@ -33,6 +33,8 @@ function formatTime(dateStr: string) {
   });
 }
 
+const DOUBLE_TAP_MS = 300;
+
 function MessageBubbleInner({
   message,
   isOwn,
@@ -44,6 +46,20 @@ function MessageBubbleInner({
 }: MessageBubbleProps) {
   const hasReacted = message.reactions.some((r) => r.userId === currentUserId);
   const reactionCount = message.reactions.length;
+  const lastTapRef = useRef(0);
+  const [showBurst, setShowBurst] = useState(false);
+
+  const handleDoubleTap = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTapRef.current < DOUBLE_TAP_MS) {
+      onReact(message.id);
+      lastTapRef.current = 0;
+      setShowBurst(true);
+      setTimeout(() => setShowBurst(false), 600);
+    } else {
+      lastTapRef.current = now;
+    }
+  }, [onReact, message.id]);
 
   return (
     <div
@@ -59,6 +75,7 @@ function MessageBubbleInner({
       )}
 
       <div
+        onClick={handleDoubleTap}
         className={cn(
           "relative max-w-[85%] rounded-2xl px-3.5 py-2 text-sm sm:max-w-[70%]",
           isOwn
@@ -84,12 +101,33 @@ function MessageBubbleInner({
             {message._failed ? "Couldn't send" : formatTime(message.createdAt)}
           </span>
         </div>
+
+        {showBurst && (
+          <span className="absolute inset-0 flex items-center justify-center text-2xl animate-chat-reaction-burst">
+            🤘
+          </span>
+        )}
+
+        {reactionCount > 0 && (
+          <div
+            className={cn(
+              "absolute -bottom-2.5 flex items-center gap-0.5 rounded-full border bg-background px-1.5 py-0.5 text-xs shadow-sm",
+              isOwn ? "left-2" : "right-2",
+            )}
+          >
+            <span className="text-[11px]">🤘</span>
+            <span className="tabular-nums text-muted-foreground">
+              {reactionCount}
+            </span>
+          </div>
+        )}
       </div>
 
       <div
         className={cn(
           "flex items-center gap-1",
           isOwn ? "flex-row-reverse" : "flex-row",
+          reactionCount > 0 ? "mt-1.5" : "",
         )}
       >
         {message._failed && onRetry ? (
@@ -105,16 +143,13 @@ function MessageBubbleInner({
             type="button"
             onClick={() => onReact(message.id)}
             className={cn(
-              "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-all",
+              "hidden items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-all sm:flex",
               hasReacted
                 ? "bg-primary/10 text-primary animate-chat-reaction-pop"
-                : "text-muted-foreground sm:opacity-0 sm:group-hover:opacity-100",
+                : "text-muted-foreground opacity-0 group-hover:opacity-100",
             )}
           >
             <span className="text-sm">🤘</span>
-            {reactionCount > 0 && (
-              <span className="tabular-nums">{reactionCount}</span>
-            )}
           </button>
         )}
       </div>

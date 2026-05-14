@@ -49,6 +49,7 @@ enum NotificationType {
   AUDIO_COMMENT
   NEW_ALBUM
   ALBUM_UPDATED
+  CHAT_MESSAGE
 }
 
 enum UploadStatus {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser, verifyMembership } from "@/lib/auth";
 import { broadcastNewMessage } from "@/lib/chat-broadcast";
+import { notify, getProjectMemberIds } from "@/lib/notifications";
 
 type RouteParams = {
   params: Promise<{ projectId: string }>;
@@ -117,6 +118,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     projectId: message.projectId,
     user: message.user,
     reactions: message.reactions,
+  }).catch(() => {});
+
+  const recipientIds = await getProjectMemberIds(projectId, user.id);
+  const preview =
+    content.trim().length > 80
+      ? content.trim().slice(0, 80) + "..."
+      : content.trim();
+  notify({
+    type: "CHAT_MESSAGE",
+    message: `${user.displayName}: ${preview}`,
+    linkUrl: `/projects/${projectId}/chat`,
+    recipientIds,
   }).catch(() => {});
 
   return NextResponse.json(message, { status: 201 });
