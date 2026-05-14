@@ -1,12 +1,8 @@
 import { Logo } from "@/components/logo";
 import { ChaosVsClarity } from "@/components/marketing/chaos-vs-clarity";
-import { DemoVersionTree } from "@/components/marketing/demo-version-tree";
 import { DemoPlayer } from "@/components/marketing/demo-player";
 import {
-  Upload,
-  GitBranch,
-  MessageCircle,
-  Star,
+  CheckIcon,
   FileText,
   Music4,
   Calendar,
@@ -15,29 +11,75 @@ import {
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-const steps = [
+interface PricingFeature {
+  text: string;
+  comingSoon?: boolean;
+}
+
+interface PricingTier {
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  cta: string;
+  featured?: boolean;
+  features: PricingFeature[];
+  storage: string;
+  extras?: string;
+}
+
+const tiers: PricingTier[] = [
   {
-    icon: Upload,
-    title: "Upload a recording",
-    description:
-      "Drop in a voice memo, a studio bounce, or anything in between.",
+    name: "Free",
+    price: "$0",
+    period: "/month",
+    description: "Everything you need to get started.",
+    cta: "Start for free",
+    storage: "2 GB storage",
+    features: [
+      { text: "Up to 2 bands" },
+      { text: "Unlimited members per band" },
+      { text: "Songs + versions" },
+      { text: "Lyrics editor" },
+      { text: "Shared calendar" },
+      { text: "Polls" },
+      { text: "Timestamped comments" },
+      { text: "Notifications" },
+    ],
   },
   {
-    icon: GitBranch,
-    title: "Branch and iterate",
-    description:
-      "Try a different arrangement without losing the original. Every version lives in the tree.",
+    name: "Band",
+    price: "$15",
+    period: "/month",
+    description: "For bands that are serious about their music.",
+    cta: "Get Band",
+    featured: true,
+    storage: "50 GB storage",
+    features: [
+      { text: "Unlimited bands" },
+      { text: "Everything in Free, plus:" },
+      { text: "Shareable demo links", comingSoon: true },
+      { text: "Setlist builder", comingSoon: true },
+      { text: "Album organization" },
+      { text: "Album ZIP downloads" },
+    ],
   },
   {
-    icon: MessageCircle,
-    title: "Comment at the exact moment",
-    description:
-      'Click the waveform at 1:32 and say what you think. No more "around the 1:30 mark I think?"',
-  },
-  {
-    icon: Star,
-    title: "Pick your favorite",
-    description: "Star the final version. Download it. Done.",
+    name: "Studio",
+    price: "$30",
+    period: "/month",
+    description: "For power users and multi-project musicians.",
+    cta: "Get Studio",
+    storage: "150 GB storage",
+    extras: "$2/month per extra 25 GB",
+    features: [
+      { text: "Unlimited bands" },
+      { text: "Everything in Band, plus:" },
+      { text: "Automated backups", comingSoon: true },
+      { text: "500 MB upload limit", comingSoon: true },
+      { text: "Granular roles", comingSoon: true },
+      { text: "Priority support", comingSoon: true },
+    ],
   },
 ];
 
@@ -119,31 +161,6 @@ export default function MarketingPage() {
         {/* Chaos vs Clarity */}
         <ChaosVsClarity />
 
-        {/* Product showcase: Version Tree */}
-        <section className="border-t border-border/50 px-6 py-20 sm:py-28">
-          <div className="mx-auto max-w-5xl">
-            <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-              <div>
-                <p className="animate-fade-in-up mb-3 text-xs font-medium uppercase tracking-widest text-primary [animation-delay:100ms]">
-                  Version tree
-                </p>
-                <h2 className="animate-fade-in-up text-2xl font-bold tracking-tight sm:text-3xl [animation-delay:200ms]">
-                  Every draft, every idea. All organized.
-                </h2>
-                <p className="animate-fade-in-up mt-4 text-base leading-relaxed text-muted-foreground [animation-delay:300ms]">
-                  Upload a new recording and it appears in the version tree.
-                  Branch off to try something different without losing the
-                  original. Compare any two versions side by side. Star your
-                  favorite when the band agrees.
-                </p>
-              </div>
-              <div className="animate-fade-in-up [animation-delay:400ms]">
-                <DemoVersionTree className="rounded-xl border border-border/50 bg-card/30 p-4" />
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Product showcase: Waveform + Comments */}
         <section className="border-t border-border/50 px-6 py-20 sm:py-28">
           <div className="mx-auto max-w-5xl">
@@ -169,29 +186,88 @@ export default function MarketingPage() {
           </div>
         </section>
 
-        {/* How it works */}
+        {/* Pricing */}
         <section className="border-t border-border/50 px-6 py-20 sm:py-28">
           <div className="mx-auto max-w-5xl">
-            <h2 className="animate-fade-in-up mb-14 text-center text-2xl font-bold tracking-tight sm:text-3xl">
-              From rough idea to final mix
+            <h2 className="animate-fade-in-up mb-4 text-center text-2xl font-bold tracking-tight sm:text-3xl">
+              Simple pricing. No surprises.
             </h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {steps.map((step, i) => (
+            <p className="animate-fade-in-up mx-auto mb-14 max-w-lg text-center text-base text-muted-foreground [animation-delay:100ms]">
+              Only one person per band needs to pay. Everyone else gets full
+              access.
+            </p>
+
+            <div className="grid gap-5 lg:grid-cols-3">
+              {tiers.map((tier, i) => (
                 <div
-                  key={step.title}
-                  className="animate-fade-in-up relative flex flex-col items-center text-center"
+                  key={tier.name}
+                  className={`animate-fade-in-up flex flex-col rounded-2xl border p-6 sm:p-7 ${
+                    tier.featured
+                      ? "border-primary/40 bg-primary/[0.04] ring-1 ring-primary/20"
+                      : "border-border/50 bg-card/50"
+                  }`}
                   style={{ animationDelay: `${200 + i * 100}ms` }}
                 >
-                  <div className="mb-1 flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                    {i + 1}
+                  <div className="mb-5">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold">{tier.name}</h3>
+                      {tier.featured && (
+                        <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-[11px] font-medium text-primary">
+                          Popular
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-3 flex items-baseline gap-1">
+                      <span className="text-3xl font-bold tracking-tight">
+                        {tier.price}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {tier.period}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {tier.description}
+                    </p>
                   </div>
-                  <div className="mt-3 flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-red-400/15 via-rose-400/10 to-orange-300/15">
-                    <step.icon className="size-5 text-foreground/80" />
+
+                  <div className="mb-6 flex flex-col gap-1 text-sm">
+                    <div className="mb-2 flex items-center gap-2 font-medium text-card-foreground">
+                      <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        {tier.storage}
+                      </span>
+                      {tier.extras && (
+                        <span className="text-xs text-muted-foreground">
+                          {tier.extras}
+                        </span>
+                      )}
+                    </div>
+                    {tier.features.map((f) => (
+                      <div key={f.text} className="flex items-start gap-2 py-1">
+                        <CheckIcon className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                        <span className="text-card-foreground/80">
+                          {f.text}
+                          {f.comingSoon && (
+                            <span className="ml-1.5 inline-flex rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground">
+                              Coming soon
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  <h3 className="mt-4 text-sm font-semibold">{step.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    {step.description}
-                  </p>
+
+                  <div className="mt-auto">
+                    <a
+                      href={`${appUrl}/register`}
+                      className={`inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                        tier.featured
+                          ? "bg-primary text-primary-foreground hover:bg-primary/80"
+                          : "border border-border bg-card text-card-foreground hover:bg-accent"
+                      }`}
+                    >
+                      {tier.cta}
+                    </a>
+                  </div>
                 </div>
               ))}
             </div>
