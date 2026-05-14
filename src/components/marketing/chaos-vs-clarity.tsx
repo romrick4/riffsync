@@ -19,12 +19,12 @@ export function ChaosVsClarity() {
           {/* Chaos side */}
           <div className="relative overflow-hidden rounded-2xl border border-destructive/20 bg-destructive/[0.03] p-6 sm:p-8 lg:rounded-r-none lg:border-r-0">
             <p className="mb-6 text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-              This is how your band works now
+              Your band now
             </p>
 
             <div className="relative min-h-[280px]">
               {/* Chat bubbles */}
-              <div className="flex flex-col gap-2">
+              <div className="relative z-10 flex flex-col gap-2">
                 {CHAT_BUBBLES.map((bubble, i) => (
                   <div
                     key={i}
@@ -48,26 +48,28 @@ export function ChaosVsClarity() {
                 ))}
               </div>
 
-              {/* Floating chaos elements */}
-              <div className="pointer-events-none absolute -right-2 top-2 chaos-float-1">
-                <div className="rounded-lg border border-border/30 bg-card/40 px-2.5 py-1.5 text-[10px] text-muted-foreground/50 backdrop-blur-sm">
-                  <span className="font-mono">final_mix_v3_REAL_USE_THIS(2).mp3</span>
+              {/* Floating chaos elements, positioned below chat bubbles */}
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <div className="chaos-float-1">
+                  <div className="rounded-lg border border-border/30 bg-card/40 px-2.5 py-1.5 text-[10px] text-muted-foreground/50 backdrop-blur-sm">
+                    <span className="font-mono">final_mix_v3_REAL_USE_THIS(2).mp3</span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="pointer-events-none absolute -left-1 bottom-8 chaos-float-2">
-                <div className="flex items-center gap-1.5 rounded-full border border-border/30 bg-card/40 px-2.5 py-1 text-[10px] text-muted-foreground/50 backdrop-blur-sm">
-                  <span className="relative flex size-2">
-                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-destructive/60" />
-                    <span className="relative inline-flex size-2 rounded-full bg-destructive/80" />
-                  </span>
-                  47 unread
+                <div className="chaos-float-2">
+                  <div className="flex items-center gap-1.5 rounded-full border border-border/30 bg-card/40 px-2.5 py-1 text-[10px] text-muted-foreground/50 backdrop-blur-sm">
+                    <span className="relative flex size-2">
+                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-destructive/60" />
+                      <span className="relative inline-flex size-2 rounded-full bg-destructive/80" />
+                    </span>
+                    47 unread
+                  </div>
                 </div>
-              </div>
 
-              <div className="pointer-events-none absolute bottom-0 right-4 chaos-float-3">
-                <div className="rounded-lg border border-border/30 bg-card/40 px-2.5 py-1.5 text-[10px] text-muted-foreground/50 backdrop-blur-sm">
-                  🗓️ Practice Sat? Sun? idk
+                <div className="chaos-float-3">
+                  <div className="rounded-lg border border-border/30 bg-card/40 px-2.5 py-1.5 text-[10px] text-muted-foreground/50 backdrop-blur-sm">
+                    🗓️ Practice Sat? Sun? idk
+                  </div>
                 </div>
               </div>
             </div>
@@ -76,7 +78,7 @@ export function ChaosVsClarity() {
           {/* Clarity side */}
           <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.02] p-6 sm:p-8 lg:rounded-l-none lg:border-l-0">
             <p className="mb-6 text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-              This is how it could work
+              Your band with RiffSync
             </p>
 
             <div className="flex min-h-[280px] items-center justify-center">

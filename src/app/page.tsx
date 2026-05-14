@@ -64,7 +64,7 @@ const extras = [
     icon: Vote,
     name: "Polls",
     description:
-      "Vote on setlists, song names, venues — anything the band needs to decide.",
+      "Vote on setlists, song names, venues. Anything the band needs to decide.",
   },
 ];
 
@@ -107,7 +107,7 @@ export default function MarketingPage() {
                 href={`${appUrl}/register`}
                 className="inline-flex h-11 items-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
               >
-                Start your band — it&apos;s free
+                Start your band for free
               </a>
               <span className="text-xs text-muted-foreground">
                 No credit card needed
@@ -128,7 +128,7 @@ export default function MarketingPage() {
                   Version tree
                 </p>
                 <h2 className="animate-fade-in-up text-2xl font-bold tracking-tight sm:text-3xl [animation-delay:200ms]">
-                  Every draft, every idea — organized.
+                  Every draft, every idea. All organized.
                 </h2>
                 <p className="animate-fade-in-up mt-4 text-base leading-relaxed text-muted-foreground [animation-delay:300ms]">
                   Upload a new recording and it appears in the version tree.
@@ -239,7 +239,7 @@ export default function MarketingPage() {
                 href={`${appUrl}/register`}
                 className="inline-flex h-11 items-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
               >
-                Start your band — it&apos;s free
+                Start your band for free
               </a>
             </div>
           </div>

@@ -17,7 +17,7 @@ const DEMO_COMMENTS: DemoComment[] = [
     time: "0:32",
     timeSec: 32,
     author: "Maya",
-    text: "Love this riff — keep it",
+    text: "Love this riff, keep it",
     isActive: true,
   },
   {
