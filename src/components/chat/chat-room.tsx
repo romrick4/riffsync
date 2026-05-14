@@ -37,6 +37,13 @@ export function ChatRoom({
     listRef.current?.scrollToBottom("instant");
   }, []);
 
+  useEffect(() => {
+    document.body.classList.add("overflow-hidden");
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, []);
+
   const handleNewMessage = useCallback(
     (incoming: BroadcastMessage) => {
       if (incoming.userId === currentUserId) {
@@ -237,7 +244,7 @@ export function ChatRoom({
   }, []);
 
   return (
-    <div className="relative flex h-[calc(100vh-12rem)] flex-col overflow-hidden rounded-xl border bg-card">
+    <div className="relative flex h-[calc(100dvh-12rem)] flex-col overflow-hidden rounded-xl border bg-card">
       {messages.length === 0 && !loadingMore ? (
         <div className="flex flex-1 items-center justify-center">
           <p className="text-center text-sm text-muted-foreground">
