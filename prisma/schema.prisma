@@ -109,6 +109,7 @@ model Project {
   polls          Poll[]
   busyBlocks     BusyBlock[]
   demoLinks      DemoLink[]
+  setlists       Setlist[]
 }
 
 model ProjectMember {
@@ -169,6 +170,7 @@ model Song {
   lyricVersions LyricVersion[]
   tabFiles      TabFile[]
   demoLinks     DemoLink[]
+  setlistItems  SetlistItem[]
 }
 
 model SongVersion {
@@ -203,6 +205,7 @@ model SongVersion {
   audioComments  AudioComment[]
   transcodeJob   TranscodeJob?
   demoLinks      DemoLink[]
+  setlistItems   SetlistItem[]
 }
 
 model MergeParent {
@@ -387,4 +390,33 @@ model DemoLink {
 
   createdBy   User   @relation(fields: [createdById], references: [id])
   createdById String
+}
+
+model Setlist {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  items SetlistItem[]
+}
+
+model SetlistItem {
+  id        String   @id @default(uuid())
+  position  Int
+  notes     String?
+  createdAt DateTime @default(now())
+
+  setlist   Setlist @relation(fields: [setlistId], references: [id], onDelete: Cascade)
+  setlistId String
+
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId String
+
+  lockedVersion   SongVersion? @relation(fields: [lockedVersionId], references: [id], onDelete: SetNull)
+  lockedVersionId String?
 }
