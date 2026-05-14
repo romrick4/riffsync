@@ -110,6 +110,7 @@ model Project {
   busyBlocks     BusyBlock[]
   demoLinks      DemoLink[]
   setlists       Setlist[]
+  bandPage       BandPage?
 }
 
 model ProjectMember {
@@ -166,11 +167,12 @@ model Song {
   album   Album?  @relation(fields: [albumId], references: [id], onDelete: SetNull)
   albumId String?
 
-  versions      SongVersion[]
-  lyricVersions LyricVersion[]
-  tabFiles      TabFile[]
-  demoLinks     DemoLink[]
-  setlistItems  SetlistItem[]
+  versions       SongVersion[]
+  lyricVersions  LyricVersion[]
+  tabFiles       TabFile[]
+  demoLinks      DemoLink[]
+  setlistItems   SetlistItem[]
+  bandPageTracks BandPageTrack[]
 }
 
 model SongVersion {
@@ -206,6 +208,7 @@ model SongVersion {
   transcodeJob   TranscodeJob?
   demoLinks      DemoLink[]
   setlistItems   SetlistItem[]
+  bandPageTracks BandPageTrack[]
 }
 
 model MergeParent {
@@ -419,4 +422,37 @@ model SetlistItem {
 
   lockedVersion   SongVersion? @relation(fields: [lockedVersionId], references: [id], onDelete: SetNull)
   lockedVersionId String?
+}
+
+model BandPage {
+  id            String   @id @default(uuid())
+  isPublished   Boolean  @default(false)
+  bio           String?
+  contactEmail  String?
+  heroImagePath String?
+  socialLinks   Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String  @unique
+
+  tracks BandPageTrack[]
+}
+
+model BandPageTrack {
+  id        String   @id @default(uuid())
+  position  Int
+  createdAt DateTime @default(now())
+
+  bandPage   BandPage @relation(fields: [bandPageId], references: [id], onDelete: Cascade)
+  bandPageId String
+
+  song   Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId String
+
+  version   SongVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  versionId String?
+
+  @@unique([bandPageId, songId])
 }

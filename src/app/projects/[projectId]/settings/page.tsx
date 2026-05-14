@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getProjectMembership, getProjectWithMembers } from "@/lib/project-data";
 import { getStorage } from "@/lib/storage";
+import { prisma } from "@/lib/db";
 import {
   Card,
   CardContent,
@@ -15,6 +16,7 @@ import { SettingsForm } from "@/components/settings-form";
 import { MembersList } from "@/components/members-list";
 import { InviteCode } from "../_components/invite-code";
 import { DeleteProjectButton } from "@/components/delete-project-button";
+import { BandPageSettings } from "@/components/band-page-settings";
 
 export default async function ProjectSettingsPage({
   params,
@@ -36,10 +38,22 @@ export default async function ProjectSettingsPage({
   const isOwner = membership!.role === "OWNER";
   const serializedMembers = JSON.parse(JSON.stringify(project.members));
 
+  const storage = getStorage();
+
   let logoUrl: string | null = null;
   if (project.logoPath) {
-    const storage = getStorage();
     logoUrl = await storage.getUrl(project.logoPath);
+  }
+
+  let heroImageUrl: string | null = null;
+  if (isOwner) {
+    const bandPage = await prisma.bandPage.findUnique({
+      where: { projectId },
+      select: { heroImagePath: true },
+    });
+    if (bandPage?.heroImagePath) {
+      heroImageUrl = await storage.getUrl(bandPage.heroImagePath);
+    }
   }
 
   return (
@@ -103,6 +117,24 @@ export default async function ProjectSettingsPage({
           />
         </CardContent>
       </Card>
+
+      {isOwner && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Band Page</CardTitle>
+            <CardDescription>
+              A public page for your band. Share it with bookers, fans, or anyone.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <BandPageSettings
+              projectId={projectId}
+              projectSlug={project.slug}
+              heroImageUrl={heroImageUrl}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {isOwner && (
         <Card className="border-destructive/30">

@@ -38,3 +38,7 @@ export function getPollUrl(projectId: string, pollId: string): string {
 export function getDemoUrl(token: string): string {
   return `/demo/${token}`;
 }
+
+export function getBandPageUrl(slug: string): string {
+  return `/b/${slug}`;
+}
