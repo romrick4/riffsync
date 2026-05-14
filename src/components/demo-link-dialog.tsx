@@ -166,7 +166,7 @@ export function DemoLinkDialog({
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[calc(100dvh-4rem)] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Share a demo link</DialogTitle>
           <DialogDescription>
@@ -202,7 +202,6 @@ export function DemoLinkDialog({
             <Button
               onClick={handleCreate}
               disabled={creating}
-              className="w-full"
             >
               {creating ? (
                 <Loader2Icon className="size-4 animate-spin" />
@@ -226,38 +225,40 @@ export function DemoLinkDialog({
                   key={link.id}
                   className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2"
                 >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-mono text-muted-foreground">
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <p className="break-all text-xs font-mono text-muted-foreground">
                       {link.url.replace(/^https?:\/\//, "")}
                     </p>
                     <p className="flex items-center gap-1 text-xs text-muted-foreground">
                       {formatExpiry(link.expiresAt).includes("Never") ? (
-                        <InfinityIcon className="size-3" />
+                        <InfinityIcon className="size-3 shrink-0" />
                       ) : (
-                        <ClockIcon className="size-3" />
+                        <ClockIcon className="size-3 shrink-0" />
                       )}
                       {formatExpiry(link.expiresAt)}
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => copyToClipboard(link.url, link.id)}
-                  >
-                    {copiedId === link.id ? (
-                      <CheckIcon className="size-3.5 text-green-500" />
-                    ) : (
-                      <CopyIcon className="size-3.5" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={() => handleRevoke(link.id)}
-                  >
-                    <Trash2Icon className="size-3.5" />
-                  </Button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => copyToClipboard(link.url, link.id)}
+                    >
+                      {copiedId === link.id ? (
+                        <CheckIcon className="size-3.5 text-green-500" />
+                      ) : (
+                        <CopyIcon className="size-3.5" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => handleRevoke(link.id)}
+                    >
+                      <Trash2Icon className="size-3.5" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
