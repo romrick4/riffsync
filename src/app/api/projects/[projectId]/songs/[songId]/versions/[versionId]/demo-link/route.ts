@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
 import { getCurrentUser, verifyMembership, verifySongInProject } from "@/lib/auth";
 
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
   const demoLink = await prisma.demoLink.create({
     data: {
+      token: nanoid(12),
       expiresAt,
       songVersionId: versionId,
       songId,

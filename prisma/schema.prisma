@@ -370,7 +370,7 @@ model TranscodeJob {
 
 model DemoLink {
   id        String   @id @default(uuid())
-  token     String   @unique @default(uuid())
+  token     String   @unique
   expiresAt DateTime
   isRevoked Boolean  @default(false)
   createdAt DateTime @default(now())

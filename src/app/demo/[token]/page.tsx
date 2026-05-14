@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { getStorage } from "@/lib/storage";
 import { DemoPlayer } from "./demo-player";
+import { Logo } from "@/components/logo";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -76,17 +77,19 @@ export default async function DemoPage({ params }: PageProps) {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6">
-        <div className="w-full max-w-lg space-y-6">
-          <div className="space-y-1 text-center">
-            <p className="text-sm font-medium text-primary">
+        <div className="w-full max-w-lg space-y-8">
+          <div className="space-y-3 text-center">
+            <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
               {link.project.name}
-            </p>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              {link.song.title}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {link.songVersion.title}
-            </p>
+            </h2>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                {link.song.title}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {link.songVersion.title}
+              </p>
+            </div>
           </div>
 
           <DemoPlayer
@@ -145,15 +148,15 @@ function ExpiredState({ message }: { message: string }) {
 
 function Footer() {
   return (
-    <footer className="border-t px-4 py-6 text-center">
-      <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-4">
-          <path d="M9 18V5l12-2v13" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="6" cy="18" r="3" />
-          <circle cx="18" cy="16" r="3" />
-        </svg>
-        Shared with RiffSync
-      </Link>
+    <footer className="border-t px-4 py-6">
+      <div className="flex flex-col items-center gap-2">
+        <Link href="/" className="transition-opacity hover:opacity-80">
+          <Logo size="sm" />
+        </Link>
+        <p className="text-xs text-muted-foreground">
+          Your band&apos;s creative hub
+        </p>
+      </div>
     </footer>
   );
 }
