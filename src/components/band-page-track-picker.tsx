@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
 import {
   PlusIcon,
   GripVerticalIcon,
@@ -17,7 +16,6 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   Loader2Icon,
-  SaveIcon,
 } from "lucide-react";
 
 interface TrackData {
@@ -51,8 +49,6 @@ interface Props {
 export function BandPageTrackPicker({ projectId, tracks, onTracksChange }: Props) {
   const [songs, setSongs] = useState<SongOption[]>([]);
   const [loadingSongs, setLoadingSongs] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
   const loadedRef = useRef(false);
 
   useEffect(() => {
@@ -84,13 +80,10 @@ export function BandPageTrackPicker({ projectId, tracks, onTracksChange }: Props
       version: song.latestVersion,
     };
     onTracksChange([...tracks, newTrack]);
-    setDirty(true);
   }
 
   function removeTrack(index: number) {
-    const updated = tracks.filter((_, i) => i !== index);
-    onTracksChange(updated);
-    setDirty(true);
+    onTracksChange(tracks.filter((_, i) => i !== index));
   }
 
   function moveTrack(index: number, direction: "up" | "down") {
@@ -99,7 +92,6 @@ export function BandPageTrackPicker({ projectId, tracks, onTracksChange }: Props
     const updated = [...tracks];
     [updated[index], updated[target]] = [updated[target], updated[index]];
     onTracksChange(updated);
-    setDirty(true);
   }
 
   function changeVersion(index: number, versionId: string) {
@@ -113,39 +105,6 @@ export function BandPageTrackPicker({ projectId, tracks, onTracksChange }: Props
     const updated = [...tracks];
     updated[index] = { ...updated[index], version };
     onTracksChange(updated);
-    setDirty(true);
-  }
-
-  async function saveTracks() {
-    setSaving(true);
-    try {
-      const payload = tracks.map((t, i) => ({
-        songId: t.song.id,
-        versionId: t.version?.id ?? null,
-        position: i,
-      }));
-
-      const res = await fetch(`/api/projects/${projectId}/band-page/tracks`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tracks: payload }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        toast.error(data.error ?? "Something went wrong. Try again.");
-        return;
-      }
-
-      const data = await res.json();
-      onTracksChange(data.tracks);
-      setDirty(false);
-      toast.success("Featured recordings saved.");
-    } catch {
-      toast.error("Something went wrong. Try again.");
-    } finally {
-      setSaving(false);
-    }
   }
 
   return (
@@ -193,7 +152,6 @@ export function BandPageTrackPicker({ projectId, tracks, onTracksChange }: Props
             )}
           </div>
 
-          {/* Version selector - only show if the song has multiple versions */}
           {songs.find((s) => s.id === track.song.id)?.versions &&
             (songs.find((s) => s.id === track.song.id)?.versions?.length ?? 0) > 1 && (
               <Select
@@ -226,57 +184,38 @@ export function BandPageTrackPicker({ projectId, tracks, onTracksChange }: Props
         </div>
       ))}
 
-      <div className="flex flex-wrap gap-2">
-        {loadingSongs ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2Icon className="size-4 animate-spin" />
-            Loading songs...
-          </div>
-        ) : availableSongs.length > 0 ? (
-          <Select onValueChange={(songId) => {
-            if (!songId) return;
-            const song = songs.find((s) => s.id === songId);
-            if (song) addTrack(song);
-          }}>
-            <SelectTrigger className="h-9 w-full sm:w-auto">
-              <div className="flex items-center gap-1.5">
-                <PlusIcon className="size-3.5" />
-                <span>Add a song</span>
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              {availableSongs.map((song) => (
-                <SelectItem key={song.id} value={song.id}>
-                  {song.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : tracks.length > 0 ? (
-          <p className="text-xs text-muted-foreground">All songs added.</p>
-        ) : songs.length === 0 ? (
-          <p className="text-xs text-muted-foreground">
-            Upload some recordings first, then come back to feature them here.
-          </p>
-        ) : null}
-
-        {dirty && (
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            onClick={saveTracks}
-            disabled={saving}
-          >
-            {saving ? (
-              <Loader2Icon className="mr-1.5 size-3.5 animate-spin" />
-            ) : (
-              <SaveIcon className="mr-1.5 size-3.5" />
-            )}
-            Save Track Order
-          </Button>
-        )}
-      </div>
+      {loadingSongs ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2Icon className="size-4 animate-spin" />
+          Loading songs...
+        </div>
+      ) : availableSongs.length > 0 ? (
+        <Select onValueChange={(songId) => {
+          if (!songId) return;
+          const song = songs.find((s) => s.id === songId);
+          if (song) addTrack(song);
+        }}>
+          <SelectTrigger className="h-9 w-full sm:w-auto">
+            <div className="flex items-center gap-1.5">
+              <PlusIcon className="size-3.5" />
+              <span>Add a song</span>
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            {availableSongs.map((song) => (
+              <SelectItem key={song.id} value={song.id}>
+                {song.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : tracks.length > 0 ? (
+        <p className="text-xs text-muted-foreground">All songs added.</p>
+      ) : songs.length === 0 ? (
+        <p className="text-xs text-muted-foreground">
+          Upload some recordings first, then come back to feature them here.
+        </p>
+      ) : null}
     </div>
   );
 }

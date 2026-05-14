@@ -50,8 +50,6 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
 
   const [isPublished, setIsPublished] = useState(false);
   const [slug, setSlug] = useState(projectSlug);
-  const [slugError, setSlugError] = useState<string | null>(null);
-  const [savingSlug, setSavingSlug] = useState(false);
   const [bio, setBio] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -59,6 +57,7 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
   const [youtube, setYoutube] = useState("");
   const [website, setWebsite] = useState("");
   const [tracks, setTracks] = useState<TrackData[]>([]);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const publicUrl = `${origin}/b/${slug}`;
@@ -92,9 +91,20 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
     return () => { cancelled = true; };
   }, [projectId]);
 
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSlugInput(value: string) {
+    setSlug(value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+    setSaveError(null);
+  }
+
+  async function handleSave() {
+    const trimmedSlug = slug.replace(/^-+|-+$/g, "");
+    if (trimmedSlug.length < 2) {
+      setSaveError("Page URL must be at least 2 characters.");
+      return;
+    }
+
     setSaving(true);
+    setSaveError(null);
 
     try {
       const socialLinks: Record<string, string> = {};
@@ -103,27 +113,70 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
       if (youtube.trim()) socialLinks.youtube = youtube.trim();
       if (website.trim()) socialLinks.website = website.trim();
 
-      const res = await fetch(`/api/projects/${projectId}/band-page`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          isPublished,
-          bio: bio.trim() || null,
-          contactEmail: contactEmail.trim() || null,
-          socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : null,
-        }),
-      });
+      const trackPayload = tracks.map((t, i) => ({
+        songId: t.song.id,
+        versionId: t.version?.id ?? null,
+        position: i,
+      }));
 
-      if (!res.ok) {
-        const data = await res.json();
-        toast.error(data.error ?? "Something went wrong. Try again.");
+      const slugChanged = trimmedSlug !== projectSlug;
+
+      const requests: Promise<Response>[] = [
+        fetch(`/api/projects/${projectId}/band-page`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            isPublished,
+            bio: bio.trim() || null,
+            contactEmail: contactEmail.trim() || null,
+            socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : null,
+          }),
+        }),
+        fetch(`/api/projects/${projectId}/band-page/tracks`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tracks: trackPayload }),
+        }),
+      ];
+
+      if (slugChanged) {
+        requests.push(
+          fetch(`/api/projects/${projectId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ slug: trimmedSlug }),
+          }),
+        );
+      }
+
+      const results = await Promise.all(requests);
+      const [bandPageRes, tracksRes, slugRes] = results;
+
+      if (!bandPageRes.ok) {
+        const data = await bandPageRes.json();
+        setSaveError(data.error ?? "Something went wrong. Try again.");
         return;
       }
+
+      if (!tracksRes.ok) {
+        const data = await tracksRes.json();
+        setSaveError(data.error ?? "Something went wrong saving recordings. Try again.");
+        return;
+      }
+
+      if (slugRes && !slugRes.ok) {
+        const data = await slugRes.json();
+        setSaveError(data.error ?? "Something went wrong updating the URL. Try again.");
+        return;
+      }
+
+      const tracksData = await tracksRes.json();
+      setTracks(tracksData.tracks);
 
       toast.success(isPublished ? "Band page is live!" : "Band page saved.");
       router.refresh();
     } catch {
-      toast.error("Something went wrong. Try again.");
+      setSaveError("Something went wrong. Try again.");
     } finally {
       setSaving(false);
     }
@@ -136,46 +189,6 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
     setTimeout(() => setCopied(false), 2000);
   }
 
-  function handleSlugInput(value: string) {
-    const normalized = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
-    setSlug(normalized);
-    setSlugError(null);
-  }
-
-  async function saveSlug() {
-    const trimmed = slug.replace(/^-+|-+$/g, "");
-    if (trimmed === projectSlug) return;
-    if (trimmed.length < 2) {
-      setSlugError("Must be at least 2 characters.");
-      return;
-    }
-
-    setSavingSlug(true);
-    setSlugError(null);
-    try {
-      const res = await fetch(`/api/projects/${projectId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: trimmed }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setSlugError(data.error ?? "Something went wrong.");
-        setSlug(projectSlug);
-        return;
-      }
-
-      toast.success("URL updated.");
-      router.refresh();
-    } catch {
-      setSlugError("Something went wrong. Try again.");
-      setSlug(projectSlug);
-    } finally {
-      setSavingSlug(false);
-    }
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -185,7 +198,7 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
   }
 
   return (
-    <form onSubmit={handleSave} className="space-y-6">
+    <div className="space-y-6">
       {/* Published toggle */}
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
@@ -202,6 +215,7 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
         </div>
       </div>
 
+      {/* URL / Slug */}
       <div className="space-y-2">
         <Label htmlFor="bp-slug">Page URL</Label>
         <div className="flex items-center gap-2">
@@ -214,9 +228,6 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
               type="text"
               value={slug}
               onChange={(e) => handleSlugInput(e.target.value)}
-              onBlur={saveSlug}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveSlug(); } }}
-              disabled={savingSlug}
               className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm outline-none"
               maxLength={48}
             />
@@ -235,14 +246,11 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
             </Button>
           )}
         </div>
-        {slugError && (
-          <p className="text-xs text-destructive">{slugError}</p>
-        )}
       </div>
 
       <Separator />
 
-      {/* Hero Image */}
+      {/* Hero Image — saves on upload (same as logo in Band Profile) */}
       <div className="space-y-1">
         <Label>Banner Image</Label>
         <p className="text-xs text-muted-foreground">
@@ -280,7 +288,7 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
       <div className="space-y-2">
         <Label>Featured Recordings</Label>
         <p className="text-xs text-muted-foreground">
-          Pick songs to play on your band page. Drag to reorder.
+          Pick songs to feature on your band page.
         </p>
         <BandPageTrackPicker
           projectId={projectId}
@@ -354,9 +362,20 @@ export function BandPageSettings({ projectId, projectSlug, heroImageUrl }: Props
         </div>
       </div>
 
-      <Button type="submit" disabled={saving}>
-        {saving ? "Saving..." : "Save Band Page"}
+      {/* Save */}
+      {saveError && (
+        <p className="text-sm text-destructive">{saveError}</p>
+      )}
+      <Button type="button" onClick={handleSave} disabled={saving} className="w-full">
+        {saving ? (
+          <>
+            <Loader2Icon className="mr-1.5 size-4 animate-spin" />
+            Saving...
+          </>
+        ) : (
+          "Save Band Page"
+        )}
       </Button>
-    </form>
+    </div>
   );
 }
