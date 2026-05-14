@@ -55,18 +55,28 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
   try {
     const body = await request.json();
-    const { isPublished, bio, contactEmail, socialLinks } = body;
 
-    const data: Record<string, unknown> = {};
-    if (isPublished !== undefined) data.isPublished = Boolean(isPublished);
-    if (bio !== undefined) data.bio = bio?.trim() || null;
-    if (contactEmail !== undefined) data.contactEmail = contactEmail?.trim() || null;
-    if (socialLinks !== undefined) data.socialLinks = socialLinks;
+    const fields = {
+      isPublished: body.isPublished !== undefined ? Boolean(body.isPublished) : undefined,
+      bio: body.bio !== undefined ? (body.bio?.trim() || null) : undefined,
+      contactEmail: body.contactEmail !== undefined ? (body.contactEmail?.trim() || null) : undefined,
+      socialLinks: body.socialLinks !== undefined ? body.socialLinks : undefined,
+    };
+
+    const setFields = Object.fromEntries(
+      Object.entries(fields).filter(([, v]) => v !== undefined),
+    );
 
     const bandPage = await prisma.bandPage.upsert({
       where: { projectId },
-      create: { projectId, ...data },
-      update: data,
+      create: {
+        project: { connect: { id: projectId } },
+        isPublished: fields.isPublished ?? false,
+        bio: fields.bio ?? null,
+        contactEmail: fields.contactEmail ?? null,
+        socialLinks: fields.socialLinks ?? undefined,
+      },
+      update: setFields,
     });
 
     return NextResponse.json({ bandPage });
