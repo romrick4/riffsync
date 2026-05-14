@@ -12,6 +12,7 @@ import { MessageBubble, type ChatMessageData } from "./message-bubble";
 interface MessageListProps {
   messages: ChatMessageData[];
   currentUserId: string;
+  projectId: string;
   onReact: (messageId: string) => void;
   onRetry: (messageId: string) => void;
   onLoadMore: () => void;
@@ -66,6 +67,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
     {
       messages,
       currentUserId,
+      projectId,
       onReact,
       onRetry,
       onLoadMore,
@@ -161,6 +163,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
                   onReact={onReact}
                   onRetry={onRetry}
                   currentUserId={currentUserId}
+                  projectId={projectId}
                 />
               </div>
             </div>

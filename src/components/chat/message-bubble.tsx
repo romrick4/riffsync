@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
+import { MessageContent } from "./message-content";
 
 export interface ChatMessageData {
   id: string;
@@ -21,6 +22,7 @@ interface MessageBubbleProps {
   onReact: (messageId: string) => void;
   onRetry?: (messageId: string) => void;
   currentUserId: string;
+  projectId: string;
 }
 
 function formatTime(dateStr: string) {
@@ -38,6 +40,7 @@ function MessageBubbleInner({
   onReact,
   onRetry,
   currentUserId,
+  projectId,
 }: MessageBubbleProps) {
   const hasReacted = message.reactions.some((r) => r.userId === currentUserId);
   const reactionCount = message.reactions.length;
@@ -65,7 +68,11 @@ function MessageBubbleInner({
           message._failed && "opacity-50",
         )}
       >
-        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        <MessageContent
+          content={message.content}
+          projectId={projectId}
+          isOwnMessage={isOwn}
+        />
 
         <div
           className={cn(
@@ -100,9 +107,8 @@ function MessageBubbleInner({
             className={cn(
               "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-all",
               hasReacted
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground opacity-0 group-hover:opacity-100",
-              hasReacted && "animate-chat-reaction-pop",
+                ? "bg-primary/10 text-primary animate-chat-reaction-pop"
+                : "text-muted-foreground sm:opacity-0 sm:group-hover:opacity-100",
             )}
           >
             <span className="text-sm">🤘</span>
@@ -123,5 +129,6 @@ export const MessageBubble = memo(
     prev.message.reactions.length === next.message.reactions.length &&
     prev.message._optimistic === next.message._optimistic &&
     prev.message._failed === next.message._failed &&
-    prev.showAuthor === next.showAuthor,
+    prev.showAuthor === next.showAuthor &&
+    prev.projectId === next.projectId,
 );

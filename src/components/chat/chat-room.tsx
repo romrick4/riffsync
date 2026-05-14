@@ -256,6 +256,7 @@ export function ChatRoom({
           ref={listRef}
           messages={messages}
           currentUserId={currentUserId}
+          projectId={projectId}
           onReact={handleReact}
           onRetry={handleRetry}
           onLoadMore={handleLoadMore}
@@ -277,7 +278,7 @@ export function ChatRoom({
         </button>
       )}
 
-      <ChatInput onSend={handleSend} />
+      <ChatInput projectId={projectId} onSend={handleSend} />
     </div>
   );
 }
