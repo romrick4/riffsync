@@ -39,22 +39,48 @@ export function ChatRoom({
   }, []);
 
   useEffect(() => {
-    document.body.classList.add("overflow-hidden");
-    return () => {
-      document.body.classList.remove("overflow-hidden");
-    };
-  }, []);
+    const el = containerRef.current;
+    if (!el) return;
 
-  useEffect(() => {
+    window.scrollTo(0, 0);
+    const body = document.body;
+    body.style.position = "fixed";
+    body.style.top = "0";
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.bottom = "0";
+    body.style.overflow = "hidden";
+
     function setHeight() {
-      const el = containerRef.current;
-      if (!el) return;
-      const top = el.getBoundingClientRect().top;
-      el.style.height = `calc(100dvh - ${top}px)`;
+      const vv = window.visualViewport;
+      const vh = vv ? vv.height : window.innerHeight;
+      const offsetTop = vv ? vv.offsetTop : 0;
+      const elTop = el!.getBoundingClientRect().top;
+      el!.style.height = `${offsetTop + vh - elTop}px`;
     }
+
     setHeight();
+
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener("resize", setHeight);
+      vv.addEventListener("scroll", setHeight);
+    }
     window.addEventListener("resize", setHeight);
-    return () => window.removeEventListener("resize", setHeight);
+
+    return () => {
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.bottom = "";
+      body.style.overflow = "";
+      if (vv) {
+        vv.removeEventListener("resize", setHeight);
+        vv.removeEventListener("scroll", setHeight);
+      }
+      window.removeEventListener("resize", setHeight);
+    };
   }, []);
 
   const handleNewMessage = useCallback(

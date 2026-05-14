@@ -9,15 +9,33 @@ export function ChatSkeleton() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
     function setHeight() {
-      const el = containerRef.current;
-      if (!el) return;
-      const top = el.getBoundingClientRect().top;
-      el.style.height = `calc(100dvh - ${top}px)`;
+      const vv = window.visualViewport;
+      const vh = vv ? vv.height : window.innerHeight;
+      const offsetTop = vv ? vv.offsetTop : 0;
+      const elTop = el!.getBoundingClientRect().top;
+      el!.style.height = `${offsetTop + vh - elTop}px`;
     }
+
     setHeight();
+
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener("resize", setHeight);
+      vv.addEventListener("scroll", setHeight);
+    }
     window.addEventListener("resize", setHeight);
-    return () => window.removeEventListener("resize", setHeight);
+
+    return () => {
+      if (vv) {
+        vv.removeEventListener("resize", setHeight);
+        vv.removeEventListener("scroll", setHeight);
+      }
+      window.removeEventListener("resize", setHeight);
+    };
   }, []);
 
   return (
