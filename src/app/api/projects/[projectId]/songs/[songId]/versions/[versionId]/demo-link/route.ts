@@ -55,13 +55,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Default expiry is fine
   }
 
-  const expiresInDays = Math.min(
-    Math.max(1, body.expiresInDays ?? DEFAULT_EXPIRY_DAYS),
-    MAX_EXPIRY_DAYS,
-  );
+  const rawDays = body.expiresInDays ?? DEFAULT_EXPIRY_DAYS;
+  const neverExpires = rawDays === 0;
 
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+  if (neverExpires) {
+    expiresAt.setFullYear(expiresAt.getFullYear() + 100);
+  } else {
+    const expiresInDays = Math.min(Math.max(1, rawDays), MAX_EXPIRY_DAYS);
+    expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+  }
 
   const demoLink = await prisma.demoLink.create({
     data: {

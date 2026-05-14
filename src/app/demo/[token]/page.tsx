@@ -97,14 +97,16 @@ export default async function DemoPage({ params }: PageProps) {
             durationSec={link.songVersion.durationSec}
           />
 
-          <p className="text-center text-xs text-muted-foreground">
-            This link expires{" "}
-            {link.expiresAt.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </p>
+          {link.expiresAt.getFullYear() - new Date().getFullYear() < 50 && (
+            <p className="text-center text-xs text-muted-foreground">
+              This link expires{" "}
+              {link.expiresAt.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
+          )}
         </div>
       </main>
 

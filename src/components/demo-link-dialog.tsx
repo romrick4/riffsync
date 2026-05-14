@@ -10,13 +10,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   ExternalLinkIcon,
@@ -25,7 +18,15 @@ import {
   Loader2Icon,
   Trash2Icon,
   ClockIcon,
+  InfinityIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const EXPIRY_OPTIONS = [
+  { value: 7, label: "7 days" },
+  { value: 30, label: "30 days" },
+  { value: 0, label: "Never" },
+] as const;
 
 interface DemoLinkData {
   id: string;
@@ -63,7 +64,7 @@ export function DemoLinkDialog({
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [expiryDays, setExpiryDays] = useState("7");
+  const [expiryDays, setExpiryDays] = useState(7);
 
   const versionLinks = links.filter(
     (l) => l.songVersion.id === versionId && !l.isExpired,
@@ -101,7 +102,7 @@ export function DemoLinkDialog({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ expiresInDays: parseInt(expiryDays) }),
+          body: JSON.stringify({ expiresInDays: expiryDays }),
         },
       );
       if (!res.ok) {
@@ -150,6 +151,7 @@ export function DemoLinkDialog({
     const diffMs = date.getTime() - now.getTime();
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     if (diffDays <= 0) return "Expired";
+    if (diffDays > 365 * 50) return "Never expires";
     if (diffDays === 1) return "Expires tomorrow";
     return `Expires in ${diffDays} days`;
   }
@@ -173,38 +175,43 @@ export function DemoLinkDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Create new link */}
           <div className="flex flex-col gap-3 rounded-lg border bg-card p-3">
-            <p className="text-sm font-medium truncate">{versionTitle}</p>
-            <div className="flex items-center gap-2">
-              <Select value={expiryDays} onValueChange={(v) => { if (v) setExpiryDays(v); }}>
-                <SelectTrigger className="h-9 flex-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 day</SelectItem>
-                  <SelectItem value="3">3 days</SelectItem>
-                  <SelectItem value="7">7 days</SelectItem>
-                  <SelectItem value="14">14 days</SelectItem>
-                  <SelectItem value="30">30 days</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={handleCreate}
-                disabled={creating}
-                className="shrink-0"
-                size="sm"
-              >
-                {creating ? (
-                  <Loader2Icon className="size-4 animate-spin" />
-                ) : (
-                  "Create Link"
-                )}
-              </Button>
+            <p className="truncate text-sm font-medium">{versionTitle}</p>
+
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">Expires after</p>
+              <div className="flex gap-1.5">
+                {EXPIRY_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setExpiryDays(option.value)}
+                    className={cn(
+                      "flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      expiryDays === option.value
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground",
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            <Button
+              onClick={handleCreate}
+              disabled={creating}
+              className="w-full"
+            >
+              {creating ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                "Create and Copy Link"
+              )}
+            </Button>
           </div>
 
-          {/* Existing links for this version */}
           {loading ? (
             <div className="flex justify-center py-4">
               <Loader2Icon className="size-5 animate-spin text-muted-foreground" />
@@ -224,7 +231,11 @@ export function DemoLinkDialog({
                       {link.url.replace(/^https?:\/\//, "")}
                     </p>
                     <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <ClockIcon className="size-3" />
+                      {formatExpiry(link.expiresAt).includes("Never") ? (
+                        <InfinityIcon className="size-3" />
+                      ) : (
+                        <ClockIcon className="size-3" />
+                      )}
                       {formatExpiry(link.expiresAt)}
                     </p>
                   </div>
