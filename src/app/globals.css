@@ -161,3 +161,48 @@
   background-image: radial-gradient(circle, oklch(1 0 0 / 6%) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+
+/* Chaos panel: chat bubble slide-in */
+@keyframes chaos-bubble-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chaos-bubble {
+  opacity: 0;
+  animation: chaos-bubble-in 0.4s ease-out forwards;
+}
+
+/* Chaos panel: floating element drift */
+@keyframes chaos-float-a {
+  0%, 100% { transform: translate(0, 0) rotate(-1deg); }
+  50% { transform: translate(4px, -6px) rotate(1.5deg); }
+}
+
+@keyframes chaos-float-b {
+  0%, 100% { transform: translate(0, 0) rotate(0.5deg); }
+  50% { transform: translate(-5px, 4px) rotate(-1deg); }
+}
+
+@keyframes chaos-float-c {
+  0%, 100% { transform: translate(0, 0) rotate(1deg); }
+  50% { transform: translate(3px, 5px) rotate(-0.5deg); }
+}
+
+.chaos-float-1 {
+  animation: chaos-float-a 6s ease-in-out infinite;
+}
+
+.chaos-float-2 {
+  animation: chaos-float-b 7s ease-in-out infinite;
+}
+
+.chaos-float-3 {
+  animation: chaos-float-c 5s ease-in-out infinite;
+}
