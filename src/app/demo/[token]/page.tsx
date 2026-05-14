@@ -96,11 +96,11 @@ export default async function DemoPage({ params }: PageProps) {
             src={coverArtUrl}
             alt=""
             fill
-            className="object-cover blur-3xl scale-110 saturate-[0.3] opacity-20"
-            priority={false}
+            className="object-cover scale-105"
+            priority
             unoptimized
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+          <div className="absolute inset-0 bg-black/65" />
         </div>
       )}
 
@@ -111,32 +111,21 @@ export default async function DemoPage({ params }: PageProps) {
               <Image
                 src={logoUrl}
                 alt={link.project.name}
-                width={72}
-                height={72}
-                className="size-[72px] rounded-full border border-border/50 object-cover"
+                width={64}
+                height={64}
+                className="size-16 rounded-full border border-white/20 object-cover shadow-lg"
                 unoptimized
               />
-            ) : coverArtUrl ? (
-              <Image
-                src={coverArtUrl}
-                alt={link.song.title}
-                width={72}
-                height={72}
-                className="size-[72px] rounded-lg border border-border/50 object-cover"
-                unoptimized
-              />
-            ) : null}
-
+            ) : (
+              <h2 className="bg-gradient-to-r from-red-400 via-rose-400 to-orange-300 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:text-2xl">
+                {link.project.name}
+              </h2>
+            )}
             <div className="space-y-1">
-              {!logoUrl && (
-                <h2 className="bg-gradient-to-r from-red-400 via-rose-400 to-orange-300 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:text-2xl">
-                  {link.project.name}
-                </h2>
-              )}
-              <h1 className="text-lg font-medium tracking-tight text-foreground sm:text-xl">
+              <h1 className={`text-lg font-medium tracking-tight sm:text-xl ${coverArtUrl ? "text-white" : "text-foreground"}`}>
                 {link.song.title}
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className={`text-sm ${coverArtUrl ? "text-white/60" : "text-muted-foreground"}`}>
                 {link.songVersion.title}
               </p>
             </div>
@@ -151,7 +140,7 @@ export default async function DemoPage({ params }: PageProps) {
           />
 
           {!neverExpires && (
-            <p className="text-center text-xs text-muted-foreground">
+            <p className={`text-center text-xs ${coverArtUrl ? "text-white/50" : "text-muted-foreground"}`}>
               This link expires{" "}
               {link.expiresAt.toLocaleDateString("en-US", {
                 month: "short",
@@ -198,7 +187,7 @@ function ExpiredState({ message }: { message: string }) {
 
 function Footer() {
   return (
-    <footer className="relative z-10 border-t border-border/50 px-4 py-6">
+    <footer className="relative z-10 border-t border-border/30 px-4 py-6">
       <div className="flex flex-col items-center gap-2">
         <Link href="/" className="transition-opacity hover:opacity-80">
           <Logo size="sm" />
