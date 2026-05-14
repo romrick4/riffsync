@@ -186,6 +186,32 @@ export default function MarketingPage() {
           </div>
         </section>
 
+        {/* Supporting features */}
+        <section className="border-t border-border/50 px-6 py-20 sm:py-28">
+          <div className="mx-auto max-w-5xl">
+            <p className="animate-fade-in-up mb-10 text-center text-sm font-medium uppercase tracking-widest text-muted-foreground">
+              And everything else your band needs
+            </p>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {extras.map((feature, i) => (
+                <div
+                  key={feature.name}
+                  className="animate-fade-in-up rounded-xl border border-border/50 bg-card/50 p-5 transition-colors hover:border-primary/30"
+                  style={{ animationDelay: `${200 + i * 80}ms` }}
+                >
+                  <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-red-400/15 via-rose-400/10 to-orange-300/15">
+                    <feature.icon className="size-4 text-foreground/80" />
+                  </div>
+                  <h3 className="mt-3 text-sm font-semibold">{feature.name}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Pricing */}
         <section className="border-t border-border/50 px-6 py-20 sm:py-28">
           <div className="mx-auto max-w-5xl">
@@ -268,32 +294,6 @@ export default function MarketingPage() {
                       {tier.cta}
                     </a>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Supporting features */}
-        <section className="border-t border-border/50 px-6 py-20 sm:py-28">
-          <div className="mx-auto max-w-5xl">
-            <p className="animate-fade-in-up mb-10 text-center text-sm font-medium uppercase tracking-widest text-muted-foreground">
-              And everything else your band needs
-            </p>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {extras.map((feature, i) => (
-                <div
-                  key={feature.name}
-                  className="animate-fade-in-up rounded-xl border border-border/50 bg-card/50 p-5 transition-colors hover:border-primary/30"
-                  style={{ animationDelay: `${200 + i * 80}ms` }}
-                >
-                  <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-red-400/15 via-rose-400/10 to-orange-300/15">
-                    <feature.icon className="size-4 text-foreground/80" />
-                  </div>
-                  <h3 className="mt-3 text-sm font-semibold">{feature.name}</h3>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                    {feature.description}
-                  </p>
                 </div>
               ))}
             </div>
