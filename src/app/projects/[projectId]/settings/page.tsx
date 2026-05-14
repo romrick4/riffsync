@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getProjectMembership, getProjectWithMembers } from "@/lib/project-data";
+import { getStorage } from "@/lib/storage";
 import {
   Card,
   CardContent,
@@ -35,6 +36,12 @@ export default async function ProjectSettingsPage({
   const isOwner = membership!.role === "OWNER";
   const serializedMembers = JSON.parse(JSON.stringify(project.members));
 
+  let logoUrl: string | null = null;
+  if (project.logoPath) {
+    const storage = getStorage();
+    logoUrl = await storage.getUrl(project.logoPath);
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -46,10 +53,10 @@ export default async function ProjectSettingsPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Project Info</CardTitle>
+          <CardTitle>Band Profile</CardTitle>
           <CardDescription>
             {isOwner
-              ? "Update your project name and description."
+              ? "Update your band name, logo, and description."
               : "Only the project owner can edit these settings."}
           </CardDescription>
         </CardHeader>
@@ -58,6 +65,7 @@ export default async function ProjectSettingsPage({
             projectId={projectId}
             initialName={project.name}
             initialDescription={project.description ?? ""}
+            logoUrl={logoUrl}
             isOwner={isOwner}
           />
         </CardContent>

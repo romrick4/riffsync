@@ -97,6 +97,7 @@ model Project {
   name        String
   slug        String   @unique
   description String?
+  logoPath    String?
   inviteCode  String   @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

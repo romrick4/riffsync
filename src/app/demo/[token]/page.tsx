@@ -3,6 +3,7 @@ import { getStorage } from "@/lib/storage";
 import { DemoPlayer } from "./demo-player";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
 type PageProps = {
@@ -25,13 +26,19 @@ async function getDemoLink(token: string) {
         },
       },
       song: {
-        select: { title: true },
+        select: { title: true, coverArtPath: true },
       },
       project: {
-        select: { name: true },
+        select: { name: true, logoPath: true },
       },
     },
   });
+}
+
+async function resolveUrl(path: string | null | undefined) {
+  if (!path) return null;
+  const storage = getStorage();
+  return storage.getUrl(path);
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -72,18 +79,59 @@ export default async function DemoPage({ params }: PageProps) {
 
   const storage = getStorage();
   const audioKey = link.songVersion.compressedFilePath ?? link.songVersion.filePath;
-  const audioUrl = await storage.getUrl(audioKey);
+
+  const [audioUrl, coverArtUrl, logoUrl] = await Promise.all([
+    storage.getUrl(audioKey),
+    resolveUrl(link.song.coverArtPath),
+    resolveUrl(link.project.logoPath),
+  ]);
+
+  const neverExpires = link.expiresAt.getFullYear() - new Date().getFullYear() >= 50;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background">
-      <main className="flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6">
+    <div className="relative flex min-h-dvh flex-col bg-background">
+      {coverArtUrl && (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          <Image
+            src={coverArtUrl}
+            alt=""
+            fill
+            className="object-cover blur-3xl scale-110 saturate-[0.3] opacity-20"
+            priority={false}
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+        </div>
+      )}
+
+      <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6">
         <div className="w-full max-w-lg space-y-8">
-          <div className="space-y-3 text-center">
-            <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
-              {link.project.name}
-            </h2>
+          <div className="flex flex-col items-center gap-4 text-center">
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt={link.project.name}
+                width={72}
+                height={72}
+                className="size-[72px] rounded-full border border-border/50 object-cover"
+                unoptimized
+              />
+            ) : coverArtUrl ? (
+              <Image
+                src={coverArtUrl}
+                alt={link.song.title}
+                width={72}
+                height={72}
+                className="size-[72px] rounded-lg border border-border/50 object-cover"
+                unoptimized
+              />
+            ) : null}
+
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              <h2 className="bg-gradient-to-r from-red-400 via-rose-400 to-orange-300 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:text-2xl">
+                {link.project.name}
+              </h2>
+              <h1 className="text-lg font-medium tracking-tight text-foreground sm:text-xl">
                 {link.song.title}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -100,7 +148,7 @@ export default async function DemoPage({ params }: PageProps) {
             durationSec={link.songVersion.durationSec}
           />
 
-          {link.expiresAt.getFullYear() - new Date().getFullYear() < 50 && (
+          {!neverExpires && (
             <p className="text-center text-xs text-muted-foreground">
               This link expires{" "}
               {link.expiresAt.toLocaleDateString("en-US", {
@@ -148,7 +196,7 @@ function ExpiredState({ message }: { message: string }) {
 
 function Footer() {
   return (
-    <footer className="border-t px-4 py-6">
+    <footer className="relative z-10 border-t border-border/50 px-4 py-6">
       <div className="flex flex-col items-center gap-2">
         <Link href="/" className="transition-opacity hover:opacity-80">
           <Logo size="sm" />
