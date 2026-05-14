@@ -206,3 +206,41 @@
 .chaos-float-3 {
   animation: chaos-float-c 5s ease-in-out infinite;
 }
+
+/* Chat: message slide-in */
+@keyframes chat-message-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-chat-message-in {
+  animation: chat-message-in 0.2s ease-out both;
+}
+
+/* Chat: reaction pop */
+@keyframes chat-reaction-pop {
+  0% { transform: scale(0.5); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.animate-chat-reaction-pop {
+  animation: chat-reaction-pop 0.25s ease-out;
+}
+
+/* Chat: skeleton shimmer */
+@keyframes chat-skeleton-shimmer {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+
+.animate-chat-skeleton-shimmer {
+  animation: chat-skeleton-shimmer 1.5s ease-in-out infinite;
+}

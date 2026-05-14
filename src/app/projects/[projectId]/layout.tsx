@@ -10,6 +10,7 @@ const tabs = [
   { label: "Calendar", href: "/calendar" },
   { label: "Setlists", href: "/setlists" },
   { label: "Polls", href: "/polls" },
+  { label: "Chat", href: "/chat" },
   { label: "Settings", href: "/settings" },
 ] as const;
 
