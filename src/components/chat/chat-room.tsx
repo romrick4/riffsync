@@ -31,6 +31,7 @@ export function ChatRoom({
   const [loadingMore, setLoadingMore] = useState(false);
   const [showNewPill, setShowNewPill] = useState(false);
   const listRef = useRef<MessageListHandle>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const optimisticIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -42,6 +43,18 @@ export function ChatRoom({
     return () => {
       document.body.classList.remove("overflow-hidden");
     };
+  }, []);
+
+  useEffect(() => {
+    function setHeight() {
+      const el = containerRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      el.style.height = `calc(100dvh - ${top}px)`;
+    }
+    setHeight();
+    window.addEventListener("resize", setHeight);
+    return () => window.removeEventListener("resize", setHeight);
   }, []);
 
   const handleNewMessage = useCallback(
@@ -244,7 +257,7 @@ export function ChatRoom({
   }, []);
 
   return (
-    <div className="relative flex h-[calc(100dvh-12rem)] flex-col overflow-hidden rounded-xl border bg-card">
+    <div ref={containerRef} className="relative flex flex-col overflow-hidden rounded-xl border bg-card">
       {messages.length === 0 && !loadingMore ? (
         <div className="flex flex-1 items-center justify-center">
           <p className="text-center text-sm text-muted-foreground">

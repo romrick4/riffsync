@@ -1,12 +1,27 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 const BUBBLE_WIDTHS = ["w-48", "w-56", "w-40", "w-64", "w-44", "w-52", "w-36", "w-60"];
 
 export function ChatSkeleton() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function setHeight() {
+      const el = containerRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      el.style.height = `calc(100dvh - ${top}px)`;
+    }
+    setHeight();
+    window.addEventListener("resize", setHeight);
+    return () => window.removeEventListener("resize", setHeight);
+  }, []);
+
   return (
-    <div className="flex h-[calc(100dvh-12rem)] flex-col overflow-hidden rounded-xl border bg-card">
+    <div ref={containerRef} className="flex flex-col overflow-hidden rounded-xl border bg-card">
       <div className="flex flex-1 flex-col gap-3 px-4 py-3">
         {BUBBLE_WIDTHS.map((width, i) => {
           const isRight = i % 3 === 0;
