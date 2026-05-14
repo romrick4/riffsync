@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
   async headers() {
     const storageOrigins = r2Domain ? `https://${r2Domain}` : "";
     const supabaseOrigin = supabaseUrl || "";
+    const supabaseWs = supabaseUrl
+      ? supabaseUrl.replace(/^https?:\/\//, "wss://")
+      : "";
 
     return [
       {
@@ -35,7 +38,7 @@ const nextConfig: NextConfig = {
               `img-src 'self' data: blob: ${storageOrigins}`.trim(),
               `media-src 'self' blob: ${storageOrigins}`.trim(),
               "font-src 'self'",
-              `connect-src 'self' ${storageOrigins} ${supabaseOrigin}`.trim(),
+              `connect-src 'self' ${storageOrigins} ${supabaseOrigin} ${supabaseWs}`.trim(),
               "worker-src 'self'",
               "object-src 'none'",
               "base-uri 'self'",
