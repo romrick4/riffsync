@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser, verifyMembership } from "@/lib/auth";
-import { broadcastNewMessage } from "@/lib/chat";
+import { broadcastNewMessage } from "@/lib/chat-broadcast";
 
 type RouteParams = {
   params: Promise<{ projectId: string }>;
