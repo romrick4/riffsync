@@ -78,6 +78,7 @@ model User {
   eventRsvps        EventRsvp[]
   pushSubscriptions PushSubscription[]
   busyBlocks        BusyBlock[]
+  demoLinks         DemoLink[]
 }
 
 model PushSubscription {
@@ -106,6 +107,7 @@ model Project {
   calendarEvents CalendarEvent[]
   polls          Poll[]
   busyBlocks     BusyBlock[]
+  demoLinks      DemoLink[]
 }
 
 model ProjectMember {
@@ -165,6 +167,7 @@ model Song {
   versions      SongVersion[]
   lyricVersions LyricVersion[]
   tabFiles      TabFile[]
+  demoLinks     DemoLink[]
 }
 
 model SongVersion {
@@ -198,6 +201,7 @@ model SongVersion {
 
   audioComments  AudioComment[]
   transcodeJob   TranscodeJob?
+  demoLinks      DemoLink[]
 }
 
 model MergeParent {
@@ -362,4 +366,24 @@ model TranscodeJob {
 
   version   SongVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
   versionId String      @unique
+}
+
+model DemoLink {
+  id        String   @id @default(uuid())
+  token     String   @unique @default(uuid())
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  songVersion   SongVersion @relation(fields: [songVersionId], references: [id], onDelete: Cascade)
+  songVersionId String
+
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId String
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
 }

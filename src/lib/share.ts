@@ -34,3 +34,7 @@ export function getEventUrl(projectId: string, eventId: string): string {
 export function getPollUrl(projectId: string, pollId: string): string {
   return `/projects/${projectId}/polls?poll=${pollId}`;
 }
+
+export function getDemoUrl(token: string): string {
+  return `/demo/${token}`;
+}

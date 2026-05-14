@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getAudioUrl } from "@/app/actions/audio";
+import { DemoLinkDialog } from "@/components/demo-link-dialog";
 import {
   DownloadIcon,
   LinkIcon,
@@ -411,6 +412,12 @@ export function SongDetailClient({
                 )}
                 {copied ? "Copied!" : "Share"}
               </Button>
+              <DemoLinkDialog
+                projectId={projectId}
+                songId={songId}
+                versionId={selectedVersion.id}
+                versionTitle={selectedVersion.title}
+              />
               {fileUrl && (
                 <a href={fileUrl} download>
                   <Button variant="ghost" size="sm">
