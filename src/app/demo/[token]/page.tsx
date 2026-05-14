@@ -128,9 +128,11 @@ export default async function DemoPage({ params }: PageProps) {
             ) : null}
 
             <div className="space-y-1">
-              <h2 className="bg-gradient-to-r from-red-400 via-rose-400 to-orange-300 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:text-2xl">
-                {link.project.name}
-              </h2>
+              {!logoUrl && (
+                <h2 className="bg-gradient-to-r from-red-400 via-rose-400 to-orange-300 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:text-2xl">
+                  {link.project.name}
+                </h2>
+              )}
               <h1 className="text-lg font-medium tracking-tight text-foreground sm:text-xl">
                 {link.song.title}
               </h1>
