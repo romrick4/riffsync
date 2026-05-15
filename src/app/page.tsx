@@ -85,37 +85,59 @@ export default function MarketingPage() {
 
         {/* Pricing */}
         <section className="bg-white/[0.02] px-6 py-20 sm:py-28">
-          <div className="mx-auto max-w-xl text-center">
-            <p className="text-lg text-muted-foreground">
-              Free for up to 2 bands. Paid plans start at{" "}
-              <span className="font-semibold text-foreground">$15/mo</span> for
-              serious bands.
-            </p>
-            <div className="mt-8">
-              <a
-                href={`${appUrl}/register`}
-                className="inline-flex h-12 items-center rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/80"
-              >
-                Start your band for free
-              </a>
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="mb-6 text-2xl font-bold tracking-tight sm:text-3xl">
+              Simple pricing
+            </h2>
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-8">
+              <div>
+                <span className="text-2xl font-bold text-foreground">Free</span>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Up to 2 bands &middot; 2 GB
+                </p>
+              </div>
+              <div className="hidden h-10 w-px bg-border/50 sm:block" />
+              <div>
+                <span className="text-2xl font-bold text-foreground">$15</span>
+                <span className="text-sm text-muted-foreground">/mo</span>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Unlimited bands &middot; 50 GB
+                </p>
+              </div>
+              <div className="hidden h-10 w-px bg-border/50 sm:block" />
+              <div>
+                <span className="text-2xl font-bold text-foreground">$30</span>
+                <span className="text-sm text-muted-foreground">/mo</span>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Everything &middot; 150 GB
+                </p>
+              </div>
             </div>
+            <p className="mt-6 text-sm text-muted-foreground">
+              Only one person per band needs to pay. Everyone else gets full
+              access.
+            </p>
           </div>
         </section>
 
         {/* Closing CTA */}
-        <section className="px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+        <section className="relative overflow-hidden px-6 py-28 sm:py-36">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-b from-primary/[0.06] via-primary/[0.03] to-transparent"
+          />
+          <div className="relative mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Your band deserves better than a group chat.
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
+            <p className="mx-auto mt-5 max-w-md text-lg text-muted-foreground">
               Set up your band in under a minute. Upload your first song and
               start collaborating right away.
             </p>
-            <div className="mt-8">
+            <div className="mt-10">
               <a
                 href={`${appUrl}/register`}
-                className="inline-flex h-12 items-center rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/80"
+                className="inline-flex h-14 items-center rounded-xl bg-primary px-10 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/80 hover:shadow-xl hover:shadow-primary/30"
               >
                 Start your band for free
               </a>

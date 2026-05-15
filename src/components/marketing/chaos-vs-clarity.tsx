@@ -1,25 +1,42 @@
 "use client";
 
 import { DemoVersionTree } from "./demo-version-tree";
-import { AppMockup } from "./app-mockup";
 
-const CHAT_BUBBLES = [
-  { text: "yo did anyone save that new riff Jake played at practice", fromMe: false, delay: 0 },
-  { text: "I think he voice memo'd it", fromMe: true, delay: 0.5 },
-  { text: "that was two weeks ago lol", fromMe: false, delay: 1.1 },
-  { text: "check the drive", fromMe: true, delay: 1.7 },
-  { text: "which folder", fromMe: false, delay: 2.2 },
-  { text: "idk Maya renamed everything", fromMe: true, delay: 2.8 },
-  { text: "I didn't rename anything??", fromMe: false, delay: 3.4 },
-  { text: "ok it's gone lol", fromMe: true, delay: 4.0 },
+interface ChatMessage {
+  name: string;
+  text: string;
+  delay: number;
+}
+
+const CHAT_MESSAGES: ChatMessage[] = [
+  { name: "Alex", text: "yo did anyone save that new riff Jake played at practice", delay: 0 },
+  { name: "Maya", text: "I think he voice memo'd it", delay: 0.5 },
+  { name: "Alex", text: "that was two weeks ago lol", delay: 1.1 },
+  { name: "Maya", text: "check the drive", delay: 1.7 },
+  { name: "Alex", text: "which folder", delay: 2.2 },
+  { name: "Jake", text: "idk Maya renamed everything", delay: 2.8 },
+  { name: "Maya", text: "I didn't rename anything??", delay: 3.4 },
+  { name: "Alex", text: "ok it's gone lol", delay: 4.0 },
 ];
+
+const NAME_COLORS: Record<string, string> = {
+  Alex: "text-blue-400/70",
+  Maya: "text-emerald-400/70",
+  Jake: "text-amber-400/70",
+};
+
+const BUBBLE_COLORS: Record<string, string> = {
+  Alex: "bg-blue-600/90 text-white",
+  Maya: "bg-emerald-700/80 text-white",
+  Jake: "bg-amber-700/80 text-white",
+};
 
 export function ChaosSection() {
   return (
     <section className="bg-destructive/[0.04] px-6 py-20 sm:py-28">
       <div className="mx-auto max-w-2xl">
         <h2 className="mb-2 text-center text-2xl font-bold tracking-tight sm:text-3xl">
-          Sound familiar?
+          Every band&rsquo;s group chat
         </h2>
         <p className="mb-12 text-center text-base text-muted-foreground">
           Demos buried in group chats. Nobody knows which version is the
@@ -27,26 +44,32 @@ export function ChaosSection() {
         </p>
 
         <div className="mx-auto max-w-sm">
-          <div className="flex flex-col gap-2">
-            {CHAT_BUBBLES.map((bubble, i) => (
-              <div
-                key={i}
-                className={`chaos-bubble flex ${
-                  bubble.fromMe ? "justify-end" : "justify-start"
-                }`}
-                style={{ animationDelay: `${bubble.delay}s` }}
-              >
+          <div className="flex flex-col gap-1">
+            {CHAT_MESSAGES.map((msg, i) => {
+              const prevName = i > 0 ? CHAT_MESSAGES[i - 1].name : null;
+              const showName = msg.name !== prevName;
+
+              return (
                 <div
-                  className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${
-                    bubble.fromMe
-                      ? "rounded-br-md bg-blue-600/90 text-white"
-                      : "rounded-bl-md bg-muted/80 text-foreground/90"
-                  }`}
+                  key={i}
+                  className={`chaos-bubble ${showName ? "mt-2" : ""}`}
+                  style={{ animationDelay: `${msg.delay}s` }}
                 >
-                  {bubble.text}
+                  {showName && (
+                    <p
+                      className={`mb-0.5 text-[11px] font-medium ${NAME_COLORS[msg.name] ?? "text-muted-foreground/60"}`}
+                    >
+                      {msg.name}
+                    </p>
+                  )}
+                  <div
+                    className={`inline-block max-w-[85%] rounded-2xl rounded-bl-md px-3.5 py-2 text-sm ${BUBBLE_COLORS[msg.name] ?? "bg-muted/80 text-foreground/90"}`}
+                  >
+                    {msg.text}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -92,11 +115,14 @@ export function ClaritySection() {
           what&rsquo;s latest, who uploaded it, and where it came from.
         </p>
 
-        <div className="mb-16 flex justify-center">
-          <DemoVersionTree />
+        <div className="flex justify-center">
+          <div>
+            <DemoVersionTree />
+            <p className="mt-4 text-center text-xs text-muted-foreground/50">
+              How your songs look inside RiffSync
+            </p>
+          </div>
         </div>
-
-        <AppMockup />
       </div>
     </section>
   );
