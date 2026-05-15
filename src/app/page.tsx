@@ -4,6 +4,7 @@ import {
   ClaritySection,
 } from "@/components/marketing/chaos-vs-clarity";
 import { DemoPlayer } from "@/components/marketing/demo-player";
+import { ChevronDown } from "lucide-react";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -25,7 +26,7 @@ export default function MarketingPage() {
 
       <main>
         {/* Hero — band photo background */}
-        <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pt-16">
+        <section className="relative flex min-h-screen flex-col justify-center overflow-hidden px-6 pt-16">
           <div
             aria-hidden="true"
             className="absolute inset-0 bg-cover bg-center"
@@ -36,22 +37,28 @@ export default function MarketingPage() {
             className="absolute inset-0 bg-black/65"
           />
 
-          <div className="relative z-10 mx-auto max-w-2xl text-center">
-            <h1 className="animate-fade-in-up text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Organize your band&rsquo;s creative process.
-            </h1>
-            <p className="animate-fade-in-up mx-auto mt-6 max-w-md text-lg text-white/70 [animation-delay:120ms]">
-              Upload recordings. Leave feedback at exact timestamps. Plan
-              rehearsals. All in one place.
-            </p>
-            <div className="animate-fade-in-up mt-10 [animation-delay:240ms]">
-              <a
-                href={`${appUrl}/register`}
-                className="inline-flex h-12 items-center rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/80"
-              >
-                Start your band for free
-              </a>
+          <div className="relative z-10 mx-auto w-full max-w-5xl">
+            <div className="max-w-xl">
+              <h1 className="animate-fade-in-up text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                Organize your band&rsquo;s creative process.
+              </h1>
+              <p className="animate-fade-in-up mt-6 max-w-md text-lg text-white/70 [animation-delay:120ms]">
+                Upload recordings. Leave feedback at exact timestamps. Plan
+                rehearsals. All in one place.
+              </p>
+              <div className="animate-fade-in-up mt-10 [animation-delay:240ms]">
+                <a
+                  href={`${appUrl}/register`}
+                  className="inline-flex h-12 items-center rounded-xl border border-white/20 bg-white/10 px-8 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20"
+                >
+                  Start your band for free
+                </a>
+              </div>
             </div>
+          </div>
+
+          <div className="animate-bounce-subtle absolute bottom-8 left-1/2 z-10 -translate-x-1/2">
+            <ChevronDown className="size-6 text-white/40" />
           </div>
         </section>
 
@@ -124,20 +131,25 @@ export default function MarketingPage() {
         <section className="relative overflow-hidden px-6 py-28 sm:py-36">
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-b from-primary/[0.06] via-primary/[0.03] to-transparent"
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/cta-bg.jpg')" }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-black/70"
           />
           <div className="relative mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
               Your band deserves better than a group chat.
             </h2>
-            <p className="mx-auto mt-5 max-w-md text-lg text-muted-foreground">
+            <p className="mx-auto mt-5 max-w-md text-lg text-white/60">
               Set up your band in under a minute. Upload your first song and
               start collaborating right away.
             </p>
             <div className="mt-10">
               <a
                 href={`${appUrl}/register`}
-                className="inline-flex h-14 items-center rounded-xl bg-primary px-10 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/80 hover:shadow-xl hover:shadow-primary/30"
+                className="inline-flex h-14 items-center rounded-xl border border-white/20 bg-white/10 px-10 text-base font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20"
               >
                 Start your band for free
               </a>

@@ -6,17 +6,17 @@ interface ChatMessage {
   name: string;
   text: string;
   delay: number;
+  isYou?: boolean;
 }
 
 const CHAT_MESSAGES: ChatMessage[] = [
-  { name: "Alex", text: "yo did anyone save that new riff Jake played at practice", delay: 0 },
-  { name: "Maya", text: "I think he voice memo'd it", delay: 0.5 },
-  { name: "Alex", text: "that was two weeks ago lol", delay: 1.1 },
-  { name: "Maya", text: "check the drive", delay: 1.7 },
-  { name: "Alex", text: "which folder", delay: 2.2 },
-  { name: "Jake", text: "idk Maya renamed everything", delay: 2.8 },
-  { name: "Maya", text: "I didn't rename anything??", delay: 3.4 },
-  { name: "Alex", text: "ok it's gone lol", delay: 4.0 },
+  { name: "You", text: "hey alex do you have the latest track to put on Spotify?", delay: 0, isYou: true },
+  { name: "Alex", text: "yeah I'll send it over", delay: 0.5 },
+  { name: "Maya", text: "wait I have it here, I'll upload it", delay: 1.1 },
+  { name: "Jake", text: "Maya I just listened to it… there's no bass on it", delay: 1.8 },
+  { name: "Maya", text: "oh no that's the wrong version", delay: 2.5 },
+  { name: "You", text: "we needed NEW_SONG_FINAL (2).wav not NEW_SONG_FINAL (1).wav", delay: 3.2, isYou: true },
+  { name: "Maya", text: "idgi 😭", delay: 3.9 },
 ];
 
 const NAME_COLORS: Record<string, string> = {
@@ -48,6 +48,25 @@ export function ChaosSection() {
             {CHAT_MESSAGES.map((msg, i) => {
               const prevName = i > 0 ? CHAT_MESSAGES[i - 1].name : null;
               const showName = msg.name !== prevName;
+
+              if (msg.isYou) {
+                return (
+                  <div
+                    key={i}
+                    className={`chaos-bubble flex flex-col items-end ${showName ? "mt-2" : ""}`}
+                    style={{ animationDelay: `${msg.delay}s` }}
+                  >
+                    {showName && (
+                      <p className="mb-0.5 text-[11px] font-medium text-white/40">
+                        You
+                      </p>
+                    )}
+                    <div className="max-w-[85%] rounded-2xl rounded-br-md bg-blue-500 px-3.5 py-2 text-sm text-white">
+                      {msg.text}
+                    </div>
+                  </div>
+                );
+              }
 
               return (
                 <div
@@ -115,13 +134,13 @@ export function ClaritySection() {
           what&rsquo;s latest, who uploaded it, and where it came from.
         </p>
 
-        <div className="flex justify-center">
-          <div>
+        <div className="mx-auto max-w-full overflow-x-auto">
+          <div className="flex min-w-0 justify-center">
             <DemoVersionTree />
-            <p className="mt-4 text-center text-xs text-muted-foreground/50">
-              How your songs look inside RiffSync
-            </p>
           </div>
+          <p className="mt-4 text-center text-xs text-muted-foreground/50">
+            How your songs look inside RiffSync
+          </p>
         </div>
       </div>
     </section>
